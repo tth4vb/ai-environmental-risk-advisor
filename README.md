@@ -29,12 +29,12 @@ Automatically validates and fixes WRI Design System compliance issues in your co
 
 ## Installation
 
-### Option 1: Copy to Your Project
+### Option 1: Quick Install (Recommended)
 
 ```bash
 # In your project directory
-mkdir -p .claude/commands
-cp .claude/commands/validate-wri.md /path/to/your-project/.claude/commands/
+mkdir -p .claude/commands && curl -o .claude/commands/validate-wri.md \
+  https://raw.githubusercontent.com/tth4vb/wri-validation-commands/main/.claude/commands/validate-wri.md
 ```
 
 ### Option 2: Clone This Repo
@@ -42,7 +42,7 @@ cp .claude/commands/validate-wri.md /path/to/your-project/.claude/commands/
 ```bash
 # Clone into your project
 cd /path/to/your-project
-git clone https://github.com/YOUR_USERNAME/wri-validation-commands.git tmp-commands
+git clone https://github.com/tth4vb/wri-validation-commands.git tmp-commands
 cp -r tmp-commands/.claude .
 rm -rf tmp-commands
 ```
