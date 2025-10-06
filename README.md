@@ -33,10 +33,10 @@ Automatically validates and fixes WRI Design System compliance issues in your co
 
 ```bash
 # Install as a dev dependency in your project
-npm install --save-dev @wri/claude-validation-commands
+npm install --save-dev wri-claude-validation-commands
 
 # Or install globally
-npm install -g @wri/claude-validation-commands
+npm install -g wri-claude-validation-commands
 ```
 
 The command will automatically be installed to `.claude/commands/validate-wri.md` in your project during the postinstall step.

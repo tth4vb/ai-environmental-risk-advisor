@@ -1,5 +1,5 @@
 {
-  "name": "@wri/claude-validation-commands",
+  "name": "wri-claude-validation-commands",
   "version": "1.0.0",
   "description": "Claude Code commands for validating and auto-fixing WRI Design System compliance",
   "main": "index.js",
