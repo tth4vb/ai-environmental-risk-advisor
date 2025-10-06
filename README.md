@@ -29,27 +29,26 @@ Automatically validates and fixes WRI Design System compliance issues in your co
 
 ## Installation
 
-### Option 1: Quick Install (Recommended)
+### Option 1: npm install (Recommended)
 
 ```bash
-# In your project directory
-mkdir -p .claude/commands && curl -o .claude/commands/validate-wri.md \
-  https://raw.githubusercontent.com/tth4vb/wri-validation-commands/main/.claude/commands/validate-wri.md
+# Install as a dev dependency in your project
+npm install --save-dev @wri/claude-validation-commands
+
+# Or install globally
+npm install -g @wri/claude-validation-commands
 ```
 
-### Option 2: Clone This Repo
+The command will automatically be installed to `.claude/commands/validate-wri.md` in your project during the postinstall step.
+
+### Option 2: Manual Installation
 
 ```bash
-# Clone into your project
-cd /path/to/your-project
+# Clone this repo
 git clone https://github.com/tth4vb/wri-validation-commands.git tmp-commands
 cp -r tmp-commands/.claude .
 rm -rf tmp-commands
 ```
-
-### Option 3: Download Single File
-
-Download the [validate-wri.md](/.claude/commands/validate-wri.md) file and place it in your project's `.claude/commands/` directory.
 
 ## Usage
 

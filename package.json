@@ -1,0 +1,30 @@
+{
+  "name": "@wri/claude-validation-commands",
+  "version": "1.0.0",
+  "description": "Claude Code commands for validating and auto-fixing WRI Design System compliance",
+  "main": "index.js",
+  "bin": {
+    "wri-validation-install": "./bin/install.js"
+  },
+  "scripts": {
+    "postinstall": "node bin/install.js"
+  },
+  "keywords": [
+    "wri",
+    "design-system",
+    "validation",
+    "claude-code",
+    "linting"
+  ],
+  "author": "WRI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tth4vb/wri-validation-commands.git"
+  },
+  "files": [
+    ".claude/",
+    "bin/",
+    "README.md"
+  ]
+}
