@@ -101,8 +101,6 @@ export function MineMap({ mines, selectedMineId, onMineSelect }: MineMapProps) {
                     weight: isSelected ? 2 : 0.5,
                     opacity: isSelected ? 1 : 0.8,
                     fillOpacity: 1,
-                    // Smooth rendering
-                    smoothFactor: 1,
                     // Add dashed border for non-certified mines (only when selected)
                     dashArray: (!certified && isSelected) ? '3, 3' : undefined
                   }}
