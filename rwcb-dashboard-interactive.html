@@ -190,47 +190,14 @@
                          ===================================== -->
                     <article class="indicator-card indicator-card--section-start" data-indicator="seedlings">
                         <!-- Card Header -->
-                        <header class="indicator-header">
-                            <div>
-                                <h2 class="indicator-title">Seedlings Produced</h2>
-                                <div class="indicator-meta">
-                                    <span class="tm-badge">Bi-annual</span>
-                                    <span class="tm-badge-secondary">Pipeline metric</span>
-                                </div>
-                            </div>
-
-                            <!-- Visualization Toggle Group -->
-                            <div class="viz-toggle-group" role="group"
-                                 aria-label="Visualization options for Seedlings Produced">
-                                <button class="viz-toggle active"
-                                        data-option="sparkline"
-                                        aria-pressed="true"
-                                        aria-label="Show as trend sparkline">
-                                    <span class="toggle-icon" aria-hidden="true">📈</span>
-                                    <span class="toggle-label">Trend</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="progress"
-                                        aria-pressed="false"
-                                        aria-label="Show as progress bar">
-                                    <span class="toggle-icon" aria-hidden="true">📊</span>
-                                    <span class="toggle-label">Progress</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="breakdown"
-                                        aria-pressed="false"
-                                        aria-label="Show breakdown by nursery">
-                                    <span class="toggle-icon" aria-hidden="true">🗂️</span>
-                                    <span class="toggle-label">By Site</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="table"
-                                        aria-pressed="false"
-                                        aria-label="Show as data table">
-                                    <span class="toggle-icon" aria-hidden="true">📋</span>
-                                    <span class="toggle-label">Table</span>
-                                </button>
-                            </div>
+                        <header class="card-header">
+                            <h2 class="indicator-title">Seedlings Produced</h2>
+                            <select class="view-dropdown" aria-label="View options for Seedlings Produced">
+                                <option value="sparkline">Trend</option>
+                                <option value="progress">Progress</option>
+                                <option value="breakdown">By Nursery</option>
+                                <option value="table">Table</option>
+                            </select>
                         </header>
 
                         <!-- Visualization Container -->
@@ -474,47 +441,14 @@
                          ===================================== -->
                     <article class="tm-card indicator-card" data-indicator="trees-planted">
                         <!-- Card Header -->
-                        <header class="indicator-header">
-                            <div>
-                                <h2 class="indicator-title">Trees Planted</h2>
-                                <div class="indicator-meta">
-                                    <span class="tm-badge">Bi-annual</span>
-                                    <span class="tm-badge-secondary">Core implementation</span>
-                                </div>
-                            </div>
-
-                            <!-- Visualization Toggle Group -->
-                            <div class="viz-toggle-group" role="group"
-                                 aria-label="Visualization options for Trees Planted">
-                                <button class="viz-toggle active"
-                                        data-option="cumulative"
-                                        aria-pressed="true"
-                                        aria-label="Show cumulative progress vs plan">
-                                    <span class="toggle-icon" aria-hidden="true">📈</span>
-                                    <span class="toggle-label">Progress</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="sparkline"
-                                        aria-pressed="false"
-                                        aria-label="Show as sparkline with big number">
-                                    <span class="toggle-icon" aria-hidden="true">🔢</span>
-                                    <span class="toggle-label">At a Glance</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="sites"
-                                        aria-pressed="false"
-                                        aria-label="Show breakdown by site">
-                                    <span class="toggle-icon" aria-hidden="true">🗂️</span>
-                                    <span class="toggle-label">By Site</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="velocity"
-                                        aria-pressed="false"
-                                        aria-label="Show planting velocity over time">
-                                    <span class="toggle-icon" aria-hidden="true">⚡</span>
-                                    <span class="toggle-label">Velocity</span>
-                                </button>
-                            </div>
+                        <header class="card-header">
+                            <h2 class="indicator-title">Trees Planted</h2>
+                            <select class="view-dropdown" aria-label="View options for Trees Planted">
+                                <option value="cumulative">Progress</option>
+                                <option value="sparkline">Sparkline</option>
+                                <option value="sites">By Site</option>
+                                <option value="velocity">Velocity</option>
+                            </select>
                         </header>
 
                         <!-- Visualization Container -->
@@ -780,47 +714,14 @@
                          ===================================== -->
                     <article class="indicator-card indicator-card--section-start" data-indicator="survival-rate">
                         <!-- Card Header -->
-                        <header class="indicator-header">
-                            <div>
-                                <h2 class="indicator-title">Survival Rate</h2>
-                                <div class="indicator-meta">
-                                    <span class="tm-badge">Annual</span>
-                                    <span class="tm-badge-secondary">High-value decision indicator</span>
-                                </div>
-                            </div>
-
-                            <!-- Visualization Toggle Group -->
-                            <div class="viz-toggle-group" role="group"
-                                 aria-label="Visualization options for Survival Rate">
-                                <button class="viz-toggle active"
-                                        data-option="confidence-band"
-                                        aria-pressed="true"
-                                        aria-label="Show with confidence bands">
-                                    <span class="toggle-icon" aria-hidden="true">📊</span>
-                                    <span class="toggle-label">Trend</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="cohort-table"
-                                        aria-pressed="false"
-                                        aria-label="Show cohort comparison table">
-                                    <span class="toggle-icon" aria-hidden="true">📋</span>
-                                    <span class="toggle-label">Cohorts</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="risk-dashboard"
-                                        aria-pressed="false"
-                                        aria-label="Show risk status by site">
-                                    <span class="toggle-icon" aria-hidden="true">🚦</span>
-                                    <span class="toggle-label">Risk</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="simplified"
-                                        aria-pressed="false"
-                                        aria-label="Show simplified trend for public">
-                                    <span class="toggle-icon" aria-hidden="true">📈</span>
-                                    <span class="toggle-label">Simple</span>
-                                </button>
-                            </div>
+                        <header class="card-header">
+                            <h2 class="indicator-title">Survival Rate</h2>
+                            <select class="view-dropdown" aria-label="View options for Survival Rate">
+                                <option value="confidence-band">Confidence Bands</option>
+                                <option value="cohort-table">Cohort Table</option>
+                                <option value="risk-dashboard">Risk Dashboard</option>
+                                <option value="simplified">Trend</option>
+                            </select>
                         </header>
 
                         <!-- Visualization Container -->
@@ -1060,47 +961,14 @@
                          ===================================== -->
                     <article class="tm-card indicator-card" data-indicator="natural-regeneration">
                         <!-- Card Header -->
-                        <header class="indicator-header">
-                            <div>
-                                <h2 class="indicator-title">Natural Regeneration</h2>
-                                <div class="indicator-meta">
-                                    <span class="tm-badge">Annual + Bi-annual photos</span>
-                                    <span class="tm-badge-secondary">ANR progress</span>
-                                </div>
-                            </div>
-
-                            <!-- Visualization Toggle Group -->
-                            <div class="viz-toggle-group" role="group"
-                                 aria-label="Visualization options for Natural Regeneration">
-                                <button class="viz-toggle active"
-                                        data-option="qualitative"
-                                        aria-pressed="true"
-                                        aria-label="Show qualitative assessment with photos">
-                                    <span class="toggle-icon" aria-hidden="true">🌱</span>
-                                    <span class="toggle-label">Status</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="distribution"
-                                        aria-pressed="false"
-                                        aria-label="Show distribution by abundance">
-                                    <span class="toggle-icon" aria-hidden="true">📊</span>
-                                    <span class="toggle-label">Distribution</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="photos"
-                                        aria-pressed="false"
-                                        aria-label="Show before and after photos">
-                                    <span class="toggle-icon" aria-hidden="true">📷</span>
-                                    <span class="toggle-label">Photos</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="details"
-                                        aria-pressed="false"
-                                        aria-label="Show detailed site table">
-                                    <span class="toggle-icon" aria-hidden="true">📋</span>
-                                    <span class="toggle-label">Details</span>
-                                </button>
-                            </div>
+                        <header class="card-header">
+                            <h2 class="indicator-title">Natural Regeneration</h2>
+                            <select class="view-dropdown" aria-label="View options for Natural Regeneration">
+                                <option value="photos-status">Photos+Status</option>
+                                <option value="distribution">Distribution</option>
+                                <option value="before-after">Before/After</option>
+                                <option value="table">Table</option>
+                            </select>
                         </header>
 
                         <!-- Visualization Container -->
