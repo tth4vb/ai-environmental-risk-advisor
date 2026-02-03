@@ -555,3 +555,44 @@
   background: var(--tm-hover-bg);
   font-weight: 600;
 }
+
+/* ========================================
+   Stat Display (Big Numbers)
+   ======================================== */
+
+/* Stat Display (Big Numbers) */
+.stat-display {
+  margin: 16px 0;
+  text-align: left;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.0;
+  color: var(--tm-accent); /* Green */
+  margin: 0 0 4px 0;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--tm-neutrals-700);
+  margin: 0;
+}
+
+/* Supporting Text */
+.supporting-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--tm-neutrals-700);
+  margin: 12px 0;
+}
+
+/* Card Body */
+.card-content {
+  position: relative;
+}
+
+.card-body {
+  margin: 16px 0;
+}
