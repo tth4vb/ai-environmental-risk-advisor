@@ -510,3 +510,48 @@
     display: block !important;
   }
 }
+
+/* ========================================
+   Dropdown Toggle Component
+   ======================================== */
+
+/* Dropdown Toggle Component */
+.view-dropdown {
+  background: transparent;
+  border: 1px solid var(--tm-border-light);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: var(--tm-font-family);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--tm-neutrals-900);
+  cursor: pointer;
+  transition: background 150ms ease;
+  appearance: none; /* Remove default browser styling */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%231a1919" d="M6 9L1 4h10z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+  min-height: 32px;
+}
+
+.view-dropdown:hover {
+  background: var(--tm-hover-bg);
+}
+
+.view-dropdown:focus {
+  outline: 2px solid var(--tm-focus-outline);
+  outline-offset: 2px;
+}
+
+/* Dropdown Options */
+.view-dropdown option {
+  padding: 8px;
+  background: var(--tm-white);
+  color: var(--tm-neutrals-900);
+}
+
+.view-dropdown option:checked {
+  background: var(--tm-hover-bg);
+  font-weight: 600;
+}
