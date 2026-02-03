@@ -959,9 +959,14 @@
                     <!-- =====================================
                          INDICATOR 4: NATURAL REGENERATION (CRITICAL)
                          ===================================== -->
-                    <article class="tm-card indicator-card" data-indicator="natural-regeneration">
-                        <!-- Card Header -->
-                        <header class="card-header">
+                    <article class="indicator-card indicator-card--visual-first" data-indicator="natural-regeneration">
+                        <div class="card-visual">
+                            <img src="https://via.placeholder.com/600x400/477010/ffffff?text=Natural+Regeneration+Photo"
+                                 alt="Natural regeneration site showing native species growth">
+                        </div>
+                        <div class="card-content">
+                            <!-- Card Header -->
+                            <header class="card-header">
                             <h2 class="indicator-title">Natural Regeneration</h2>
                             <select class="view-dropdown" aria-label="View options for Natural Regeneration">
                                 <option value="photos-status">Photos+Status</option>
@@ -1252,6 +1257,7 @@
                                 </div>
                             </details>
                         </aside>
+                        </div>
                     </article>
 
                 </div>
@@ -1358,22 +1364,21 @@
                     <!-- =====================================
                          INDICATOR 7: CHIMPANZEE HABITAT SUITABILITY
                          ===================================== -->
-                    <article class="tm-card indicator-card" data-indicator="habitat-suitability">
-                        <header class="indicator-header">
-                            <div>
+                    <article class="indicator-card indicator-card--visual-first" data-indicator="habitat-suitability">
+                        <div class="card-visual">
+                            <img src="https://via.placeholder.com/600x400/477010/ffffff?text=Habitat+Suitability+Map"
+                                 alt="Chimpanzee habitat suitability zones">
+                        </div>
+                        <div class="card-content">
+                            <header class="card-header">
                                 <h2 class="indicator-title">Chimpanzee Habitat Suitability</h2>
-                                <div class="indicator-meta">
-                                    <span class="tm-badge">Annual</span>
-                                    <span class="tm-badge-secondary">Habitat proxy</span>
-                                </div>
-                            </div>
-                            <div class="viz-toggle-group" role="group" aria-label="Visualization options for Habitat Suitability">
-                                <button class="viz-toggle active" data-option="directional" aria-pressed="true"><span class="toggle-icon">↗</span><span class="toggle-label">Status</span></button>
-                                <button class="viz-toggle" data-option="index" aria-pressed="false"><span class="toggle-icon">📈</span><span class="toggle-label">Index</span></button>
-                                <button class="viz-toggle" data-option="map" aria-pressed="false"><span class="toggle-icon">🗺️</span><span class="toggle-label">Map</span></button>
-                                <button class="viz-toggle" data-option="simple" aria-pressed="false"><span class="toggle-icon">🦍</span><span class="toggle-label">Simple</span></button>
-                            </div>
-                        </header>
+                                <select class="view-dropdown" aria-label="View options for Chimpanzee Habitat">
+                                    <option value="directional">Status</option>
+                                    <option value="index">Index Trend</option>
+                                    <option value="map">Map Overlay</option>
+                                    <option value="simple">Simple</option>
+                                </select>
+                            </header>
                         <div class="indicator-viz-container">
                             <!-- OPTION A: DIRECTIONAL -->
                             <div class="viz-option" data-option="directional" aria-hidden="false">
@@ -1431,6 +1436,7 @@
                                 </div>
                             </details>
                         </aside>
+                        </div>
                     </article>
 
                 </div>
