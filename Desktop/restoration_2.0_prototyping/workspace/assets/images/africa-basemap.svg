@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" class="africa-basemap">
+  <defs>
+    <style>
+      .ocean { fill: var(--tm-primary-100, #f7fbfd); }
+      .continent { fill: var(--tm-neutrals-300, #e7e6e6); fill-opacity: 0.3; stroke: var(--tm-neutrals-400, #c9c9c9); stroke-width: 2; }
+      .restoration-region { fill: var(--tm-accent, #477010); fill-opacity: 0.2; stroke: var(--tm-accent, #477010); stroke-width: 1.5; transition: fill-opacity 200ms ease; }
+      .restoration-region:hover { fill-opacity: 0.3; cursor: pointer; }
+      .site-marker { fill: var(--tm-accent, #477010); stroke: white; stroke-width: 2; transition: transform 200ms ease; }
+      .site-marker:hover { transform: scale(1.25); cursor: pointer; }
+    </style>
+  </defs>
+
+  <!-- Ocean background -->
+  <rect class="ocean" x="0" y="0" width="800" height="600" />
+
+  <!-- Africa continent outline (simplified) -->
+  <path class="continent" d="M 250,50 L 350,60 L 420,90 L 480,140 L 510,200 L 520,270 L 510,340 L 480,410 L 440,470 L 380,520 L 310,550 L 240,540 L 190,510 L 150,460 L 130,400 L 120,330 L 130,260 L 160,200 L 200,150 L 250,100 Z" />
+
+  <!-- Ghana Cocoa Belt region -->
+  <polygon class="restoration-region"
+           data-region="ghana"
+           points="180,280 220,270 230,310 210,330 180,320">
+    <title>Ghana Cocoa Belt</title>
+  </polygon>
+
+  <!-- Greater Rift Valley of Kenya region -->
+  <polygon class="restoration-region"
+           data-region="rift-valley"
+           points="420,320 450,310 460,350 440,370 420,360">
+    <title>Greater Rift Valley of Kenya</title>
+  </polygon>
+
+  <!-- Lake Kivu & Rusizi Basin region -->
+  <polygon class="restoration-region"
+           data-region="lake-kivu"
+           points="380,360 400,350 410,380 395,395 380,385">
+    <title>Lake Kivu & Rusizi River Basin</title>
+  </polygon>
+
+  <!-- Site markers -->
+  <circle class="site-marker" cx="200" cy="295" r="8" data-site="Ghana Site 1">
+    <title>Ghana Site 1</title>
+  </circle>
+  <circle class="site-marker" cx="435" cy="335" r="8" data-site="Kenya Site 1">
+    <title>Kenya Site 1</title>
+  </circle>
+  <circle class="site-marker" cx="390" cy="375" r="8" data-site="Rwanda Site 1">
+    <title>Rwanda Site 1</title>
+  </circle>
+</svg>
