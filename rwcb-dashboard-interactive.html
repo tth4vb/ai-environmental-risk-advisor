@@ -107,6 +107,79 @@
             <!-- Indicators Container -->
             <div class="dashboard-bento-grid">
 
+                    <!-- HERO: Hectares Under Restoration -->
+                    <article class="indicator-card indicator-card--hero indicator-card--visual-first"
+                             data-indicator="hectares-under">
+                        <div class="card-visual">
+                            <object data="assets/images/africa-basemap.svg" type="image/svg+xml" class="africa-basemap">
+                                <img src="assets/images/africa-basemap-fallback.png" alt="Africa restoration regions map" style="display:none;">
+                            </object>
+                            <div class="visual-overlay">
+                                <h3 class="stat-large">47,000 hectares</h3>
+                                <p class="stat-label">across 3 regions</p>
+                            </div>
+                        </div>
+
+                        <div class="card-content">
+                            <header class="card-header">
+                                <div class="title-row">
+                                    <span class="status-dot status-dot--green" aria-label="Status: Active"></span>
+                                    <h2 class="indicator-title">Hectares Under Restoration</h2>
+                                </div>
+                                <select class="view-dropdown" aria-label="View options for Hectares Under Restoration">
+                                    <option value="map">Map</option>
+                                    <option value="timeline">Timeline</option>
+                                    <option value="by-site">By Site</option>
+                                    <option value="stat-card">Stat Card</option>
+                                </select>
+                            </header>
+
+                            <div class="indicator-viz-container">
+                                <!-- Map view (default) -->
+                                <div class="viz-option" data-option="map" aria-hidden="false">
+                                    <div class="stat-display">
+                                        <p class="stat-number">47,000</p>
+                                        <p class="stat-label">hectares under restoration</p>
+                                    </div>
+                                    <p class="supporting-text">
+                                        <strong>🔒 Finalized Year 2</strong> - Site boundaries were finalized at the end of Year 2 and cannot be changed.
+                                    </p>
+                                    <p class="supporting-text">
+                                        This metric represents the total area committed to restoration activities across three priority landscapes.
+                                    </p>
+                                </div>
+
+                                <!-- Timeline view -->
+                                <div class="viz-option" data-option="timeline" aria-hidden="true">
+                                    <p class="supporting-text">Timeline showing boundary finalization history...</p>
+                                </div>
+
+                                <!-- By Site view -->
+                                <div class="viz-option" data-option="by-site" aria-hidden="true">
+                                    <p class="supporting-text">Breakdown by individual restoration sites...</p>
+                                </div>
+
+                                <!-- Stat Card view -->
+                                <div class="viz-option" data-option="stat-card" aria-hidden="true">
+                                    <div class="stat-display">
+                                        <p class="stat-number">47,000 ha</p>
+                                        <p class="stat-label">Total Area</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <details class="indicator-context">
+                                <summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>The total geographic area (in hectares) where restoration activities are being implemented.</p>
+                                    <h5>Why It Matters</h5>
+                                    <p>This metric defines the scope of restoration work and remains fixed after Year 2 to ensure accountability.</p>
+                                </div>
+                            </details>
+                        </div>
+                    </article>
+
                 <!-- =====================================
                      SECTION: OPERATIONAL METRICS
                      ===================================== -->
@@ -1323,89 +1396,6 @@
                     <!-- =====================================
                          INDICATOR 5: HECTARES UNDER RESTORATION
                          ===================================== -->
-                    <article class="tm-card indicator-card" data-indicator="hectares-under-restoration">
-                        <header class="indicator-header">
-                            <div>
-                                <h2 class="indicator-title">Hectares Under Restoration</h2>
-                                <div class="indicator-meta">
-                                    <span class="tm-badge">Bi-annual until Y2</span>
-                                    <span class="tm-badge-secondary">🔒 Locked Sep 2024</span>
-                                </div>
-                            </div>
-                            <div class="viz-toggle-group" role="group" aria-label="Visualization options for Hectares Under Restoration">
-                                <button class="viz-toggle active" data-option="map" aria-pressed="true"><span class="toggle-icon">🗺️</span><span class="toggle-label">Map</span></button>
-                                <button class="viz-toggle" data-option="timeline" aria-pressed="false"><span class="toggle-icon">📅</span><span class="toggle-label">Timeline</span></button>
-                                <button class="viz-toggle" data-option="breakdown" aria-pressed="false"><span class="toggle-icon">📊</span><span class="toggle-label">By Site</span></button>
-                                <button class="viz-toggle" data-option="simple" aria-pressed="false"><span class="toggle-icon">🔢</span><span class="toggle-label">Simple</span></button>
-                            </div>
-                        </header>
-                        <div class="indicator-viz-container">
-                            <!-- OPTION A: MAP VIEW -->
-                            <div class="viz-option" data-option="map" aria-hidden="false">
-                                <div class="lock-badge" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(76, 175, 80, 0.1); border-radius: var(--tm-radius-sm); margin-bottom: 1.5rem; border-left: 4px solid var(--tm-success);">
-                                    <span style="font-size: 1.5rem;">🔒</span>
-                                    <div><strong style="color: var(--tm-success);">Baseline Established</strong><br><span style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Area boundaries finalized and locked as of September 2024</span></div>
-                                </div>
-                                <div class="map-container" style="border: 3px solid var(--tm-success); position: relative;">
-                                    <svg viewBox="0 0 400 300" style="width: 100%; height: 300px;">
-                                        <defs><pattern id="mapPattern" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="1" fill="#ccc"/></pattern></defs>
-                                        <rect width="400" height="300" fill="#f0f0f0"/>
-                                        <polygon points="80,60 320,70 340,120 310,220 180,240 100,190 70,120" fill="var(--tm-accent)" opacity="0.3" stroke="var(--tm-success)" stroke-width="3"/>
-                                        <circle cx="200" cy="140" r="6" fill="var(--tm-success)"/>
-                                        <text x="200" y="155" font-size="12" fill="var(--tm-primary)" text-anchor="middle" font-weight="600">Gishwati-Mukura</text>
-                                        <g transform="translate(340, 40)"><rect x="0" y="8" width="20" height="15" fill="var(--tm-success)" rx="2"/><path d="M 4 8 L 4 4 A 6 6 0 0 1 16 4 L 16 8" stroke="var(--tm-success)" stroke-width="2.5" fill="none"/><circle cx="10" cy="15" r="2" fill="white"/></g>
-                                    </svg>
-                                    <div style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem; background: white; padding: 1rem; border-radius: var(--tm-radius-sm); box-shadow: var(--tm-shadow-md);">
-                                        <div style="font-size: 2rem; font-weight: var(--tm-font-weight-bold); color: var(--tm-primary);">1,847 hectares</div>
-                                        <div style="font-size: var(--tm-font-size-sm); color: var(--tm-success); font-weight: var(--tm-font-weight-semibold); margin-top: 0.25rem;">✓ Finalized & Locked (Sep 2024)</div>
-                                    </div>
-                                </div>
-                                <div style="margin-top: 1rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
-                                    <strong>Note:</strong> Site boundaries are now locked. No further changes expected. Minor boundary corrections in Years 1-2 are normal; major changes later would require explanation.
-                                </div>
-                            </div>
-                            <!-- OPTION B: TIMELINE -->
-                            <div class="viz-option" data-option="timeline" aria-hidden="true">
-                                <div class="timeline">
-                                    <div class="timeline-line"></div>
-                                    <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">Dec 2023</div><div class="timeline-content"><strong>Initial baseline survey</strong><br>1,820 hectares identified</div></div>
-                                    <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">Mar 2024</div><div class="timeline-content"><strong>Site C boundary correction</strong><br>+15 hectares (verification)</div></div>
-                                    <div class="timeline-item"><div class="timeline-dot" style="background: var(--tm-success);"></div><div class="timeline-date">Sep 2024</div><div class="timeline-content"><strong>🔒 Final verification - LOCKED</strong><br>1,847 hectares finalized</div></div>
-                                </div>
-                            </div>
-                            <!-- OPTION C: BREAKDOWN -->
-                            <div class="viz-option" data-option="breakdown" aria-hidden="true">
-                                <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1rem;">Area by Site</h4>
-                                <div class="bar-chart">
-                                    <div class="bar-item"><div class="bar-label"><span class="bar-label-primary">Gishwati Forest</span><span class="bar-label-secondary">892 ha (48%)</span></div><div class="bar-track"><div class="bar-fill" style="width: 48%; background: var(--tm-success);"></div></div></div>
-                                    <div class="bar-item"><div class="bar-label"><span class="bar-label-primary">Mukura Forest</span><span class="bar-label-secondary">687 ha (37%)</span></div><div class="bar-track"><div class="bar-fill" style="width: 37%; background: var(--tm-accent);"></div></div></div>
-                                    <div class="bar-item"><div class="bar-label"><span class="bar-label-primary">Buffer Zones</span><span class="bar-label-secondary">268 ha (15%)</span></div><div class="bar-track"><div class="bar-fill" style="width: 15%; background: var(--tm-info);"></div></div></div>
-                                </div>
-                            </div>
-                            <!-- OPTION D: SIMPLE -->
-                            <div class="viz-option" data-option="simple" aria-hidden="true">
-                                <div style="text-align: center; padding: 2rem 0;">
-                                    <div style="font-size: 4rem; font-weight: var(--tm-font-weight-bold); color: var(--tm-primary);">1,847</div>
-                                    <div style="font-size: var(--tm-font-size-xl); color: var(--tm-text-secondary); margin-bottom: 2rem;">hectares under restoration</div>
-                                    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
-                                        <div><div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Equivalent to</div><div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold);">~2,600</div><div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">football fields</div></div>
-                                        <div><div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Or approximately</div><div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold);">18.5 km²</div><div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">of land</div></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <aside class="indicator-context">
-                            <details open><summary>About this metric</summary>
-                                <div class="context-content">
-                                    <h5>What This Measures</h5>
-                                    <p>The total area (in hectares) of land under active restoration management. This includes all restoration sites, regardless of approach (planting, ANR, or mixed). Reported bi-annually until Year 2, when site boundaries are finalized and the metric "locks."</p>
-                                    <h5>Why It Matters</h5>
-                                    <p>This establishes the <strong>scale and scope</strong> of the restoration commitment. Once finalized (Year 2), this metric should be visually "locked" to prevent confusion. Any changes after Year 2 would require clear explanation.</p>
-                                </div>
-                            </details>
-                        </aside>
-                    </article>
-
                     <!-- =====================================
                          INDICATOR 6: SPECIES DIVERSITY
                          ===================================== -->
