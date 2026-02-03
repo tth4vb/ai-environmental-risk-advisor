@@ -5,9 +5,9 @@
 
 /* Main Grid Container */
 .dashboard-bento-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 16px !important;
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px;
@@ -15,7 +15,7 @@
 
 /* Hero Cards (Full-width) */
 .indicator-card--hero {
-  grid-column: 1 / -1;
+  grid-column: 1 / -1 !important;
 }
 
 /* Section Visual Breaks (32px spacing) */
