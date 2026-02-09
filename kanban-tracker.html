@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Risk Advisor - Feedback Kanban</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: #ffffff;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+
+        .filters {
+            max-width: 1400px;
+            margin: 0 auto 2rem;
+            padding: 0 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input, .filter-select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background-color: white;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-select {
+            min-width: 150px;
+        }
+
+        .board {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0 2rem 2rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .column {
+            background-color: #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 400px;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #d1d5db;
+        }
+
+        .column-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .card-count {
+            background-color: #9ca3af;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            min-height: 100px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 6px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+            transition: all 0.2s;
+            border-left: 4px solid #9ca3af;
+            animation: cardEnter 0.3s ease-out;
+        }
+
+        @keyframes cardEnter {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .card.priority-high {
+            border-left-color: #ef4444;
+        }
+
+        .card.priority-medium {
+            border-left-color: #f59e0b;
+        }
+
+        .card.priority-low {
+            border-left-color: #3b82f6;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-id {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            font-family: 'Courier New', monospace;
+        }
+
+        .badge-bug { background-color: #fee2e2; color: #991b1b; }
+        .badge-feature { background-color: #dbeafe; color: #1e40af; }
+        .badge-ux { background-color: #e0e7ff; color: #3730a3; }
+        .badge-performance { background-color: #fef3c7; color: #92400e; }
+        .badge-documentation { background-color: #d1fae5; color: #065f46; }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: #6b7280;
+            transition: color 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: #1f2937;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+        }
+
+        .card-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .card-meta {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .column.drag-over {
+            background-color: #dbeafe;
+            border: 2px dashed #3b82f6;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .board {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .search-input, .filter-select {
+                width: 100%;
+            }
+
+            .card {
+                cursor: default;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>Environmental Risk Advisor - Feedback Tracker</h1>
+                <p class="subtitle">Organize feedback from consultations and user calls</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <span>📥</span> Export JSON
+                </button>
+                <button class="btn btn-primary" onclick="openModal('create')">
+                    <span>+</span> Add Card
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search cards..." oninput="applyFilters()">
+        <select class="filter-select" id="priorityFilter" onchange="applyFilters()">
+            <option value="">All Priorities</option>
+            <option value="High">High Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="Low">Low Priority</option>
+        </select>
+        <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+            <option value="">All Categories</option>
+            <option value="Bug">Bug</option>
+            <option value="Feature Request">Feature Request</option>
+            <option value="UX Issue">UX Issue</option>
+            <option value="Performance">Performance</option>
+            <option value="Documentation">Documentation</option>
+        </select>
+        <select class="filter-select" id="sortOrder" onchange="applyFilters()">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="priority">Priority</option>
+        </select>
+    </div>
+
+    <div class="board">
+        <div class="column" data-status="todo" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+            <div class="column-header">
+                <h2 class="column-title">To Do</h2>
+                <span class="card-count" id="todo-count">0</span>
+            </div>
+            <div class="cards-container" id="todo-cards">
+                <div class="empty-state">No cards yet</div>
+            </div>
+        </div>
+
+        <div class="column" data-status="in-progress" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+            <div class="column-header">
+                <h2 class="column-title">In Progress</h2>
+                <span class="card-count" id="in-progress-count">0</span>
+            </div>
+            <div class="cards-container" id="in-progress-cards">
+                <div class="empty-state">No cards yet</div>
+            </div>
+        </div>
+
+        <div class="column" data-status="qa" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+            <div class="column-header">
+                <h2 class="column-title">QA</h2>
+                <span class="card-count" id="qa-count">0</span>
+            </div>
+            <div class="cards-container" id="qa-cards">
+                <div class="empty-state">No cards yet</div>
+            </div>
+        </div>
+
+        <div class="column" data-status="done" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+            <div class="column-header">
+                <h2 class="column-title">Done</h2>
+                <span class="card-count" id="done-count">0</span>
+            </div>
+            <div class="cards-container" id="done-cards">
+                <div class="empty-state">No cards yet</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="cardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Create Card</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="cardForm" onsubmit="submitModal(event)">
+                <div class="form-group">
+                    <label class="form-label" for="cardTitle">Title *</label>
+                    <input type="text" class="form-input" id="cardTitle" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="cardDescription">Description</label>
+                    <textarea class="form-textarea" id="cardDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="cardPriority">Priority</label>
+                    <select class="form-select" id="cardPriority">
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="cardCategory">Category</label>
+                    <select class="form-select" id="cardCategory">
+                        <option value="Feature Request">Feature Request</option>
+                        <option value="Bug">Bug</option>
+                        <option value="UX Issue">UX Issue</option>
+                        <option value="Performance">Performance</option>
+                        <option value="Documentation">Documentation</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Card</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let cards = [];
+        let currentEditId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCards();
+            initializeWithFeedback();
+            renderBoard();
+            setupKeyboardShortcuts();
+        });
+
+        // Initialize with technical feedback if no cards exist
+        function initializeWithFeedback() {
+            if (cards.length === 0) {
+                const initialCards = [
+                    // User Interface Recommendations
+                    {
+                        id: Date.now() + 1,
+                        title: "Allow users to input their own geometry",
+                        description: "Enable users to upload shapefiles or input coordinates for their mining project locations. Communities often have precise location data.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 2,
+                        title: "Make interface more map-based",
+                        description: "Redesign UI to center around map-based interaction since affected communities often work with coordinates and spatial data.",
+                        priority: "High",
+                        category: "UX Issue",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 3,
+                        title: "Implement map-based outputs for impact visualization",
+                        description: "Create map-based visualizations to highlight impact zones and sensitive areas for easier community understanding.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 4,
+                        title: "Add language accessibility/internationalization",
+                        description: "Implement multi-language support to ensure tool can be used by diverse audiences and communities.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Technical Requirements
+                    {
+                        id: Date.now() + 5,
+                        title: "Differentiate underground vs surface mining",
+                        description: "Create capability to distinguish between underground and surface mining projects based on geological survey data. Different mining types have different impacts. (Source: Ke)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 6,
+                        title: "Develop standardized EIA automation methodology",
+                        description: "Build standardized methodology to anticipate and automate environmental impact assessments for different mining types. (Source: Ke)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 7,
+                        title: "Include tailings dam information",
+                        description: "Add tailings information (upstream, downstream, or dry stack) to assess catastrophic failure risks and potential loss of life scenarios.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 8,
+                        title: "Improve quantification of potential losses",
+                        description: "Better quantify potential losses from mining impacts including farming livelihoods, carbon stocks from deforestation, etc.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Data Integration Needs - High Priority
+                    {
+                        id: Date.now() + 9,
+                        title: "Integrate IPLC data from LandMark",
+                        description: "Add Indigenous Peoples and Local Communities spatial data from LandMark database to identify affected communities.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 10,
+                        title: "Integrate water and water risk data",
+                        description: "Add water availability and water risk datasets to assess impacts on local water resources.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 11,
+                        title: "Integrate protected areas (WDPA)",
+                        description: "Add World Database on Protected Areas to identify mining projects near or within protected zones.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 12,
+                        title: "Integrate Key Biodiversity Areas (KBAs)",
+                        description: "Add KBA dataset to identify projects impacting critical biodiversity zones.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Data Integration Needs - Medium Priority
+                    {
+                        id: Date.now() + 13,
+                        title: "Integrate land cover information",
+                        description: "Add land cover datasets to understand baseline conditions and potential deforestation impacts.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 14,
+                        title: "Integrate natural ecosystems data",
+                        description: "Add natural ecosystems spatial data to assess ecosystem service impacts.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 15,
+                        title: "Integrate global mineral resource data",
+                        description: "Add global mineral resource availability data to provide context on deposit quality and alternatives.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 16,
+                        title: "Integrate demographic data",
+                        description: "Add population and demographic datasets to quantify affected populations.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 17,
+                        title: "Integrate armed conflict information",
+                        description: "Add conflict zone data to identify projects in high-risk security contexts.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Open Source Data Integration
+                    {
+                        id: Date.now() + 18,
+                        title: "Integrate biodiversity data (IBAT, IUCN, WDMPA)",
+                        description: "Add open source biodiversity datasets including IBAT, KBA, IUCN, and WDMPA for comprehensive biodiversity risk assessment.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 19,
+                        title: "Integrate MoEF One Map land cover data",
+                        description: "Add MoEF One Map dataset for detailed land cover analysis (Indonesia context).",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 20,
+                        title: "Integrate UNESCO World Heritage data",
+                        description: "Add UNESCO World Heritage site data to identify cultural heritage impacts.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 21,
+                        title: "Integrate BRWA Map IPLC data",
+                        description: "Add BRWA Map dataset for additional IPLC land rights information.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 22,
+                        title: "Integrate MoEF Protection Forest Map",
+                        description: "Add MoEF Protection Forest Map for forest protection zone analysis (Indonesia context).",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 23,
+                        title: "Reference WBG EHS Guidelines",
+                        description: "Integrate World Bank Group Environmental Health & Safety Guidelines as reference framework for typical mining impacts.",
+                        priority: "Low",
+                        category: "Documentation",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Additional Considerations
+                    {
+                        id: Date.now() + 24,
+                        title: "Literature review per critical mineral",
+                        description: "Conduct comprehensive literature review for each critical mineral (copper, nickel, lithium, cobalt) on specific environmental impacts.",
+                        priority: "Medium",
+                        category: "Documentation",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 25,
+                        title: "Develop baseline assessment methodology",
+                        description: "Create standardized methodology for baseline assessment of existing environmental and socioeconomic risks before mining begins.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 26,
+                        title: "Build environmental risk assessment framework",
+                        description: "Develop comprehensive environmental risk assessment framework with input from environmental risk assessment expertise.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 27,
+                        title: "Create project glossary",
+                        description: "Develop comprehensive glossary with clear terminology for mining impacts, environmental risks, and technical terms to support community understanding.",
+                        priority: "Medium",
+                        category: "Documentation",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Expert Assessment Feedback - Risk Assessment Framework
+                    {
+                        id: Date.now() + 28,
+                        title: "Generate risk maps with current conditions overlay",
+                        description: "Create risk maps based on current baseline conditions overlaid with typical potential project impacts to show combined risk scenarios.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 29,
+                        title: "Flexible minimal inputs for community users",
+                        description: "Design input system requiring only location, commodity type, and project phase for community users without extensive technical data.",
+                        priority: "High",
+                        category: "UX Issue",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 30,
+                        title: "Differentiate IPLC location points vs exploration areas",
+                        description: "Distinguish between indigenous people settlement location points and their broader exploration/use areas for accurate impact assessment.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Expert Assessment - Data Considerations
+                    {
+                        id: Date.now() + 31,
+                        title: "Include deforestation and illegal mining datasets",
+                        description: "Add datasets on deforestation, forests, and illegal gold mining activities to assess cumulative impacts.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 32,
+                        title: "Implement data protection for IPLC lands",
+                        description: "Ensure strong data protection measures for Indigenous Peoples and Local Communities lands to prevent unauthorized access or misuse.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 33,
+                        title: "Build safeguards against company misuse",
+                        description: "Implement access controls and usage safeguards to prevent mining companies from misusing community data or tool for targeting.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 34,
+                        title: "Enable override of global data with local data",
+                        description: "Create capability to override global datasets with higher-quality local data when communities or experts provide better information.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Expert Assessment - Baseline Environmental Parameters
+                    {
+                        id: Date.now() + 35,
+                        title: "Add cultural heritage area data",
+                        description: "Integrate cultural heritage area datasets to identify impacts on sites of cultural significance.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 36,
+                        title: "Add critical habitat location data",
+                        description: "Include potential critical habitat locations for endangered species and sensitive ecosystems.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 37,
+                        title: "Add river location data",
+                        description: "Integrate river and stream network data to assess water-related impacts.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 38,
+                        title: "Add flood risk data",
+                        description: "Include flood risk zones to assess vulnerability of mining operations and downstream communities.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 39,
+                        title: "Add erosion risk data",
+                        description: "Integrate erosion risk datasets to assess soil stability and sedimentation impacts.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 40,
+                        title: "Add geotechnical risk data",
+                        description: "Include geotechnical hazard data for slope stability, subsidence, and structural risks.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 41,
+                        title: "Add assimilative capacity data",
+                        description: "Include current assimilative capacity of water bodies and air sheds to assess pollution tolerance.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 42,
+                        title: "Add economic area mapping",
+                        description: "Map economic zones including commercial, agriculture, and aquaculture areas to assess livelihood impacts.",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Expert Assessment - Implementation Approach
+                    {
+                        id: Date.now() + 43,
+                        title: "Develop risk calculation algorithms",
+                        description: "Set algorithms to calculate risk scores based on overlay of baseline conditions and typical project impacts.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 44,
+                        title: "Cite all external data sources",
+                        description: "Implement comprehensive citation system for all external data sources to enhance credibility and reduce liability risk.",
+                        priority: "High",
+                        category: "Documentation",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 45,
+                        title: "Ensure risk methodology reliability",
+                        description: "Focus on ensuring risk calculation methodology is scientifically sound and reliable with expert validation.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 46,
+                        title: "Indigenous-specific risk assessment approach",
+                        description: "Develop differentiated risk assessment methodology specifically for indigenous communities with culturally appropriate indicators.",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Expert Assessment - Questions to Address
+                    {
+                        id: Date.now() + 47,
+                        title: "Define expert validation mechanism",
+                        description: "Document how experts will be provided, validated, and integrated into the platform for credibility.",
+                        priority: "Medium",
+                        category: "Documentation",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 48,
+                        title: "Identify existing expert network",
+                        description: "Research and document whether existing expert networks can be leveraged for validation and support.",
+                        priority: "Medium",
+                        category: "Documentation",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 49,
+                        title: "Address liability concerns",
+                        description: "Document legal and liability framework for providing environmental risk assessments to communities.",
+                        priority: "Medium",
+                        category: "Documentation",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Ambika Interview Feedback (Jobs to Move America - Lithium Valley)
+                    {
+                        id: Date.now() + 50,
+                        title: "Create onboarding page",
+                        description: "Design an onboarding page that explains how to use each section of the tool before users start. User expressed need to understand tool functionality upfront. (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "UX Issue",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 51,
+                        title: "Add scope/coverage disclosure section",
+                        description: "Create clear section explaining what risk areas the tool DOES and DOES NOT assess (e.g., earthquakes for geothermal lithium). Prevent false sense of comprehensive coverage. (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 52,
+                        title: "Reduce jargon in action steps and recommendations",
+                        description: "Replace technical terms like 'social license challenges,' 'FPIC,' etc. with plain language explanations accessible to community members without researchers as intermediaries. (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "UX Issue",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 53,
+                        title: "Differentiate visual design between risk results and action steps",
+                        description: "Use different colors/symbols for risk assessment results vs. recommended actions to avoid user confusion about which items to focus on. (Source: Ambika, Jobs to Move America)",
+                        priority: "Medium",
+                        category: "UX Issue",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Ambika Interview - Technical Translation Feature
+                    {
+                        id: Date.now() + 54,
+                        title: "Add document size limits and handling guidance",
+                        description: "Display maximum PDF size limits and set expectations for document complexity. Some EIRs are 1,000+ pages with 5,000 pages of appendices. (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 55,
+                        title: "Change PDF upload to text paste for translation",
+                        description: "Replace file upload with text paste field to give users more control over what specific sections get translated, building trust in the process. (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 56,
+                        title: "Show example translation before user inputs",
+                        description: "Display sample 'before and after' translation to build trust in the tool's capability before users upload their own documents. (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "UX Issue",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 57,
+                        title: "Handle contradictory information in documents",
+                        description: "Build AI capability to detect and flag contradictory information in uploaded documents, showing users when data conflicts exist (common in EIRs). (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Ambika Interview - Data & Methodology
+                    {
+                        id: Date.now() + 58,
+                        title: "Display data sources and methodology transparency",
+                        description: "Show data sources, calculation methods, and citations for all risk assessments to enable use in legal/technical comments. 'Estimated using WRI tool based on [sources].' (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 59,
+                        title: "Add uncertainty/confidence levels to projections",
+                        description: "Build in uncertainty ranges for risk projections, especially for emerging technologies (e.g., DLE for lithium from geothermal brine). Show speculative vs. validated estimates. (Source: Ambika, Jobs to Move America)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Ambika Interview - Contextual Features
+                    {
+                        id: Date.now() + 60,
+                        title: "Add context comparisons for quantitative data",
+                        description: "Always provide contextual comparisons for technical metrics (e.g., 'X acre-feet = water for Y households' vs 'football field with 1 foot of water'). (Source: Ambika, Jobs to Move America)",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 61,
+                        title: "Specify expert types and how they can help",
+                        description: "In expert connection feature, clarify what each type of expert can speak to (CEQA attorneys vs. hydrologists vs. community organizers have different roles). (Source: Ambika, Jobs to Move America)",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Additional Dataset Integration - Open Access
+                    {
+                        id: Date.now() + 62,
+                        title: "Integrate projected demand data for critical minerals",
+                        description: "Add projected demand datasets for critical minerals (copper, nickel, lithium, cobalt) to contextualize supply needs and project urgency. Open access for non-commercial use. (Source: Radost)",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 63,
+                        title: "Integrate proximity to existing mining projects",
+                        description: "Add spatial data on existing mining projects to assess cumulative impacts and proximity risks. Open access for non-commercial use. (Source: Radost)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    // Additional Dataset Integration - Availability Uncertain
+                    {
+                        id: Date.now() + 64,
+                        title: "Integrate known environmental resource use and impact data",
+                        description: "Add historical data on environmental resource use and documented impacts from existing mining operations. Availability uncertain - requires research. (Source: Radost)",
+                        priority: "High",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 65,
+                        title: "Integrate known time horizons for exploration/use",
+                        description: "Add data on known project timelines, exploration phases, and anticipated operational periods. Availability uncertain - requires research. (Source: Radost)",
+                        priority: "Medium",
+                        category: "Feature Request",
+                        status: "todo",
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+
+                cards = initialCards;
+                saveCards();
+            }
+        }
+
+        // localStorage operations
+        function loadCards() {
+            try {
+                const stored = localStorage.getItem('kanban-cards');
+                if (stored) {
+                    cards = JSON.parse(stored);
+                }
+            } catch (error) {
+                console.error('Error loading cards:', error);
+                if (confirm('Error loading saved data. Would you like to start fresh?')) {
+                    cards = [];
+                    saveCards();
+                }
+            }
+        }
+
+        function saveCards() {
+            try {
+                localStorage.setItem('kanban-cards', JSON.stringify(cards));
+            } catch (error) {
+                if (error.name === 'QuotaExceededError') {
+                    alert('Storage quota exceeded. Please export your data and clear some cards.');
+                } else {
+                    console.error('Error saving cards:', error);
+                }
+            }
+        }
+
+        // Render functions
+        function renderBoard() {
+            const statuses = ['todo', 'in-progress', 'qa', 'done'];
+
+            statuses.forEach(status => {
+                const container = document.getElementById(`${status}-cards`);
+                const statusCards = getFilteredCards().filter(card => card.status === status);
+
+                if (statusCards.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No cards yet</div>';
+                } else {
+                    container.innerHTML = statusCards.map(card => renderCard(card)).join('');
+                }
+            });
+
+            updateColumnCounts();
+        }
+
+        function renderCard(card) {
+            const categoryClass = card.category.toLowerCase().replace(/ /g, '-');
+            const priorityClass = card.priority.toLowerCase();
+            const createdDate = new Date(card.createdAt).toLocaleDateString();
+
+            return `
+                <div class="card priority-${priorityClass}" draggable="true" data-id="${card.id}"
+                     ondragstart="dragStart(event)" ondragend="dragEnd(event)">
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-id">#${card.id}</span>
+                            <span class="badge badge-${categoryClass}">${card.category}</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="icon-btn" onclick="openModal('edit', ${card.id})" title="Edit">
+                                ✏️
+                            </button>
+                            <button class="icon-btn" onclick="deleteCard(${card.id})" title="Delete">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-title">${escapeHtml(card.title)}</div>
+                    ${card.description ? `<div class="card-description">${escapeHtml(card.description)}</div>` : ''}
+                    <div class="card-meta">
+                        ${card.priority} Priority • Created ${createdDate}
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateColumnCounts() {
+            const statuses = ['todo', 'in-progress', 'qa', 'done'];
+            const filteredCards = getFilteredCards();
+
+            statuses.forEach(status => {
+                const count = filteredCards.filter(card => card.status === status).length;
+                document.getElementById(`${status}-count`).textContent = count;
+            });
+        }
+
+        // CRUD operations
+        function createCard(data) {
+            const card = {
+                id: Date.now(),
+                title: data.title,
+                description: data.description,
+                priority: data.priority,
+                category: data.category,
+                status: 'todo',
+                createdAt: new Date().toISOString()
+            };
+
+            cards.push(card);
+            saveCards();
+            renderBoard();
+        }
+
+        function updateCard(id, data) {
+            const index = cards.findIndex(card => card.id === id);
+            if (index !== -1) {
+                cards[index] = {
+                    ...cards[index],
+                    title: data.title,
+                    description: data.description,
+                    priority: data.priority,
+                    category: data.category
+                };
+                saveCards();
+                renderBoard();
+            }
+        }
+
+        function deleteCard(id) {
+            if (confirm('Are you sure you want to delete this card?')) {
+                cards = cards.filter(card => card.id !== id);
+                saveCards();
+                renderBoard();
+            }
+        }
+
+        function moveCard(id, newStatus) {
+            const card = cards.find(card => card.id === id);
+            if (card) {
+                card.status = newStatus;
+                saveCards();
+                renderBoard();
+            }
+        }
+
+        // Modal management
+        function openModal(mode, cardId = null) {
+            const modal = document.getElementById('cardModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('cardForm');
+
+            form.reset();
+            currentEditId = null;
+
+            if (mode === 'edit' && cardId) {
+                const card = cards.find(c => c.id === cardId);
+                if (card) {
+                    modalTitle.textContent = 'Edit Card';
+                    document.getElementById('cardTitle').value = card.title;
+                    document.getElementById('cardDescription').value = card.description || '';
+                    document.getElementById('cardPriority').value = card.priority;
+                    document.getElementById('cardCategory').value = card.category;
+                    currentEditId = cardId;
+                }
+            } else {
+                modalTitle.textContent = 'Create Card';
+            }
+
+            modal.classList.add('active');
+            document.getElementById('cardTitle').focus();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('cardModal');
+            modal.classList.remove('active');
+            currentEditId = null;
+        }
+
+        function submitModal(event) {
+            event.preventDefault();
+
+            const data = {
+                title: document.getElementById('cardTitle').value.trim(),
+                description: document.getElementById('cardDescription').value.trim(),
+                priority: document.getElementById('cardPriority').value,
+                category: document.getElementById('cardCategory').value
+            };
+
+            if (!data.title) {
+                alert('Title is required');
+                return;
+            }
+
+            if (currentEditId) {
+                updateCard(currentEditId, data);
+            } else {
+                createCard(data);
+            }
+
+            closeModal();
+        }
+
+        // Drag and drop
+        function dragStart(event) {
+            event.dataTransfer.setData('text/plain', event.target.dataset.id);
+            event.target.classList.add('dragging');
+        }
+
+        function dragEnd(event) {
+            event.target.classList.remove('dragging');
+            document.querySelectorAll('.column').forEach(col => col.classList.remove('drag-over'));
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            const column = event.currentTarget;
+            column.classList.add('drag-over');
+        }
+
+        function dragLeave(event) {
+            const column = event.currentTarget;
+            if (!column.contains(event.relatedTarget)) {
+                column.classList.remove('drag-over');
+            }
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const column = event.currentTarget;
+            column.classList.remove('drag-over');
+
+            const cardId = parseInt(event.dataTransfer.getData('text/plain'));
+            const newStatus = column.dataset.status;
+
+            moveCard(cardId, newStatus);
+        }
+
+        // Filter and sort
+        function getFilteredCards() {
+            let filtered = [...cards];
+
+            // Search filter
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filtered = filtered.filter(card =>
+                    card.title.toLowerCase().includes(searchTerm) ||
+                    (card.description && card.description.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            // Priority filter
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            if (priorityFilter) {
+                filtered = filtered.filter(card => card.priority === priorityFilter);
+            }
+
+            // Category filter
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            if (categoryFilter) {
+                filtered = filtered.filter(card => card.category === categoryFilter);
+            }
+
+            // Sort
+            const sortOrder = document.getElementById('sortOrder').value;
+            if (sortOrder === 'newest') {
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else if (sortOrder === 'oldest') {
+                filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            } else if (sortOrder === 'priority') {
+                const priorityOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
+                filtered.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+            }
+
+            return filtered;
+        }
+
+        function applyFilters() {
+            renderBoard();
+        }
+
+        // Export
+        function exportData() {
+            const dataStr = JSON.stringify(cards, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `kanban-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Keyboard shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (event) => {
+                // Escape closes modal
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+
+                // Cmd/Ctrl + K opens create modal
+                if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+                    event.preventDefault();
+                    openModal('create');
+                }
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('cardModal').addEventListener('click', (event) => {
+                if (event.target.id === 'cardModal') {
+                    closeModal();
+                }
+            });
+        }
+
+        // Utility function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
