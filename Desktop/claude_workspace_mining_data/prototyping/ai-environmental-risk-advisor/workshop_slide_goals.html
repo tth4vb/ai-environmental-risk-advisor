@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop Goals - Internal Consultation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .slide {
+            background: white;
+            width: 1200px;
+            height: 750px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f4c2c 0%, #1a6940 50%, #2d8659 100%);
+            color: white;
+            padding: 22px 50px 18px;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f7931e 0%, #ffa940 100%);
+        }
+
+        .header h1 {
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 22px 50px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Section Styling */
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f4c2c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #f7931e;
+            border-radius: 2px;
+        }
+
+        /* Goals Grid */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .goal-card {
+            background: linear-gradient(135deg, #f0f8f4 0%, #e8f5e9 100%);
+            border: 2px solid #27ae60;
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.15);
+        }
+
+        .goal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .goal-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #27ae60;
+            opacity: 0.3;
+            margin-bottom: 8px;
+        }
+
+        .goal-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f4c2c;
+            margin-bottom: 6px;
+        }
+
+        .goal-desc {
+            font-size: 12.5px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+
+        /* Questions Box */
+        .questions-box {
+            background: linear-gradient(135deg, #fff4e6 0%, #ffe8cc 100%);
+            border: 2px solid #f7931e;
+            border-radius: 8px;
+            padding: 16px 20px;
+            position: relative;
+        }
+
+        .questions-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #f7931e 0%, #ffa940 100%);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .questions-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f4c2c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon {
+            font-size: 20px;
+        }
+
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .question-item {
+            font-size: 12.5px;
+            color: #2c3e50;
+            line-height: 1.4;
+            padding-left: 18px;
+            position: relative;
+        }
+
+        .question-item::before {
+            content: '?';
+            position: absolute;
+            left: 0;
+            color: #f7931e;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Not Looking For Box */
+        .not-looking-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .not-looking-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .not-looking-content {
+            flex: 1;
+        }
+
+        .not-looking-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #c0392b;
+            margin-bottom: 6px;
+        }
+
+        .not-looking-text {
+            font-size: 12.5px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+
+        /* Next Steps Box */
+        .next-steps-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #d1e7f5 100%);
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .next-steps-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .next-steps-content {
+            flex: 1;
+        }
+
+        .next-steps-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1565c0;
+            margin-bottom: 6px;
+        }
+
+        .next-steps-text {
+            font-size: 12.5px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+            padding: 12px 50px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .wri-logo {
+            font-weight: 700;
+            color: #0f4c2c;
+            font-size: 13px;
+        }
+
+        .divider {
+            color: #bdc3c7;
+            font-weight: 300;
+        }
+
+        .time-badge {
+            background: #f7931e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <!-- Header -->
+        <div class="header">
+            <h1>Goals of This Consultation</h1>
+            <div class="header-meta">
+                <span>What we need from you today</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Three Goals -->
+            <div class="section">
+                <div class="section-title">Three Things We Need From You</div>
+                <div class="goals-grid">
+                    <div class="goal-card">
+                        <div class="goal-number">1</div>
+                        <div class="goal-title">Technical Reality Check</div>
+                        <div class="goal-desc">Is this technically feasible? What data exists? What are we oversimplifying about environmental risk?</div>
+                    </div>
+                    <div class="goal-card">
+                        <div class="goal-number">2</div>
+                        <div class="goal-title">Expert Assessment</div>
+                        <div class="goal-desc">Based on your work with users, where would this help vs. fall short? What credibility requirements are we missing?</div>
+                    </div>
+                    <div class="goal-card">
+                        <div class="goal-number">3</div>
+                        <div class="goal-title">External Connections</div>
+                        <div class="goal-desc">Who are 2-3 specific people we should validate this with? Can you introduce us to real users?</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Questions -->
+            <div class="questions-box">
+                <div class="questions-title"><span class="icon">💭</span> Key Questions We'll Explore</div>
+                <div class="questions-grid">
+                    <div class="question-item">What datasets would we need that don't exist or aren't accessible?</div>
+                    <div class="question-item">What would make this credible vs. easily dismissed by your stakeholders?</div>
+                    <div class="question-item">What environmental risks are we oversimplifying or missing entirely?</div>
+                    <div class="question-item">What's the biggest gap or concern you see with this approach?</div>
+                    <div class="question-item">How does this fit with WRI's positioning in responsible mining?</div>
+                    <div class="question-item">What would make this uniquely valuable vs. easily replicable?</div>
+                </div>
+            </div>
+
+            <!-- What We're NOT Looking For -->
+            <div class="not-looking-box">
+                <div class="not-looking-icon">🚫</div>
+                <div class="not-looking-content">
+                    <div class="not-looking-title">What We're NOT Looking For</div>
+                    <div class="not-looking-text">User validation (we'll do that with real users) • Feature requests without pain point validation • Polite enthusiasm without honest criticism • Hypothetical scenarios instead of experience-based insights</div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="next-steps-box">
+                <div class="next-steps-icon">→</div>
+                <div class="next-steps-content">
+                    <div class="next-steps-title">After Today</div>
+                    <div class="next-steps-text">We'll synthesize your feedback, address technical gaps, and reach out for introductions to external validators within 1 week. If we move forward, you'll see how your input shaped the direction.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-left">
+                <span class="wri-logo">WRI Product Studio</span>
+                <span class="divider">|</span>
+                <span>Responsible Mining Data Platform</span>
+                <span class="divider">|</span>
+                <span>Internal Expert Consultation</span>
+            </div>
+            <div class="time-badge">3 MIN</div>
+        </div>
+    </div>
+</body>
+</html>

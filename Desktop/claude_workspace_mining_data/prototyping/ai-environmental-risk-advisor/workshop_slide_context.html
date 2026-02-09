@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Environmental Risk Advisor - IPLC Context</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .slide {
+            background: white;
+            width: 1200px;
+            height: 675px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f4c2c 0%, #1a6940 50%, #2d8659 100%);
+            color: white;
+            padding: 22px 50px 18px;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f7931e 0%, #ffa940 100%);
+        }
+
+        .header h1 {
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .confidence {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            gap: 4px;
+        }
+
+        .confidence::before {
+            content: '✓';
+            font-weight: 700;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 22px 50px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Section Styling */
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f4c2c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #f7931e;
+            border-radius: 2px;
+        }
+
+        /* Pain Points */
+        .pain-points {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .pain-point {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+            border-left: 4px solid #e74c3c;
+            padding: 10px 14px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .pain-point:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
+        }
+
+        .pain-point .label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #c0392b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pain-point .quote {
+            font-size: 13px;
+            color: #2c3e50;
+            line-height: 1.5;
+            font-style: italic;
+            margin-bottom: 3px;
+            font-weight: 400;
+        }
+
+        .pain-point .context {
+            font-size: 11px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* Jobs to Be Done */
+        .jtbd-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .jtbd-item {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+            border-left: 4px solid #27ae60;
+            padding: 10px 14px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .jtbd-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.15);
+        }
+
+        .jtbd-item strong {
+            color: #0f4c2c;
+            display: block;
+            margin-bottom: 3px;
+            font-size: 12.5px;
+            font-weight: 700;
+        }
+
+        .jtbd-item span {
+            font-size: 12.5px;
+            color: #34495e;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* Connection Box */
+        .connection-box {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border: 2px solid #f7931e;
+            border-radius: 8px;
+            padding: 12px 18px;
+            box-shadow: 0 4px 16px rgba(247, 147, 30, 0.12);
+            position: relative;
+        }
+
+        .connection-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #f7931e 0%, #ffa940 100%);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .connection-box h3 {
+            font-size: 15px;
+            color: #0f4c2c;
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .arrow-icon {
+            font-size: 18px;
+            color: #f7931e;
+            font-weight: 700;
+        }
+
+        .connection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .connection-item {
+            font-size: 13px;
+            color: #2c3e50;
+            line-height: 1.4;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .connection-item::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #f7931e;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .connection-item strong {
+            color: #0f4c2c;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+            padding: 12px 50px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .wri-logo {
+            font-weight: 700;
+            color: #0f4c2c;
+            font-size: 13px;
+        }
+
+        .divider {
+            color: #bdc3c7;
+            font-weight: 300;
+        }
+
+        .time-badge {
+            background: #f7931e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <!-- Header -->
+        <div class="header">
+            <h1>AI Environmental Risk Advisor: Why This Path?</h1>
+            <div class="header-meta">
+                <span>IPLC/CSO User Research Findings</span>
+                <span class="confidence">Validated Insights</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="two-column">
+                <!-- Left Column: Pain Points -->
+                <div class="section">
+                    <div class="section-title">Critical Pain Points</div>
+                    <div class="pain-points">
+                        <div class="pain-point">
+                            <div class="label">🚫 Technical Data Inaccessible</div>
+                            <div class="quote">"It is not easy for a lay person to interpret and understand water quality reports"</div>
+                            <div class="context">Black Butte, MT • Communities require paid consultants</div>
+                        </div>
+
+                        <div class="pain-point">
+                            <div class="label">⚠️ Trust Deficit</div>
+                            <div class="quote">"The public source of data is not particularly trusted"</div>
+                            <div class="context">Imperial Valley, CA • Leads to litigation & delays</div>
+                        </div>
+
+                        <div class="pain-point">
+                            <div class="label">📊 No Future Projections</div>
+                            <div class="quote">"Barely any publicly available data on future projections"</div>
+                            <div class="context">Lithium Valley • Can't assess cumulative impacts</div>
+                        </div>
+
+                        <div class="pain-point">
+                            <div class="label">❓ Lack Technical Expertise</div>
+                            <div class="quote">"Need an outline on what questions to ask developers"</div>
+                            <div class="context">Multiple sites • Unprepared for permit review</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Jobs to Be Done -->
+                <div class="section">
+                    <div class="section-title">What They Need to Do</div>
+                    <ul class="jtbd-list">
+                        <li class="jtbd-item">
+                            <strong>Translate Complexity</strong>
+                            <span>Turn technical metrics into comprehensible summaries and visuals for community members</span>
+                        </li>
+                        <li class="jtbd-item">
+                            <strong>Prepare for FPIC/Permitting</strong>
+                            <span>Get evidence-based questions to ask mining companies during consultation</span>
+                        </li>
+                        <li class="jtbd-item">
+                            <strong>Build Evidence</strong>
+                            <span>Access structured, comparable data for advocacy and grievance processes</span>
+                        </li>
+                        <li class="jtbd-item">
+                            <strong>Assess Risks Independently</strong>
+                            <span>Evaluate environmental risks without sole reliance on company data</span>
+                        </li>
+                        <li class="jtbd-item">
+                            <strong>Understand Cumulative Impacts</strong>
+                            <span>Map multi-user water risks across landscape, not just single mine site</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Connection to Solution -->
+            <div class="connection-box">
+                <h3><span class="arrow-icon">→</span> How This Solution Addresses IPLC Needs</h3>
+                <div class="connection-list">
+                    <div class="connection-item">
+                        <strong>Plain-language risk assessments</strong> translate technical EIA data into accessible summaries, reducing dependency on expensive consultants
+                    </div>
+                    <div class="connection-item">
+                        <strong>Independent, evidence-based analysis</strong> using WRI datasets (Aqueduct, GFW, LandMark) provides credible third-party perspective communities can cite
+                    </div>
+                    <div class="connection-item">
+                        <strong>Guided question generation</strong> helps communities know what to ask during FPIC, identifying red flags around water, biodiversity, and land rights
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-left">
+                <span class="wri-logo">WRI Product Studio</span>
+                <span class="divider">|</span>
+                <span>Responsible Mining Data Platform</span>
+                <span class="divider">|</span>
+                <span>Internal Expert Consultation</span>
+            </div>
+            <div class="time-badge">5 MIN</div>
+        </div>
+    </div>
+</body>
+</html>
