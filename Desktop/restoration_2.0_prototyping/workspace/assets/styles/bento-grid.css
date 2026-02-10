@@ -1,0 +1,113 @@
+/**
+ * Bento Grid Layout
+ * Consumer-app inspired masonry grid for RWCB dashboard
+ */
+
+/* Main Grid Container - Tighter spacing for higher information density */
+.dashboard-bento-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Hero Cards (Full-width) */
+.indicator-card--hero {
+  grid-column: 1 / -1 !important;
+}
+
+/* Section Visual Breaks (24px spacing) */
+.indicator-card--section-start {
+  margin-top: 24px;
+}
+
+/* Visual-First Treatment */
+.indicator-card--visual-first .card-visual {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+  margin: -20px -20px 20px -20px; /* Bleed to card edges */
+}
+
+.indicator-card--visual-first .card-visual img,
+.indicator-card--visual-first .card-visual svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.indicator-card--visual-first:hover .card-visual img,
+.indicator-card--visual-first:hover .card-visual svg {
+  transform: scale(1.05);
+}
+
+/* Visual Overlay (for hero stats on map) */
+.visual-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  color: white;
+}
+
+.visual-overlay .stat-large {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.0;
+  margin: 0 0 4px 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.visual-overlay .stat-label {
+  font-size: 14px;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Tablet Responsive (768-1023px) */
+@media (max-width: 1023px) {
+  .dashboard-bento-grid {
+    padding: 24px;
+    gap: 16px;
+  }
+
+  .indicator-card {
+    padding: 16px;
+  }
+
+  .visual-overlay .stat-large {
+    font-size: 32px;
+  }
+}
+
+/* Mobile Responsive (≤767px) */
+@media (max-width: 767px) {
+  .dashboard-bento-grid {
+    grid-template-columns: 1fr; /* Single column */
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .indicator-card {
+    padding: 16px;
+  }
+
+  .indicator-card--section-start {
+    margin-top: 24px;
+  }
+
+  .indicator-card--visual-first .card-visual {
+    height: 250px;
+  }
+
+  .visual-overlay .stat-large {
+    font-size: 28px;
+  }
+}

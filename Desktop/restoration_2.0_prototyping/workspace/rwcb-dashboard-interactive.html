@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RWCB Interactive Dashboard | TerraMatch</title>
+    <meta name="description" content="Rwanda Wildlife Conservation Bond - Interactive monitoring dashboard for restoration champions, funders, and public audiences">
+
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="assets/styles/terramatch-core.css" as="style">
+    <link rel="preload" href="assets/styles/dashboard-components.css" as="style">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/styles/terramatch-core.css">
+    <link rel="stylesheet" href="assets/styles/bento-grid.css">
+    <link rel="stylesheet" href="assets/styles/dashboard-components.css">
+    <link rel="stylesheet" href="assets/styles/visualization-styles.css">
+
+    <style>
+        /* Leaflet map containers */
+        .leaflet-map-container {
+            width: 100%;
+            height: 350px;
+            border-radius: 8px;
+            z-index: 1;
+        }
+        .leaflet-map-container.hero-map {
+            height: 400px;
+        }
+        .leaflet-map-container.habitat-map {
+            height: 300px;
+        }
+        /* Custom Leaflet controls */
+        .leaflet-control-attribution {
+            font-size: 10px;
+        }
+        .map-legend {
+            background: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        .map-legend h4 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        .map-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .map-legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+        .restoration-popup {
+            font-family: Inter, system-ui, sans-serif;
+        }
+        .restoration-popup h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #032230;
+        }
+        .restoration-popup p {
+            margin: 4px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .restoration-popup .stat {
+            font-size: 18px;
+            font-weight: 700;
+            color: #477010;
+        }
+    </style>
+
+    <style>
+        /* Inline critical visualization styles for first paint */
+        /* Tufte Principle: Make numbers prominent, labels subtle */
+        .sparkline-chart {
+            width: 100%;
+            margin: 1rem 0;
+        }
+        .sparkline-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        .sparkline-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--tm-primary);
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+        .sparkline-label {
+            font-size: 11px;
+            color: var(--tm-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+            opacity: 0.8;
+        }
+        .supply-warning {
+            font-size: 11px;
+            color: var(--tm-text-secondary);
+            margin-top: 0.25rem;
+            font-weight: var(--tm-font-weight-normal);
+            opacity: 0.7;
+        }
+
+        /* Metric Pulse Row - At-a-glance summary (Tufte sparklines) */
+        .metric-pulse-row {
+            display: flex;
+            gap: 24px;
+            padding: 16px 24px;
+            background: var(--tm-white);
+            border-bottom: 1px solid var(--tm-border-light);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .pulse-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 160px;
+        }
+        .pulse-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .pulse-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--tm-text-secondary);
+            opacity: 0.8;
+        }
+        .pulse-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--tm-primary);
+            line-height: 1.2;
+        }
+        .pulse-spark {
+            width: 48px;
+            height: 20px;
+        }
+        .pulse-context {
+            font-size: 10px;
+            color: var(--tm-text-secondary);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip to content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="tm-app">
+        <!-- =====================================
+             SIDEBAR NAVIGATION
+             ===================================== -->
+        <aside class="tm-sidebar" role="navigation" aria-label="Dashboard navigation">
+            <div class="tm-sidebar-header">
+                <h3>RWCB Dashboard</h3>
+                <p>Rwanda Wildlife Conservation Bond</p>
+            </div>
+
+            <nav class="tm-nav-tree" aria-label="Indicator sections">
+                <button class="tm-nav-item active"
+                        data-section="operational"
+                        aria-current="true">
+                    Operational Metrics
+                    <span class="tm-count">4</span>
+                </button>
+                <button class="tm-nav-item"
+                        data-section="ecological">
+                    Ecological Outcomes
+                    <span class="tm-count">3</span>
+                </button>
+                <button class="tm-nav-item"
+                        data-section="outcome">
+                    Final Outcome
+                    <span class="tm-count">1</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- =====================================
+             MAIN CONTENT
+             ===================================== -->
+        <main class="tm-content" id="main-content">
+            <!-- Dashboard Header -->
+            <header class="dashboard-header">
+                <h1>RWCB Conservation Dashboard</h1>
+
+                <!-- Audience Selector -->
+                <div class="tm-segmented-control" role="group" aria-label="Audience view selector">
+                    <button class="active" data-audience="champion" aria-pressed="true">
+                        Champion
+                    </button>
+                    <button data-audience="funder" aria-pressed="false">
+                        Funder
+                    </button>
+                    <button data-audience="public" aria-pressed="false">
+                        Public
+                    </button>
+                </div>
+            </header>
+
+            <!-- Metric Pulse Row - At-a-glance summary (Tufte sparklines principle) -->
+            <div class="metric-pulse-row" role="region" aria-label="Key metrics summary">
+                <div class="pulse-item">
+                    <div class="pulse-content">
+                        <span class="pulse-label">Hectares</span>
+                        <span class="pulse-value">1,847</span>
+                        <span class="pulse-context">Locked</span>
+                    </div>
+                    <svg class="pulse-spark" viewBox="0 0 48 20" aria-hidden="true">
+                        <polyline points="0,18 16,14 32,10 48,8" fill="none" stroke="var(--tm-accent)" stroke-width="2"/>
+                        <circle cx="48" cy="8" r="2" fill="var(--tm-accent)"/>
+                    </svg>
+                </div>
+                <div class="pulse-item">
+                    <div class="pulse-content">
+                        <span class="pulse-label">Trees Planted</span>
+                        <span class="pulse-value">158K</span>
+                        <span class="pulse-context">79% of target</span>
+                    </div>
+                    <svg class="pulse-spark" viewBox="0 0 48 20" aria-hidden="true">
+                        <polyline points="0,18 16,12 32,8 48,6" fill="none" stroke="var(--tm-accent)" stroke-width="2"/>
+                        <circle cx="48" cy="6" r="2" fill="var(--tm-accent)"/>
+                    </svg>
+                </div>
+                <div class="pulse-item">
+                    <div class="pulse-content">
+                        <span class="pulse-label">Survival Rate</span>
+                        <span class="pulse-value">85%</span>
+                        <span class="pulse-context">vs 70% avg</span>
+                    </div>
+                    <svg class="pulse-spark" viewBox="0 0 48 20" aria-hidden="true">
+                        <polyline points="0,16 16,12 32,8 48,5" fill="none" stroke="var(--tm-success)" stroke-width="2"/>
+                        <circle cx="48" cy="5" r="2" fill="var(--tm-success)"/>
+                    </svg>
+                </div>
+                <div class="pulse-item">
+                    <div class="pulse-content">
+                        <span class="pulse-label">Regeneration</span>
+                        <span class="pulse-value">8-12K</span>
+                        <span class="pulse-context">Moderate conf.</span>
+                    </div>
+                    <svg class="pulse-spark" viewBox="0 0 48 20" aria-hidden="true">
+                        <polyline points="0,14 16,11 32,8 48,6" fill="none" stroke="var(--tm-info)" stroke-width="2"/>
+                        <circle cx="48" cy="6" r="2" fill="var(--tm-info)"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Indicators Container -->
+            <div class="dashboard-bento-grid">
+                <!-- =====================================
+                     INDICATOR 1: HECTARES UNDER RESTORATION (HERO)
+                     ===================================== -->
+<article class="tm-card indicator-card indicator-card--hero indicator-card--visual-first indicator-card--section-start" data-indicator="hectares-under-restoration">
+                        <header class="indicator-header">
+                            <div>
+                                <h2 class="indicator-title">Hectares Under Restoration</h2>
+                                <div class="indicator-meta">
+                                    <span class="tm-badge">Bi-annual until Y2</span>
+                                    <span class="tm-badge-secondary">🔒 Locked Sep 2024</span>
+                                </div>
+                            </div>
+                            <select class="view-dropdown" aria-label="View options for Hectares Under Restoration">
+                                <option value="map" selected>Map</option>
+                                <option value="timeline">Timeline</option>
+                                <option value="breakdown">By Site</option>
+                                <option value="simple">Simple</option>
+                            </select>
+                        </header>
+                        <div class="indicator-viz-container">
+                            <div class="viz-option" data-option="map" aria-hidden="false">
+                                <div class="card-visual" style="position: relative;">
+                                    <div id="hero-map" class="leaflet-map-container hero-map"></div>
+                                    <div class="visual-overlay">
+                                        <h3 class="stat-large">1,847 hectares</h3>
+                                        <p class="stat-label">Gishwati-Mukura National Park, Rwanda</p>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                                    <div class="status-indicator" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <span style="color: var(--tm-success);">🔒</span>
+                                        <span style="font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">Finalized & Locked (Sep 2024)</span>
+                                    </div>
+                                    <p class="supporting-text" style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">
+                                        Site boundaries are now locked. No further changes expected.
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- OPTION B: TIMELINE -->
+                            <div class="viz-option" data-option="timeline" aria-hidden="true">
+                                <div class="timeline">
+                                    <div class="timeline-line"></div>
+                                    <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">Dec 2023</div><div class="timeline-content"><strong>Initial baseline survey</strong><br>1,820 hectares identified</div></div>
+                                    <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">Mar 2024</div><div class="timeline-content"><strong>Site C boundary correction</strong><br>+15 hectares (verification)</div></div>
+                                    <div class="timeline-item"><div class="timeline-dot" style="background: var(--tm-success);"></div><div class="timeline-date">Sep 2024</div><div class="timeline-content"><strong>🔒 Final verification - LOCKED</strong><br>1,847 hectares finalized</div></div>
+                                </div>
+                            </div>
+                            <!-- OPTION C: BREAKDOWN -->
+                            <div class="viz-option" data-option="breakdown" aria-hidden="true">
+                                <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1rem;">Area by Site</h4>
+                                <div class="bar-chart">
+                                    <div class="bar-item"><div class="bar-label"><span class="bar-label-primary">Gishwati Forest</span><span class="bar-label-secondary">892 ha (48%)</span></div><div class="bar-track"><div class="bar-fill" style="width: 48%; background: var(--tm-success);"></div></div></div>
+                                    <div class="bar-item"><div class="bar-label"><span class="bar-label-primary">Mukura Forest</span><span class="bar-label-secondary">687 ha (37%)</span></div><div class="bar-track"><div class="bar-fill" style="width: 37%; background: var(--tm-accent);"></div></div></div>
+                                    <div class="bar-item"><div class="bar-label"><span class="bar-label-primary">Buffer Zones</span><span class="bar-label-secondary">268 ha (15%)</span></div><div class="bar-track"><div class="bar-fill" style="width: 15%; background: var(--tm-info);"></div></div></div>
+                                </div>
+                            </div>
+                            <!-- OPTION D: SIMPLE -->
+                            <div class="viz-option" data-option="simple" aria-hidden="true">
+                                <div style="text-align: center; padding: 2rem 0;">
+                                    <div style="font-size: 4rem; font-weight: var(--tm-font-weight-bold); color: var(--tm-primary);">1,847</div>
+                                    <div style="font-size: var(--tm-font-size-xl); color: var(--tm-text-secondary); margin-bottom: 2rem;">hectares under restoration</div>
+                                    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+                                        <div><div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Equivalent to</div><div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold);">~2,600</div><div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">football fields</div></div>
+                                        <div><div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Or approximately</div><div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold);">18.5 km²</div><div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">of land</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <aside class="indicator-context">
+                            <details><summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>The total area (in hectares) of land under active restoration management. This includes all restoration sites, regardless of approach (planting, ANR, or mixed). Reported bi-annually until Year 2, when site boundaries are finalized and the metric "locks."</p>
+                                    <h5>Why It Matters</h5>
+                                    <p>This establishes the <strong>scale and scope</strong> of the restoration commitment. Once finalized (Year 2), this metric should be visually "locked" to prevent confusion. Any changes after Year 2 would require clear explanation.</p>
+                                </div>
+                            </details>
+                        </aside>
+                    </article>
+
+                <!-- =====================================
+                     SECTION: PIPELINE METRICS
+                     ===================================== -->
+
+                <!-- =====================================
+                     INDICATOR 2: SEEDLINGS PRODUCED
+                     ===================================== -->
+<article class="tm-card indicator-card indicator-card--section-start" data-indicator="seedlings">
+                        <!-- Card Header -->
+                        <header class="indicator-header">
+                            <div>
+                                <h2 class="indicator-title">Seedlings Produced</h2>
+                                <div class="indicator-meta">
+                                    <span class="tm-badge">Bi-annual</span>
+                                    <span class="tm-badge-secondary">Pipeline metric</span>
+                                </div>
+                            </div>
+
+                            <select class="view-dropdown" aria-label="View options for Seedlings Produced">
+                                <option value="sparkline" selected>Trend</option>
+                                <option value="progress">Progress</option>
+                                <option value="breakdown">By Nursery</option>
+                                <option value="table">Table</option>
+                            </select>
+                        </header>
+
+                        <!-- Visualization Container -->
+                        <div class="indicator-viz-container">
+
+                            <!-- OPTION A: SPARKLINE TREND -->
+                            <div class="viz-option" data-option="sparkline" aria-hidden="false">
+                                <div class="sparkline-chart">
+                                    <div class="sparkline-header">
+                                        <div>
+                                            <div class="sparkline-label">Seedlings Ready for Planting</div>
+                                            <div class="sparkline-value">45,200</div>
+                                            <div class="supply-warning">⚠ Supply metric • Not conservation impact</div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div class="sparkline-label">Target</div>
+                                            <div class="sparkline-value" style="font-size: 1.5rem; color: var(--tm-gray-600);">50,000</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SVG Sparkline -->
+                                    <svg viewBox="0 0 400 80" style="width: 100%; height: 80px;" role="img"
+                                         aria-label="Sparkline chart showing seedling production trending upward from 12,000 to 45,200 over four periods">
+                                        <!-- Background reference line for target -->
+                                        <line x1="0" y1="20" x2="400" y2="20" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="4,4"/>
+
+                                        <!-- Sparkline path -->
+                                        <polyline
+                                            points="0,70 133,50 266,30 400,22"
+                                            fill="none"
+                                            stroke="var(--tm-success)"
+                                            stroke-width="3"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"/>
+
+                                        <!-- Data points -->
+                                        <circle cx="0" cy="70" r="4" fill="var(--tm-success)"/>
+                                        <circle cx="133" cy="50" r="4" fill="var(--tm-success)"/>
+                                        <circle cx="266" cy="30" r="5" fill="var(--tm-success)"/>
+                                        <circle cx="400" cy="22" r="6" fill="var(--tm-success)" stroke="white" stroke-width="2"/>
+
+                                        <!-- Value labels -->
+                                        <text x="0" y="65" font-size="10" fill="#666" text-anchor="start">12K</text>
+                                        <text x="133" y="45" font-size="10" fill="#666" text-anchor="middle">28K</text>
+                                        <text x="266" y="25" font-size="10" fill="#666" text-anchor="middle">38K</text>
+                                        <text x="400" y="15" font-size="11" fill="var(--tm-success)" font-weight="600" text-anchor="end">45.2K</text>
+                                    </svg>
+
+                                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 12px; color: var(--tm-text-secondary);">
+                                        <span>Dec 2024</span>
+                                        <span>Feb 2025</span>
+                                        <span>Apr 2025</span>
+                                        <span>Jun 2025</span>
+                                    </div>
+
+                                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--tm-success);"></span>
+                                            <span style="font-size: var(--tm-font-size-sm);">On track • 90.4% of target</span>
+                                        </div>
+                                        <div style="font-size: var(--tm-font-size-sm); font-weight: var(--tm-font-weight-medium);">
+                                            <strong>4,800</strong> more needed by June
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION B: PROGRESS BAR -->
+                            <div class="viz-option" data-option="progress" aria-hidden="true">
+                                <div style="padding: 2rem 0;">
+                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
+                                        <div>
+                                            <div class="sparkline-label">Current Progress</div>
+                                            <div class="sparkline-value">45,200</div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div class="sparkline-label">Target</div>
+                                            <div style="font-size: 1.5rem; font-weight: 600; color: var(--tm-gray-600);">50,000</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Progress Bar -->
+                                    <div style="background: var(--tm-gray-100); border-radius: var(--tm-radius-sm); height: 40px; overflow: hidden; position: relative;">
+                                        <div style="background: linear-gradient(90deg, var(--tm-accent) 0%, var(--tm-success) 100%); height: 100%; width: 90.4%; transition: width 1s ease-out; display: flex; align-items: center; justify-content: flex-end; padding-right: 1rem;">
+                                            <span style="color: white; font-weight: 600; font-size: var(--tm-font-size-base);">90.4%</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                        <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">
+                                            <strong style="color: var(--tm-text-primary);">4,800 seedlings</strong> remaining to reach target by June 2025
+                                        </div>
+                                        <div class="supply-warning" style="margin-top: 0.5rem;">
+                                            ⚠ Supply metric • Not conservation impact
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION C: NURSERY BREAKDOWN -->
+                            <div class="viz-option" data-option="breakdown" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1.5rem;">Production by Nursery</h4>
+
+                                    <!-- Nursery A -->
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="font-weight: var(--tm-font-weight-medium);">Gishwati Nursery A</span>
+                                            <span style="color: var(--tm-text-secondary);">18,500 (41%)</span>
+                                        </div>
+                                        <div style="background: var(--tm-gray-100); border-radius: 4px; height: 24px; overflow: hidden;">
+                                            <div style="background: var(--tm-accent); height: 100%; width: 92.5%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nursery B -->
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="font-weight: var(--tm-font-weight-medium);">Gishwati Nursery B</span>
+                                            <span style="color: var(--tm-text-secondary);">14,200 (31%)</span>
+                                        </div>
+                                        <div style="background: var(--tm-gray-100); border-radius: 4px; height: 24px; overflow: hidden;">
+                                            <div style="background: var(--tm-info); height: 100%; width: 85%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nursery C -->
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="font-weight: var(--tm-font-weight-medium);">Mukura Nursery</span>
+                                            <span style="color: var(--tm-text-secondary);">8,300 (18%)</span>
+                                        </div>
+                                        <div style="background: var(--tm-gray-100); border-radius: 4px; height: 24px; overflow: hidden;">
+                                            <div style="background: var(--tm-warning); height: 100%; width: 66%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Community Nurseries -->
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="font-weight: var(--tm-font-weight-medium);">Community Nurseries</span>
+                                            <span style="color: var(--tm-text-secondary);">4,200 (9%)</span>
+                                        </div>
+                                        <div style="background: var(--tm-gray-100); border-radius: 4px; height: 24px; overflow: hidden;">
+                                            <div style="background: var(--tm-success); height: 100%; width: 84%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 2rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">
+                                        <strong>Total: 45,200 seedlings</strong> ready for planting across 4 production sites
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION D: DATA TABLE -->
+                            <div class="viz-option" data-option="table" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: var(--tm-font-size-sm);">
+                                        <thead>
+                                            <tr style="border-bottom: 2px solid var(--tm-border-medium);">
+                                                <th style="text-align: left; padding: 0.75rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary);">Period</th>
+                                                <th style="text-align: right; padding: 0.75rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary);">Produced</th>
+                                                <th style="text-align: right; padding: 0.75rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary);">Cumulative</th>
+                                                <th style="text-align: right; padding: 0.75rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary);">% of Target</th>
+                                                <th style="text-align: left; padding: 0.75rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary);">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style="border-bottom: 1px solid var(--tm-border-light);">
+                                                <td style="padding: 0.75rem;">Dec 2024</td>
+                                                <td style="padding: 0.75rem; text-align: right;">12,000</td>
+                                                <td style="padding: 0.75rem; text-align: right;">12,000</td>
+                                                <td style="padding: 0.75rem; text-align: right;">24%</td>
+                                                <td style="padding: 0.75rem;"><span style="color: var(--tm-warning);">● Behind</span></td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid var(--tm-border-light);">
+                                                <td style="padding: 0.75rem;">Feb 2025</td>
+                                                <td style="padding: 0.75rem; text-align: right;">16,000</td>
+                                                <td style="padding: 0.75rem; text-align: right;">28,000</td>
+                                                <td style="padding: 0.75rem; text-align: right;">56%</td>
+                                                <td style="padding: 0.75rem;"><span style="color: var(--tm-warning);">● Behind</span></td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid var(--tm-border-light);">
+                                                <td style="padding: 0.75rem;">Apr 2025</td>
+                                                <td style="padding: 0.75rem; text-align: right;">10,000</td>
+                                                <td style="padding: 0.75rem; text-align: right;">38,000</td>
+                                                <td style="padding: 0.75rem; text-align: right;">76%</td>
+                                                <td style="padding: 0.75rem;"><span style="color: var(--tm-warning);">● Behind</span></td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid var(--tm-border-light); background: var(--tm-gray-50);">
+                                                <td style="padding: 0.75rem; font-weight: var(--tm-font-weight-medium);">Jun 2025</td>
+                                                <td style="padding: 0.75rem; text-align: right; font-weight: var(--tm-font-weight-medium);">7,200</td>
+                                                <td style="padding: 0.75rem; text-align: right; font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary);">45,200</td>
+                                                <td style="padding: 0.75rem; text-align: right; font-weight: var(--tm-font-weight-semibold);">90.4%</td>
+                                                <td style="padding: 0.75rem; font-weight: var(--tm-font-weight-medium);"><span style="color: var(--tm-success);">● On Track</span></td>
+                                            </tr>
+                                            <tr style="font-style: italic; color: var(--tm-text-secondary);">
+                                                <td style="padding: 0.75rem;">Jun 2025 (Target)</td>
+                                                <td style="padding: 0.75rem; text-align: right;">—</td>
+                                                <td style="padding: 0.75rem; text-align: right; font-weight: var(--tm-font-weight-medium);">50,000</td>
+                                                <td style="padding: 0.75rem; text-align: right;">100%</td>
+                                                <td style="padding: 0.75rem;">—</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
+                                        <strong>Gap to target:</strong> 4,800 seedlings needed in final period
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Context Panel (Collapsible) -->
+                        <aside class="indicator-context">
+                            <details>
+                                <summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>The number of seedlings or saplings produced in nurseries and ready for planting. This is an <strong>early pipeline indicator</strong> that tracks nursery capacity and preparation—relevant primarily before planting operations begin.</p>
+
+                                    <h5>Why It Matters</h5>
+                                    <p>Champions need to ensure adequate seedling supply to meet planting targets. A shortfall here could delay planting schedules. However, this metric has <strong>high risk of misinterpretation</strong>—seedlings produced ≠ trees planted ≠ ecological outcomes. This is supply chain logistics, not conservation impact.</p>
+
+                                    <h5>Key Questions This Helps Answer</h5>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6;">
+                                        <li>Are nurseries on track to supply planting needs for the upcoming season?</li>
+                                        <li>Do we need to ramp up nursery production or engage additional suppliers?</li>
+                                        <li>Is the seedling mix aligned with species diversity targets?</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </aside>
+                    </article>
+
+                <!-- =====================================
+                     INDICATOR 3: TREES PLANTED
+                     ===================================== -->
+<article class="tm-card indicator-card" data-indicator="trees-planted">
+                        <!-- Card Header -->
+                        <header class="indicator-header">
+                            <div>
+                                <h2 class="indicator-title">Trees Planted</h2>
+                                <div class="indicator-meta">
+                                    <span class="tm-badge">Bi-annual</span>
+                                    <span class="tm-badge-secondary">Core implementation</span>
+                                </div>
+                            </div>
+
+                            <select class="view-dropdown" aria-label="View options for Trees Planted">
+                                <option value="cumulative" selected>Progress</option>
+                                <option value="sparkline">Sparkline</option>
+                                <option value="sites">By Site</option>
+                                <option value="velocity">Velocity</option>
+                            </select>
+                        </header>
+
+                        <!-- Visualization Container -->
+                        <div class="indicator-viz-container">
+
+                            <!-- OPTION A: CUMULATIVE PROGRESS VS PLAN -->
+                            <div class="viz-option" data-option="cumulative" aria-hidden="false">
+                                <div style="padding: 1rem 0;">
+                                    <svg viewBox="0 0 600 250" style="width: 100%; height: 250px;" role="img"
+                                         aria-label="Area chart showing cumulative tree planting progress of 158,000 trees versus planned trajectory of 200,000 trees over 5 years">
+                                        <!-- Grid lines -->
+                                        <line x1="40" y1="200" x2="560" y2="200" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="150" x2="560" y2="150" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="100" x2="560" y2="100" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="50" x2="560" y2="50" stroke="#ddd" stroke-width="1"/>
+
+                                        <!-- Y-axis labels -->
+                                        <text x="30" y="205" font-size="12" fill="#999" text-anchor="end">0</text>
+                                        <text x="30" y="155" font-size="12" fill="#999" text-anchor="end">50K</text>
+                                        <text x="30" y="105" font-size="12" fill="#999" text-anchor="end">100K</text>
+                                        <text x="30" y="55" font-size="12" fill="#999" text-anchor="end">150K</text>
+                                        <text x="30" y="15" font-size="12" fill="#999" text-anchor="end">200K</text>
+
+                                        <!-- X-axis labels -->
+                                        <text x="90" y="220" font-size="12" fill="#999">Y1</text>
+                                        <text x="194" y="220" font-size="12" fill="#999">Y2</text>
+                                        <text x="298" y="220" font-size="12" fill="#999">Y3</text>
+                                        <text x="402" y="220" font-size="12" fill="#999">Y4</text>
+                                        <text x="506" y="220" font-size="12" fill="#999">Y5</text>
+
+                                        <!-- Plan line (dashed) -->
+                                        <polyline points="40,200 194,150 298,100 402,60 506,30"
+                                                  stroke="#999" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
+                                        <text x="520" y="30" font-size="11" fill="#999">Plan</text>
+
+                                        <!-- Actual area and line -->
+                                        <polygon points="40,200 194,180 194,200 40,200"
+                                                 fill="var(--tm-accent)" opacity="0.2"/>
+                                        <polyline points="40,200 194,180"
+                                                  stroke="var(--tm-accent)" stroke-width="3" fill="none"/>
+                                        <circle cx="194" cy="180" r="5" fill="var(--tm-accent)" stroke="white" stroke-width="2"/>
+
+                                        <!-- Current value label -->
+                                        <text x="194" y="165" font-size="14" font-weight="600" fill="var(--tm-primary)" text-anchor="middle">158,000</text>
+                                        <text x="194" y="235" font-size="11" fill="#666" text-anchor="middle">← Current (Year 2)</text>
+                                    </svg>
+
+                                    <!-- Gap indicator -->
+                                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                        <div>
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Gap to Plan</div>
+                                            <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-warning);">-42,000 trees</div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">On Track For</div>
+                                            <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-text-primary);">~160K of 200K</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Critical caveat -->
+                                    <div class="callout callout-warning" style="margin-top: 1rem;">
+                                        <strong>⚠️ Planting ≠ Outcomes</strong> — See Survival Rate below for actual conservation impact
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION B: SPARKLINE + BIG NUMBER -->
+                            <div class="viz-option" data-option="sparkline" aria-hidden="true">
+                                <div style="padding: 2rem 0; text-align: center;">
+                                    <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem;">Total Trees Planted</div>
+                                    <div style="font-size: 4rem; font-weight: var(--tm-font-weight-bold); color: var(--tm-primary); line-height: 1; margin-bottom: 1rem;">158,000</div>
+
+                                    <!-- Mini sparkline -->
+                                    <svg viewBox="0 0 200 40" style="width: 200px; height: 40px; margin: 1rem auto;" role="img" aria-label="Trend showing steady growth">
+                                        <polyline points="0,35 100,15 200,8" fill="none" stroke="var(--tm-accent)" stroke-width="2"/>
+                                        <circle cx="200" cy="8" r="3" fill="var(--tm-accent)"/>
+                                    </svg>
+
+                                    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+                                        <div>
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Year 1</div>
+                                            <div style="font-size: var(--tm-font-size-lg); font-weight: var(--tm-font-weight-semibold);">42,000</div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Year 2</div>
+                                            <div style="font-size: var(--tm-font-size-lg); font-weight: var(--tm-font-weight-semibold);">116,000</div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Target</div>
+                                            <div style="font-size: var(--tm-font-size-lg); font-weight: var(--tm-font-weight-medium); color: var(--tm-gray-600);">200,000</div>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 2rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center; font-size: var(--tm-font-size-sm);">
+                                        <span class="status-indicator">
+                                            <span class="status-dot" style="background: var(--tm-warning);"></span>
+                                            Behind plan by 42,000 trees
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION C: SITE BREAKDOWN -->
+                            <div class="viz-option" data-option="sites" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1.5rem;">Planting Progress by Site</h4>
+
+                                    <!-- Site A: Gishwati -->
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="font-weight: var(--tm-font-weight-medium);">Gishwati Forest</span>
+                                            <span style="color: var(--tm-text-secondary);">68,000 / 80,000 (85%)</span>
+                                        </div>
+                                        <div style="background: var(--tm-gray-100); border-radius: 4px; height: 28px; overflow: hidden; position: relative;">
+                                            <div style="background: var(--tm-success); height: 100%; width: 85%; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+                                                <span style="color: white; font-size: var(--tm-font-size-xs); font-weight: 600;">On Track</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Site B: Mukura -->
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="font-weight: var(--tm-font-weight-medium);">Mukura Forest</span>
+                                            <span style="color: var(--tm-text-secondary);">52,000 / 70,000 (74%)</span>
+                                        </div>
+                                        <div style="background: var(--tm-gray-100); border-radius: 4px; height: 28px; overflow: hidden;">
+                                            <div style="background: var(--tm-warning); height: 100%; width: 74%; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+                                                <span style="color: white; font-size: var(--tm-font-size-xs); font-weight: 600;">Behind</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Site C: Buffer Zone A -->
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="font-weight: var(--tm-font-weight-medium);">Buffer Zone A</span>
+                                            <span style="color: var(--tm-text-secondary);">24,000 / 30,000 (80%)</span>
+                                        </div>
+                                        <div style="background: var(--tm-gray-100); border-radius: 4px; height: 28px; overflow: hidden;">
+                                            <div style="background: var(--tm-accent); height: 100%; width: 80%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Site D: Buffer Zone B -->
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span style="font-weight: var(--tm-font-weight-medium);">Buffer Zone B</span>
+                                            <span style="color: var(--tm-text-secondary);">14,000 / 20,000 (70%)</span>
+                                        </div>
+                                        <div style="background: var(--tm-gray-100); border-radius: 4px; height: 28px; overflow: hidden;">
+                                            <div style="background: var(--tm-info); height: 100%; width: 70%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 2rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
+                                        <strong>Total: 158,000 trees</strong> planted across 4 sites • Mukura lagging, needs attention
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION D: PLANTING VELOCITY -->
+                            <div class="viz-option" data-option="velocity" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1rem;">Planting Rate Over Time</h4>
+
+                                    <svg viewBox="0 0 600 200" style="width: 100%; height: 200px;" role="img"
+                                         aria-label="Bar chart showing monthly planting rates with target line">
+                                        <!-- Grid -->
+                                        <line x1="40" y1="160" x2="560" y2="160" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="120" x2="560" y2="120" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="80" x2="560" y2="80" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="40" x2="560" y2="40" stroke="#ddd" stroke-width="1"/>
+
+                                        <!-- Y-axis labels -->
+                                        <text x="30" y="165" font-size="11" fill="#999" text-anchor="end">0</text>
+                                        <text x="30" y="125" font-size="11" fill="#999" text-anchor="end">10K</text>
+                                        <text x="30" y="85" font-size="11" fill="#999" text-anchor="end">20K</text>
+                                        <text x="30" y="45" font-size="11" fill="#999" text-anchor="end">30K</text>
+
+                                        <!-- Target line -->
+                                        <line x1="40" y1="100" x2="560" y2="100" stroke="var(--tm-warning)" stroke-width="1" stroke-dasharray="4,4"/>
+                                        <text x="565" y="103" font-size="10" fill="var(--tm-warning)">Target: 16.7K/month</text>
+
+                                        <!-- Velocity bars -->
+                                        <rect x="60" y="80" width="30" height="80" fill="var(--tm-accent)" opacity="0.8"/>
+                                        <rect x="110" y="60" width="30" height="100" fill="var(--tm-accent)" opacity="0.8"/>
+                                        <rect x="160" y="40" width="30" height="120" fill="var(--tm-success)"/>
+                                        <rect x="210" y="50" width="30" height="110" fill="var(--tm-success)"/>
+                                        <rect x="260" y="70" width="30" height="90" fill="var(--tm-accent)" opacity="0.8"/>
+                                        <rect x="310" y="90" width="30" height="70" fill="var(--tm-warning)" opacity="0.8"/>
+                                        <rect x="360" y="110" width="30" height="50" fill="var(--tm-warning)" opacity="0.8"/>
+                                        <rect x="410" y="85" width="30" height="75" fill="var(--tm-accent)" opacity="0.8"/>
+
+                                        <!-- X-axis periods -->
+                                        <text x="75" y="180" font-size="10" fill="#666">Q1</text>
+                                        <text x="125" y="180" font-size="10" fill="#666">Q2</text>
+                                        <text x="175" y="180" font-size="10" fill="#666">Q3</text>
+                                        <text x="225" y="180" font-size="10" fill="#666">Q4</text>
+                                        <text x="275" y="180" font-size="10" fill="#666">Q1</text>
+                                        <text x="325" y="180" font-size="10" fill="#666">Q2</text>
+                                        <text x="375" y="180" font-size="10" fill="#666">Q3</text>
+                                        <text x="425" y="180" font-size="10" fill="#666">Q4</text>
+
+                                        <!-- Year labels -->
+                                        <text x="145" y="195" font-size="11" fill="#999" font-weight="600">Year 1</text>
+                                        <text x="345" y="195" font-size="11" fill="#999" font-weight="600">Year 2</text>
+                                    </svg>
+
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
+                                        <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;">
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Peak Rate</div>
+                                            <div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">24K/mo</div>
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Y1 Q3</div>
+                                        </div>
+                                        <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;">
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Current Rate</div>
+                                            <div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold); color: var(--tm-accent);">15K/mo</div>
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Y2 Q4</div>
+                                        </div>
+                                        <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;">
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Needed Rate</div>
+                                            <div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold); color: var(--tm-warning);">17K/mo</div>
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">To meet target</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="callout callout-warning" style="margin-top: 1.5rem;">
+                                        <strong>⚠️ Slowing pace detected</strong> — Current rate (15K/mo) below target (17K/mo). Need to accelerate in Years 3-5.
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Context Panel (Collapsible) -->
+                        <aside class="indicator-context">
+                            <details>
+                                <summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>Cumulative number of trees physically planted in the ground across all restoration sites. This is the <strong>core implementation progress metric</strong> showing that field operations are proceeding.</p>
+
+                                    <h5>Why It Matters</h5>
+                                    <p>Both champions and funders need visibility into whether implementation is progressing according to plan. This metric works best as cumulative progress versus planned trajectory over the 5-year period.</p>
+
+                                    <p><strong>Critical caveat:</strong> Planting doesn't guarantee outcomes. Trees planted can create false confidence if shown without survival rate context. Some sites may also start later than others, leading to uneven timelines that need contextual explanation.</p>
+
+                                    <h5>Key Questions This Helps Answer</h5>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6;">
+                                        <li>Is implementation progressing as planned across the timeline?</li>
+                                        <li>Which sites are ahead/behind schedule and why?</li>
+                                        <li>Do we need to accelerate planting operations to meet targets?</li>
+                                        <li>Are we deploying resources (teams, equipment) effectively across sites?</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </aside>
+                    </article>
+
+                <!-- =====================================
+                     SECTION: ECOLOGICAL OUTCOMES
+                     ===================================== -->
+
+                <!-- =====================================
+                     INDICATOR 4: SURVIVAL RATE
+                     ===================================== -->
+<article class="tm-card indicator-card indicator-card--section-start" data-indicator="survival-rate">
+                        <!-- Card Header -->
+                        <header class="indicator-header">
+                            <div>
+                                <h2 class="indicator-title">Survival Rate</h2>
+                                <div class="indicator-meta">
+                                    <span class="tm-badge">Annual</span>
+                                    <span class="tm-badge-secondary">High-value decision indicator</span>
+                                </div>
+                            </div>
+
+                            <select class="view-dropdown" aria-label="View options for Survival Rate">
+                                <option value="confidence-band" selected>Confidence Bands</option>
+                                <option value="cohort-table">Cohort Table</option>
+                                <option value="risk-dashboard">Risk Dashboard</option>
+                                <option value="simplified">Simple</option>
+                            </select>
+                        </header>
+
+                        <!-- Visualization Container -->
+                        <div class="indicator-viz-container">
+
+                            <!-- OPTION A: CONFIDENCE BAND (CRITICAL - Shows Uncertainty) -->
+                            <div class="viz-option" data-option="confidence-band" aria-hidden="false">
+                                <div style="padding: 1rem 0;">
+                                    <svg viewBox="0 0 600 250" style="width: 100%; height: 250px;" role="img"
+                                         aria-label="Line chart with confidence bands showing survival rate trending from 55% to 85% with uncertainty decreasing over time">
+                                        <!-- Grid -->
+                                        <line x1="40" y1="200" x2="560" y2="200" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="150" x2="560" y2="150" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="100" x2="560" y2="100" stroke="#ddd" stroke-width="1"/>
+                                        <line x1="40" y1="50" x2="560" y2="50" stroke="#ddd" stroke-width="1"/>
+
+                                        <!-- Y-axis -->
+                                        <text x="30" y="205" font-size="12" fill="#999" text-anchor="end">40%</text>
+                                        <text x="30" y="155" font-size="12" fill="#999" text-anchor="end">60%</text>
+                                        <text x="30" y="105" font-size="12" fill="#999" text-anchor="end">80%</text>
+                                        <text x="30" y="55" font-size="12" fill="#999" text-anchor="end">100%</text>
+
+                                        <!-- X-axis -->
+                                        <text x="70" y="220" font-size="11" fill="#999">M3</text>
+                                        <text x="140" y="220" font-size="11" fill="#999">M6</text>
+                                        <text x="210" y="220" font-size="11" fill="#999">Y1</text>
+                                        <text x="315" y="220" font-size="11" fill="#999">Y2</text>
+                                        <text x="420" y="220" font-size="11" fill="#999">Y3</text>
+                                        <text x="525" y="220" font-size="11" fill="#999">Y4</text>
+
+                                        <!-- Confidence band (WIDE early, NARROW later = decreasing uncertainty) -->
+                                        <polygon points="70,140 140,120 210,100 315,90 420,85 525,80 525,120 420,120 315,125 210,135 140,155 70,175"
+                                                 fill="var(--tm-info)" opacity="0.15"/>
+
+                                        <!-- "Expected Range" label -->
+                                        <text x="450" y="95" font-size="11" fill="var(--tm-primary)" font-weight="600">Expected Range →</text>
+
+                                        <!-- Actual survival line -->
+                                        <polyline points="70,160 140,135 210,115 315,105 420,95"
+                                                  stroke="var(--tm-info)" stroke-width="3" fill="none"/>
+                                        <circle cx="70" cy="160" r="4" fill="var(--tm-info)"/>
+                                        <circle cx="140" cy="135" r="4" fill="var(--tm-info)"/>
+                                        <circle cx="210" cy="115" r="4" fill="var(--tm-info)"/>
+                                        <circle cx="315" cy="105" r="5" fill="var(--tm-info)" stroke="white" stroke-width="2"/>
+                                        <circle cx="420" cy="95" r="5" fill="var(--tm-info)" stroke="white" stroke-width="2">
+                                                                                    </circle>
+
+                                        <!-- Phase labels -->
+                                        <text x="105" y="240" font-size="11" fill="#666" text-anchor="middle" font-style="italic">Volatile Phase</text>
+                                        <text x="367" y="240" font-size="11" fill="#666" text-anchor="middle" font-style="italic">Stabilizing Phase</text>
+                                        <line x1="70" y1="235" x2="210" y2="235" stroke="var(--tm-warning)" stroke-width="1.5"/>
+                                        <line x1="210" y1="235" x2="525" y2="235" stroke="var(--tm-success)" stroke-width="1.5"/>
+                                    </svg>
+
+                                    <!-- Current status with benchmark -->
+                                    <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                        <div>
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Current Survival (Y3)</div>
+                                            <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">85%</div>
+                                            <div style="font-size: 11px; color: var(--tm-text-secondary); margin-top: 2px;">vs 70% regional avg</div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Expected Range</div>
+                                            <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-medium); color: var(--tm-text-primary);">80-90%</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Understanding the bands -->
+                                    <div class="callout callout-info" style="margin-top: 1rem;">
+                                        <div style="font-weight: var(--tm-font-weight-semibold); margin-bottom: 0.5rem;">📘 Understanding the Expected Range</div>
+                                        <p style="font-size: var(--tm-font-size-sm); line-height: 1.6; margin: 0;">
+                                            The shaded area shows normal survival rates for each growth stage. <strong>Wider early bands</strong> = higher uncertainty (typical for young plantings). <strong>Narrower later bands</strong> = more predictable outcomes. Early measurements (M3, M6) are exploratory, not predictive. Focus on trends, not individual data points.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION B: COHORT TABLE -->
+                            <div class="viz-option" data-option="cohort-table" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1rem;">Survival by Planting Cohort</h4>
+
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Planting Cohort</th>
+                                                <th class="align-right">Current Survival</th>
+                                                <th class="align-right">Expected Range</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>2024 Q1</td>
+                                                <td class="align-right" style="font-weight: var(--tm-font-weight-semibold);">82%</td>
+                                                <td class="align-right">75-85%</td>
+                                                <td><span class="status-indicator status-success"><span class="status-dot"></span> On track</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2024 Q2</td>
+                                                <td class="align-right" style="font-weight: var(--tm-font-weight-semibold);">78%</td>
+                                                <td class="align-right">75-85%</td>
+                                                <td><span class="status-indicator status-success"><span class="status-dot"></span> On track</span></td>
+                                            </tr>
+                                            <tr class="table-highlight">
+                                                <td>2025 Q1</td>
+                                                <td class="align-right" style="font-weight: var(--tm-font-weight-semibold);">64%</td>
+                                                <td class="align-right">55-75%</td>
+                                                <td><span class="status-indicator status-warning"><span class="status-dot"></span> Monitor (early)</span></td>
+                                            </tr>
+                                            <tr class="table-highlight">
+                                                <td>2025 Q2</td>
+                                                <td class="align-right" style="font-weight: var(--tm-font-weight-semibold);">58%</td>
+                                                <td class="align-right">55-75%</td>
+                                                <td><span class="status-indicator status-warning"><span class="status-dot"></span> Monitor (early)</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
+                                        <strong>Note:</strong> Recent cohorts (2025 Q1/Q2) show lower rates due to establishment phase. This is normal – focus on whether they stay within expected range, not absolute values.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION C: RISK DASHBOARD (Traffic Lights) -->
+                            <div class="viz-option" data-option="risk-dashboard" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1.5rem;">Survival Risk Status by Site</h4>
+
+                                    <!-- Site risk cards -->
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                        <!-- Gishwati - Good -->
+                                        <div style="padding: 1rem; border-left: 4px solid var(--tm-success); background: rgba(76, 175, 80, 0.05); border-radius: var(--tm-radius-sm);">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--tm-success);"></div>
+                                                <h5 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); margin: 0;">Gishwati Forest</h5>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success); margin: 0.5rem 0;">87%</div>
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Above expected range (80-85%)</div>
+                                            <div style="font-size: var(--tm-font-size-sm); margin-top: 0.5rem; font-weight: var(--tm-font-weight-medium); color: var(--tm-success);">✓ No action needed</div>
+                                        </div>
+
+                                        <!-- Mukura - Warning -->
+                                        <div style="padding: 1rem; border-left: 4px solid var(--tm-warning); background: rgba(255, 167, 38, 0.05); border-radius: var(--tm-radius-sm);">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--tm-warning);"></div>
+                                                <h5 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); margin: 0;">Mukura Forest</h5>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-warning); margin: 0.5rem 0;">74%</div>
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Below expected range (80-85%)</div>
+                                            <div style="font-size: var(--tm-font-size-sm); margin-top: 0.5rem; font-weight: var(--tm-font-weight-medium); color: var(--tm-warning);">⚠️ Monitor closely</div>
+                                        </div>
+
+                                        <!-- Buffer Zone A - Good -->
+                                        <div style="padding: 1rem; border-left: 4px solid var(--tm-success); background: rgba(76, 175, 80, 0.05); border-radius: var(--tm-radius-sm);">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--tm-success);"></div>
+                                                <h5 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); margin: 0;">Buffer Zone A</h5>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success); margin: 0.5rem 0;">83%</div>
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Within expected range (80-85%)</div>
+                                            <div style="font-size: var(--tm-font-size-sm); margin-top: 0.5rem; font-weight: var(--tm-font-weight-medium); color: var(--tm-success);">✓ On track</div>
+                                        </div>
+
+                                        <!-- Buffer Zone B - Danger -->
+                                        <div style="padding: 1rem; border-left: 4px solid var(--tm-danger); background: rgba(220, 53, 69, 0.05); border-radius: var(--tm-radius-sm);">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--tm-danger);"></div>
+                                                <h5 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); margin: 0;">Buffer Zone B</h5>
+                                            </div>
+                                            <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-danger); margin: 0.5rem 0;">62%</div>
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Significantly below range (80-85%)</div>
+                                            <div style="font-size: var(--tm-font-size-sm); margin-top: 0.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-danger);">🚨 Intervention needed</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="callout callout-warning" style="margin-top: 1.5rem;">
+                                        <strong>Action required:</strong> Buffer Zone B requires immediate assessment. Consider replanting, additional maintenance, or species mix adjustment.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION D: SIMPLIFIED TREND (Public View) -->
+                            <div class="viz-option" data-option="simplified" aria-hidden="true">
+                                <div style="padding: 2rem 0; text-align: center;">
+                                    <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem;">Tree Survival Rate</div>
+                                    <div style="font-size: 4rem; font-weight: var(--tm-font-weight-bold); color: var(--tm-success); line-height: 1; margin-bottom: 0.5rem;">85%</div>
+                                    <div style="font-size: var(--tm-font-size-lg); color: var(--tm-text-secondary); margin-bottom: 2rem;">of planted trees are thriving</div>
+
+                                    <!-- Simple trend arrow -->
+                                    <div style="display: inline-flex; align-items: center; gap: 1rem; padding: 1rem 2rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-md);">
+                                        <div style="font-size: 3rem; color: var(--tm-success);">↗</div>
+                                        <div style="text-align: left;">
+                                            <div style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold);">Improving</div>
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Up from 55% in Year 1</div>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(76, 175, 80, 0.1); border-radius: var(--tm-radius-sm); text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;">
+                                        <p style="font-size: var(--tm-font-size-sm); line-height: 1.6; margin: 0;">
+                                            <strong style="color: var(--tm-success);">Good news:</strong> The restoration is succeeding. Most planted trees are establishing well and growing stronger each year. This shows the sites are well-managed and conditions are favorable for forest recovery.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Context Panel (Collapsible) -->
+                        <aside class="indicator-context">
+                            <details>
+                                <summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>The percentage of planted trees still alive at measurement time. Measured annually (with early checks encouraged in Year 1). This is the <strong>highest-value decision indicator</strong> for assessing whether restoration interventions are working.</p>
+
+                                    <h5>Why It Matters</h5>
+                                    <p>Survival rate reveals the effectiveness of site preparation, species selection, planting techniques, and ongoing maintenance. It's the bridge between implementation (planting) and outcomes (restored hectares).</p>
+
+                                    <p><strong>Interpretation challenges:</strong> Early survival is highly volatile due to transplant shock, weather variation, and establishment phase dynamics. Early rates are NOT predictive of final outcomes. Champions risk over-reacting to normal early fluctuations if trends aren't properly contextualized.</p>
+
+                                    <h5>Key Questions This Helps Answer</h5>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6;">
+                                        <li>Are our restoration interventions effective or at risk?</li>
+                                        <li>Do specific sites, species, or cohorts need intervention (replanting, additional maintenance)?</li>
+                                        <li>Are early mortality patterns normal or indicative of systematic problems?</li>
+                                        <li>Will we likely meet the final restoration target given current survival trends?</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </aside>
+                    </article>
+
+                <!-- =====================================
+                     INDICATOR 5: NATURAL REGENERATION
+                     ===================================== -->
+<article class="tm-card indicator-card indicator-card--visual-first" data-indicator="natural-regeneration">
+                        <!-- Card Header -->
+                        <header class="indicator-header">
+                            <div>
+                                <h2 class="indicator-title">Natural Regeneration</h2>
+                                <div class="indicator-meta">
+                                    <span class="tm-badge">Annual + Bi-annual photos</span>
+                                    <span class="tm-badge-secondary">ANR progress</span>
+                                </div>
+                            </div>
+
+                            <select class="view-dropdown" aria-label="View options for Natural Regeneration">
+                                <option value="qualitative" selected>Photos + Status</option>
+                                <option value="distribution">Distribution</option>
+                                <option value="photos">Before/After</option>
+                                <option value="details">Table</option>
+                            </select>
+                        </header>
+
+                        <!-- Visualization Container -->
+                        
+                        <!-- Visual-First: Data-focused distribution chart (replaces decorative illustration) -->
+                        <div class="card-visual" style="background: var(--tm-gray-50); display: flex; align-items: center; justify-content: center; padding: 24px;">
+                            <svg viewBox="0 0 400 180" style="width: 100%; max-width: 400px; height: auto;" role="img" aria-label="Distribution of natural regeneration across sites: 40% abundant, 50% moderate, 10% limited">
+                                <!-- Stacked horizontal bar showing distribution -->
+                                <rect x="20" y="60" width="144" height="60" fill="var(--tm-success)" rx="4"/>
+                                <rect x="164" y="60" width="180" height="60" fill="var(--tm-accent)" rx="0"/>
+                                <rect x="344" y="60" width="36" height="60" fill="var(--tm-warning)" rx="4"/>
+
+                                <!-- Labels above bars -->
+                                <text x="92" y="45" font-size="12" fill="var(--tm-text-secondary)" text-anchor="middle">Abundant</text>
+                                <text x="254" y="45" font-size="12" fill="var(--tm-text-secondary)" text-anchor="middle">Moderate</text>
+                                <text x="362" y="45" font-size="12" fill="var(--tm-text-secondary)" text-anchor="middle">Limited</text>
+
+                                <!-- Percentages inside bars -->
+                                <text x="92" y="97" font-size="20" font-weight="600" fill="white" text-anchor="middle">40%</text>
+                                <text x="254" y="97" font-size="20" font-weight="600" fill="white" text-anchor="middle">50%</text>
+                                <text x="362" y="97" font-size="14" font-weight="600" fill="white" text-anchor="middle">10%</text>
+
+                                <!-- Site counts below -->
+                                <text x="92" y="140" font-size="11" fill="var(--tm-text-secondary)" text-anchor="middle">4 sites</text>
+                                <text x="254" y="140" font-size="11" fill="var(--tm-text-secondary)" text-anchor="middle">5 sites</text>
+                                <text x="362" y="140" font-size="11" fill="var(--tm-text-secondary)" text-anchor="middle">1 site</text>
+
+                                <!-- Summary text -->
+                                <text x="200" y="170" font-size="11" fill="var(--tm-text-secondary)" text-anchor="middle">90% of sites showing moderate to abundant natural regeneration</text>
+                            </svg>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="card-content">
+<div class="indicator-viz-container">
+
+                            <!-- OPTION A: QUALITATIVE-FIRST + PHOTOS (CRITICAL) -->
+                            <div class="viz-option" data-option="qualitative" aria-hidden="false">
+                                <div style="padding: 1rem 0;">
+
+                                    <!-- 1. QUALITATIVE ASSESSMENT (Large, Prominent) -->
+                                    <div style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f2 100%); border-left: 4px solid var(--tm-success); padding: 1.5rem; margin-bottom: 2rem; border-radius: var(--tm-radius-sm);">
+                                        <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Natural Regeneration Progress</div>
+                                        <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success); line-height: 1.4;">
+                                            <div style="margin-bottom: 0.5rem;">✓ Abundant at 40% of sites</div>
+                                            <div style="margin-bottom: 0.5rem;">○ Moderate at 50% of sites</div>
+                                            <div>◐ Limited at 10% of sites</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. VISUAL EVIDENCE (Photos - Builds Trust) -->
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1rem;">Photo Evidence</h4>
+
+                                    <div class="photo-grid">
+                                        <!-- Gishwati - Abundant -->
+                                        <div class="photo-card">
+                                            <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: var(--tm-font-size-sm);">
+                                                📸 Gishwati Forest
+                                            </div>
+                                            <div class="photo-card-caption">
+                                                <strong>Abundant regeneration</strong><br>
+                                                Dense regrowth across multiple zones
+                                            </div>
+                                        </div>
+
+                                        <!-- Mukura - Moderate -->
+                                        <div class="photo-card">
+                                            <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #558b2f 0%, #9ccc65 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: var(--tm-font-size-sm);">
+                                                📸 Mukura Forest
+                                            </div>
+                                            <div class="photo-card-caption">
+                                                <strong>Moderate regeneration</strong><br>
+                                                Scattered clusters emerging
+                                            </div>
+                                        </div>
+
+                                        <!-- Buffer Zone - Limited -->
+                                        <div class="photo-card">
+                                            <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #7cb342 0%, #c5e1a5 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: var(--tm-font-size-sm);">
+                                                📸 Buffer Zone B
+                                            </div>
+                                            <div class="photo-card-caption">
+                                                <strong>Limited regeneration</strong><br>
+                                                Early signs, needs monitoring
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="text-align: center; color: var(--tm-text-secondary); font-size: var(--tm-font-size-sm); margin-top: 1rem;">
+                                        ✓ Field photos verified: March 2025
+                                    </div>
+
+                                    <!-- 3. NUMERIC ESTIMATE (with Uncertainty) -->
+                                    <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                        <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); margin-bottom: 0.5rem;">Estimated Total Naturally Regenerated Trees</div>
+                                        <div style="font-size: 2rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin: 0.5rem 0;">8,000 – 12,000</div>
+
+                                        <!-- Confidence indicator -->
+                                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem;">
+                                            <span style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Confidence:</span>
+                                            <div style="display: flex; gap: 4px;">
+                                                <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--tm-accent);"></div>
+                                                <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--tm-accent);"></div>
+                                                <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--tm-accent);"></div>
+                                                <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--tm-gray-200);"></div>
+                                                <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--tm-gray-200);"></div>
+                                            </div>
+                                            <span style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">(Moderate)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="callout callout-info">
+                                        <strong>📘 Why qualitative assessment leads:</strong> Counting naturally regenerated trees is inherently uncertain. Young trees are hard to detect, difficult to distinguish from planted ones, and vary greatly by site. Photos provide verifiable evidence that numeric estimates alone cannot.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION B: DISTRIBUTION BAR CHART -->
+                            <div class="viz-option" data-option="distribution" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1.5rem;">Sites by Regeneration Abundance</h4>
+
+                                    <div class="bar-chart">
+                                        <!-- Abundant -->
+                                        <div class="bar-item">
+                                            <div class="bar-label">
+                                                <span class="bar-label-primary">Abundant Regeneration</span>
+                                                <span class="bar-label-secondary">40% of sites (4 sites)</span>
+                                            </div>
+                                            <div class="bar-track">
+                                                <div class="bar-fill" style="width: 40%; background: var(--tm-success);"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Moderate -->
+                                        <div class="bar-item">
+                                            <div class="bar-label">
+                                                <span class="bar-label-primary">Moderate Regeneration</span>
+                                                <span class="bar-label-secondary">50% of sites (5 sites)</span>
+                                            </div>
+                                            <div class="bar-track">
+                                                <div class="bar-fill" style="width: 50%; background: var(--tm-accent);"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Limited -->
+                                        <div class="bar-item">
+                                            <div class="bar-label">
+                                                <span class="bar-label-primary">Limited Regeneration</span>
+                                                <span class="bar-label-secondary">10% of sites (1 site)</span>
+                                            </div>
+                                            <div class="bar-track">
+                                                <div class="bar-fill" style="width: 10%; background: var(--tm-warning);"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 2rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                        <p style="font-size: var(--tm-font-size-sm); line-height: 1.6; margin: 0;">
+                                            <strong>Interpretation:</strong> Most sites (90%) show moderate to abundant natural regeneration, indicating that Assisted Natural Regeneration (ANR) strategies are working. The single site with limited regeneration (Buffer Zone B) requires attention.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION C: BEFORE/AFTER PHOTOS -->
+                            <div class="viz-option" data-option="photos" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1.5rem;">Visual Progress: Before & After</h4>
+
+                                    <!-- Gishwati Comparison -->
+                                    <div style="margin-bottom: 2rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                        <h5 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); margin-bottom: 1rem; color: var(--tm-primary);">Gishwati Forest</h5>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                            <div>
+                                                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #8d6e63 0%, #bcaaa4 100%); display: flex; align-items: center; justify-content: center; color: white; border-radius: var(--tm-radius-sm); margin-bottom: 0.5rem;">
+                                                    📸 January 2024
+                                                </div>
+                                                <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Baseline: Limited vegetation</div>
+                                            </div>
+                                            <div>
+                                                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%); display: flex; align-items: center; justify-content: center; color: white; border-radius: var(--tm-radius-sm); margin-bottom: 0.5rem;">
+                                                    📸 March 2025
+                                                </div>
+                                                <div style="font-size: var(--tm-font-size-sm); color: var(--tm-success); font-weight: var(--tm-font-weight-semibold);">Progress: Dense regrowth</div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 1rem; font-size: var(--tm-font-size-sm); color: var(--tm-text-primary);">
+                                            <strong>Observed change:</strong> Significant natural regeneration with diverse native species establishing across site.
+                                        </div>
+                                    </div>
+
+                                    <!-- Mukura Comparison -->
+                                    <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                        <h5 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); margin-bottom: 1rem; color: var(--tm-primary);">Mukura Forest</h5>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                            <div>
+                                                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #795548 0%, #a1887f 100%); display: flex; align-items: center; justify-content: center; color: white; border-radius: var(--tm-radius-sm); margin-bottom: 0.5rem;">
+                                                    📸 January 2024
+                                                </div>
+                                                <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Baseline: Sparse vegetation</div>
+                                            </div>
+                                            <div>
+                                                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #558b2f 0%, #9ccc65 100%); display: flex; align-items: center; justify-content: center; color: white; border-radius: var(--tm-radius-sm); margin-bottom: 0.5rem;">
+                                                    📸 March 2025
+                                                </div>
+                                                <div style="font-size: var(--tm-font-size-sm); color: var(--tm-accent); font-weight: var(--tm-font-weight-semibold);">Progress: Moderate growth</div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 1rem; font-size: var(--tm-font-size-sm); color: var(--tm-text-primary);">
+                                            <strong>Observed change:</strong> Steady improvement with scattered clusters of native saplings emerging.
+                                        </div>
+                                    </div>
+
+                                    <div class="callout callout-success" style="margin-top: 1.5rem;">
+                                        <strong>✓ Trust through transparency:</strong> Before/after photos provide verifiable evidence of restoration progress that numbers alone cannot convey. This visual proof builds confidence with all stakeholders.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION D: DETAILED SITE TABLE -->
+                            <div class="viz-option" data-option="details" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1rem;">Site-by-Site Detail</h4>
+
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Site</th>
+                                                <th>Abundance</th>
+                                                <th class="align-right">Est. Count</th>
+                                                <th>Confidence</th>
+                                                <th>Dominant Species</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Gishwati Forest A</td>
+                                                <td><span class="status-indicator status-success"><span class="status-dot"></span> Abundant</span></td>
+                                                <td class="align-right">3,000-4,500</td>
+                                                <td>Medium</td>
+                                                <td>Polyscias fulva</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Gishwati Forest B</td>
+                                                <td><span class="status-indicator status-success"><span class="status-dot"></span> Abundant</span></td>
+                                                <td class="align-right">2,500-3,500</td>
+                                                <td>Medium</td>
+                                                <td>Mixed native</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Mukura Forest A</td>
+                                                <td><span class="status-indicator"><span class="status-dot" style="background: var(--tm-accent);"></span> Moderate</span></td>
+                                                <td class="align-right">1,500-2,000</td>
+                                                <td>Low</td>
+                                                <td>Maesa lanceolata</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Mukura Forest B</td>
+                                                <td><span class="status-indicator"><span class="status-dot" style="background: var(--tm-accent);"></span> Moderate</span></td>
+                                                <td class="align-right">1,000-1,500</td>
+                                                <td>Low</td>
+                                                <td>Acacia species</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Buffer Zone A</td>
+                                                <td><span class="status-indicator"><span class="status-dot" style="background: var(--tm-accent);"></span> Moderate</span></td>
+                                                <td class="align-right">500-800</td>
+                                                <td>Low</td>
+                                                <td>Various pioneers</td>
+                                            </tr>
+                                            <tr class="table-highlight">
+                                                <td>Buffer Zone B</td>
+                                                <td><span class="status-indicator status-warning"><span class="status-dot"></span> Limited</span></td>
+                                                <td class="align-right">100-200</td>
+                                                <td>Very Low</td>
+                                                <td>Sparse coverage</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
+                                        <strong>Total estimated:</strong> 8,600-12,500 naturally regenerated trees across all sites
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Context Panel (Collapsible) -->
+                        </div>
+                        
+                        <aside class="indicator-context">
+                            <details>
+                                <summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>The number of trees that have naturally sprouted and are growing in restoration areas without being planted. This captures <strong>Assisted Natural Regeneration (ANR)</strong> success—where restoration activities create conditions for native vegetation to return on its own.</p>
+
+                                    <p>Data comes as both <strong>numeric counts</strong> (annual) and <strong>qualitative evidence with photos</strong> (bi-annual), recognizing that natural regeneration is harder to measure precisely than planted trees.</p>
+
+                                    <h5>Why It Matters</h5>
+                                    <p>Natural regeneration is often more cost-effective and ecologically appropriate than planting. It demonstrates that restoration is catalyzing ecosystem recovery beyond direct planting efforts. High natural regeneration can indicate good site conditions and effective land management.</p>
+
+                                    <p><strong>Measurement uncertainty:</strong> Counts are estimates with high uncertainty. It's difficult to distinguish young naturally regenerated trees from planted ones, and detection depends on tree size. Risk of overstating confidence if shown as precise numbers.</p>
+
+                                    <h5>Key Questions This Helps Answer</h5>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6;">
+                                        <li>Is ANR delivering the expected ecological results?</li>
+                                        <li>Can we reduce planting intensity in areas with strong natural regeneration?</li>
+                                        <li>Which sites or interventions are most successful at catalyzing natural recovery?</li>
+                                        <li>Are our ANR protocols (e.g., fencing, soil management) working?</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </aside>
+                    </article>
+
+                <!-- =====================================
+                     SECTION: BIODIVERSITY
+                     ===================================== -->
+
+                <!-- =====================================
+                     INDICATOR 6: SPECIES DIVERSITY
+                     ===================================== -->
+<article class="tm-card indicator-card indicator-card--section-start" data-indicator="species-diversity">
+                        <header class="indicator-header">
+                            <div>
+                                <h2 class="indicator-title">Tree Species Diversity</h2>
+                                <div class="indicator-meta">
+                                    <span class="tm-badge">Annual</span>
+                                    <span class="tm-badge-secondary">Derived indicator</span>
+                                </div>
+                            </div>
+                            <select class="view-dropdown" aria-label="View options for Tree Species Diversity">
+                                <option value="status" selected>Status</option>
+                                <option value="trend">Trend</option>
+                                <option value="checklist">Species</option>
+                                <option value="simple">Simple</option>
+                            </select>
+                        </header>
+                        <div class="indicator-viz-container">
+                            <div class="viz-option" data-option="status" aria-hidden="false">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+                                    <div style="font-size: 4rem; color: var(--tm-success);">↗</div>
+                                </div>
+                                <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
+                                    <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Diversity Index Score</div>
+                                    <div style="font-size: 2.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin: 0.5rem 0;">118 / 150</div>
+                                    <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Baseline: 100 (2024) • Target: 150 (2028)</div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                                    <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;"><div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">82%</div><div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Species detected</div></div>
+                                    <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;"><div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-accent);">Balanced</div><div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Distribution</div></div>
+                                    <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;"><div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-info);">7</div><div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Endemic species</div></div>
+                                </div>
+                            </div>
+                            <!-- OPTION B: TREND -->
+                            <div class="viz-option" data-option="trend" aria-hidden="true">
+                                <svg viewBox="0 0 600 250" style="width: 100%; height: 250px;">
+                                    <line x1="40" y1="200" x2="560" y2="200" stroke="#ddd" stroke-width="1"/>
+                                    <line x1="40" y1="150" x2="560" y2="150" stroke="#ddd" stroke-width="1"/>
+                                    <line x1="40" y1="100" x2="560" y2="100" stroke="#ddd" stroke-width="1"/>
+                                    <line x1="40" y1="50" x2="560" y2="50" stroke="#ddd" stroke-width="1"/>
+                                    <text x="30" y="205" font-size="12" fill="#999" text-anchor="end">100</text>
+                                    <text x="30" y="155" font-size="12" fill="#999" text-anchor="end">120</text>
+                                    <text x="30" y="105" font-size="12" fill="#999" text-anchor="end">140</text>
+                                    <text x="30" y="55" font-size="12" fill="#999" text-anchor="end">160</text>
+                                    <line x1="40" y1="35" x2="560" y2="35" stroke="var(--tm-success)" stroke-width="1" stroke-dasharray="4,4"/>
+                                    <text x="565" y="38" font-size="11" fill="var(--tm-success)">Target: 150</text>
+                                    <polyline points="100,200 250,170 400,130 520,100" stroke="var(--tm-accent)" stroke-width="3" fill="none"/>
+                                    <circle cx="100" cy="200" r="4" fill="var(--tm-accent)"/>
+                                    <circle cx="250" cy="170" r="4" fill="var(--tm-accent)"/>
+                                    <circle cx="400" cy="130" r="5" fill="var(--tm-accent)"/>
+                                    <circle cx="520" cy="100" r="5" fill="var(--tm-accent)"/>
+                                    <text x="100" y="220" font-size="11" fill="#666">2024</text>
+                                    <text x="250" y="220" font-size="11" fill="#666">2025</text>
+                                    <text x="400" y="220" font-size="11" fill="#666">2026</text>
+                                    <text x="520" y="220" font-size="11" fill="#666">2027</text>
+                                </svg>
+                            </div>
+                            <!-- OPTION C: CHECKLIST -->
+                            <div class="viz-option" data-option="checklist" aria-hidden="true">
+                                <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1rem;">Target Species Detection</h4>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--tm-gray-50); border-radius: 4px;"><span style="color: var(--tm-success); font-weight: bold;">✓</span><span style="font-size: var(--tm-font-size-sm);">Polyscias fulva</span></div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--tm-gray-50); border-radius: 4px;"><span style="color: var(--tm-success); font-weight: bold;">✓</span><span style="font-size: var(--tm-font-size-sm);">Maesa lanceolata</span></div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--tm-gray-50); border-radius: 4px;"><span style="color: var(--tm-success); font-weight: bold;">✓</span><span style="font-size: var(--tm-font-size-sm);">Prunus africana</span></div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--tm-gray-50); border-radius: 4px;"><span style="color: var(--tm-success); font-weight: bold;">✓</span><span style="font-size: var(--tm-font-size-sm);">Hagenia abyssinica</span></div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255, 167, 38, 0.1); border-radius: 4px;"><span style="color: var(--tm-warning); font-weight: bold;">○</span><span style="font-size: var(--tm-font-size-sm);">Entandrophragma excelsum</span></div>
+                                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255, 167, 38, 0.1); border-radius: 4px;"><span style="color: var(--tm-warning); font-weight: bold;">○</span><span style="font-size: var(--tm-font-size-sm);">Symphonia globulifera</span></div>
+                                </div>
+                                <div style="margin-top: 1rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);"><strong>18 detected</strong> of 22 target species • 4 species not yet established (establishment takes 3-5 years)</div>
+                            </div>
+                            <!-- OPTION D: SIMPLE -->
+                            <div class="viz-option" data-option="simple" aria-hidden="true">
+                                <div style="text-align: center; padding: 2rem 0;"><div style="font-size: 4rem; margin-bottom: 1rem;">🌳</div><div style="font-size: 2rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success); margin-bottom: 1rem;">Biodiversity Improving</div><p style="font-size: var(--tm-font-size-lg); line-height: 1.6; max-width: 500px; margin: 0 auto; color: var(--tm-text-secondary);">Forest diversity is increasing as native tree species establish and spread. More species are returning to the restoration areas each year, creating healthier forest ecosystems.</p></div>
+                            </div>
+                        </div>
+                        <aside class="indicator-context">
+                            <details><summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>A composite index measuring the variety of native tree species present across restoration sites. Combines species richness (number of species) with evenness (balanced distribution) to assess biodiversity recovery.</p>
+                                    <h5>Why It Matters</h5>
+                                    <p>Species diversity is a proxy for ecosystem health and resilience. Higher diversity typically means better ecosystem function, pest resistance, and long-term stability.</p>
+                                </div>
+                            </details>
+                        </aside>
+                    </article>
+
+                <!-- =====================================
+                     INDICATOR 7: CHIMPANZEE HABITAT SUITABILITY
+                     ===================================== -->
+<article class="tm-card indicator-card indicator-card--visual-first" data-indicator="habitat-suitability">
+                        <div class="card-visual">
+                            <svg viewBox="0 0 800 300" style="width: 100%; height: 100%;">
+                                <defs>
+                                    <linearGradient id="forestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#1a4a1a"/>
+                                        <stop offset="50%" style="stop-color:#2d5a0d"/>
+                                        <stop offset="100%" style="stop-color:#477010"/>
+                                    </linearGradient>
+                                </defs>
+                                <rect width="800" height="300" fill="url(#forestGrad)"/>
+                                <!-- Forest canopy texture -->
+                                <circle cx="100" cy="80" r="40" fill="#2d5a0d" opacity="0.5"/>
+                                <circle cx="200" cy="120" r="50" fill="#1a4a1a" opacity="0.4"/>
+                                <circle cx="350" cy="60" r="45" fill="#3d6a1d" opacity="0.5"/>
+                                <circle cx="500" cy="100" r="55" fill="#2d5a0d" opacity="0.4"/>
+                                <circle cx="650" cy="70" r="40" fill="#1a4a1a" opacity="0.5"/>
+                                <circle cx="750" cy="130" r="35" fill="#3d6a1d" opacity="0.4"/>
+                                <circle cx="150" cy="200" r="60" fill="#2d5a0d" opacity="0.3"/>
+                                <circle cx="400" cy="180" r="70" fill="#1a4a1a" opacity="0.3"/>
+                                <circle cx="600" cy="220" r="50" fill="#3d6a1d" opacity="0.3"/>
+                                <!-- Chimpanzee silhouettes -->
+                                <text x="300" y="150" font-size="48" opacity="0.3">🦍</text>
+                                <text x="500" y="180" font-size="36" opacity="0.25">🦍</text>
+                                <text x="180" y="200" font-size="28" opacity="0.2">🦍</text>
+                            </svg>
+                            <div class="visual-overlay">
+                                <h3 class="stat-large">Improving ↗</h3>
+                                <p class="stat-label">Habitat suitability index increasing</p>
+                            </div>
+                        </div>
+                        <header class="indicator-header">
+                            <div>
+                                <h2 class="indicator-title">Chimpanzee Habitat Suitability</h2>
+                                <div class="indicator-meta">
+                                    <span class="tm-badge">Annual</span>
+                                    <span class="tm-badge-secondary">Habitat proxy</span>
+                                </div>
+                            </div>
+                            <select class="view-dropdown" aria-label="View options for Chimpanzee Habitat Suitability">
+                                <option value="directional" selected>Status</option>
+                                <option value="index">Index</option>
+                                <option value="map">Map</option>
+                                <option value="simple">Simple</option>
+                            </select>
+                        </header>
+                        <div class="indicator-viz-container">
+                            <div class="viz-option" data-option="directional" aria-hidden="false">
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                                    <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;"><div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">+18%</div><div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Food availability</div></div>
+                                    <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;"><div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-accent);">+12%</div><div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Canopy cover</div></div>
+                                    <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;"><div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-info);">+8%</div><div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Connectivity</div></div>
+                                </div>
+                                <div class="callout callout-info"><strong>📘 Important context:</strong> This measures habitat quality, not population. Improved suitability creates conditions for chimpanzee use but doesn't directly measure population changes.</div>
+                            </div>
+                            <!-- OPTION B: INDEX -->
+                            <div class="viz-option" data-option="index" aria-hidden="true">
+                                <svg viewBox="0 0 600 250" style="width: 100%; height: 250px;">
+                                    <line x1="40" y1="200" x2="560" y2="200" stroke="#ddd" stroke-width="1"/>
+                                    <line x1="40" y1="150" x2="560" y2="150" stroke="#ddd" stroke-width="1"/>
+                                    <line x1="40" y1="100" x2="560" y2="100" stroke="#ddd" stroke-width="1"/>
+                                    <line x1="40" y1="50" x2="560" y2="50" stroke="#ddd" stroke-width="1"/>
+                                    <text x="30" y="205" font-size="12" fill="#999" text-anchor="end">0.5</text>
+                                    <text x="30" y="155" font-size="12" fill="#999" text-anchor="end">0.6</text>
+                                    <text x="30" y="105" font-size="12" fill="#999" text-anchor="end">0.7</text>
+                                    <text x="30" y="55" font-size="12" fill="#999" text-anchor="end">0.8</text>
+                                    <polyline points="100,180 250,150 400,110 520,80" stroke="var(--tm-success)" stroke-width="3" fill="none"/>
+                                    <circle cx="520" cy="80" r="5" fill="var(--tm-success)"/>
+                                </svg>
+                            </div>
+                            <!-- OPTION C: MAP -->
+                            <div class="viz-option" data-option="map" aria-hidden="true">
+                                <div id="habitat-map" class="leaflet-map-container habitat-map"></div>
+                            </div>
+                            <!-- OPTION D: SIMPLE -->
+                            <div class="viz-option" data-option="simple" aria-hidden="true">
+                                <div style="text-align: center; padding: 2rem 0;"><div style="font-size: 4rem; margin-bottom: 1rem;">🦍</div><div style="font-size: 2rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success); margin-bottom: 1rem;">Habitat Quality Improving</div><p style="font-size: var(--tm-font-size-lg); line-height: 1.6; max-width: 500px; margin: 0 auto; color: var(--tm-text-secondary);">Forest conditions are becoming more suitable for chimpanzees. More food sources, better tree cover, and improved forest connectivity create a healthier habitat.</p></div>
+                            </div>
+                        </div>
+
+                        <aside class="indicator-context">
+                            <details><summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>An index measuring habitat suitability for chimpanzees based on food availability, canopy cover, forest structure, and connectivity. This is a <strong>habitat proxy</strong>, not a population measure.</p>
+                                    <h5>Why It Matters</h5>
+                                    <p>Chimpanzees are a flagship species for forest health. Improved habitat suitability indicates ecosystem recovery beyond just tree numbers.</p>
+                                    <h5>Important Clarification</h5>
+                                    <p>This measures habitat quality, not chimpanzee population. Population studies require different methods (surveys, camera traps).</p>
+                                </div>
+                            </details>
+                        </aside>
+                    </article>
+
+                <!-- =====================================
+                     SECTION: FINAL OUTCOME
+                     ===================================== -->
+
+                <!-- =====================================
+                     INDICATOR 8: HECTARES RESTORED (HERO)
+                     ===================================== -->
+<article class="tm-card indicator-card indicator-card--hero indicator-card--visual-first indicator-card--section-start" data-indicator="hectares-restored">
+                        <div class="card-visual" style="background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-700, #1a4a5e) 100%);">
+                            <div class="visual-overlay" style="background: transparent;">
+                                <h3 class="stat-large">Pending</h3>
+                                <p class="stat-label">Independent verification in 2029</p>
+                            </div>
+                        </div>
+                        <header class="indicator-header">
+                            <div>
+                                <h2 class="indicator-title">Hectares Restored (Final Outcome)</h2>
+                                <div class="indicator-meta">
+                                    <span class="tm-badge">Year 5 only</span>
+                                    <span class="tm-badge-secondary">Bond outcome metric</span>
+                                </div>
+                            </div>
+                            <select class="view-dropdown" aria-label="View options for Hectares Restored (Final Outcome)">
+                                <option value="timeline" selected>Timeline</option>
+                                <option value="outcome">Result</option>
+                                <option value="breakdown">Breakdown</option>
+                                <option value="narrative">Summary</option>
+                            </select>
+                        </header>
+                        <div class="indicator-viz-container">
+                            <div class="viz-option" data-option="timeline" aria-hidden="false">
+                                <div class="timeline">
+                                    <div class="timeline-line"></div>
+                                    <div class="timeline-item">
+                                                <div class="timeline-dot" style="background: var(--tm-info);"></div>
+                                                <div class="timeline-date">Late 2028</div>
+                                                <div class="timeline-content"><strong>Final Assessment</strong><br>Comprehensive site evaluation</div>
+                                            </div>
+                                            <div class="timeline-item">
+                                                <div class="timeline-dot" style="background: var(--tm-warning);"></div>
+                                                <div class="timeline-date">Early 2029</div>
+                                                <div class="timeline-content"><strong>Independent Verification</strong><br>Third-party validation</div>
+                                            </div>
+                                            <div class="timeline-item">
+                                                <div class="timeline-dot" style="background: var(--tm-gray-200);"></div>
+                                                <div class="timeline-date">2029</div>
+                                                <div class="timeline-content"><strong>Outcome Published</strong><br>Results released publicly</div>
+                                    </div>
+                                </div>
+
+                                <div class="callout callout-warning">
+                                    <strong>⚠️ No projections shown:</strong> This dashboard does NOT project or estimate the final outcome. Showing projections would create false expectations and undermine the independent verification process. The outcome will be reported when verified.
+                                </div>
+
+                                <div style="margin-top: 1rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
+                                    <strong>Verification criteria:</strong> Hectares will be counted as "restored" only if they meet defined thresholds for tree density, survival rate, species diversity, and other ecological criteria. Independent assessors will validate all measurements.
+                                </div>
+                            </div>
+
+                            <!-- OPTION B: POST-VERIFICATION OUTCOME (Placeholder for future) -->
+                            <div class="viz-option" data-option="outcome" aria-hidden="true">
+                                <div style="text-align: center; padding: 3rem 2rem;">
+                                    <div style="display: inline-flex; align-items: center; gap: 1rem; padding: 1rem 2rem; background: rgba(76, 175, 80, 0.1); border-radius: var(--tm-radius-lg); margin-bottom: 2rem;">
+                                        <span style="font-size: 3rem;">✓</span>
+                                        <div style="text-align: left;">
+                                            <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">VERIFIED OUTCOME</div>
+                                            <div style="font-size: var(--tm-font-size-xs); color: var(--tm-success); font-weight: var(--tm-font-weight-semibold);">Independent verification complete</div>
+                                        </div>
+                                    </div>
+
+                                    <div style="font-size: 5rem; font-weight: var(--tm-font-weight-bold); color: var(--tm-primary); margin-bottom: 0.5rem;">1,654</div>
+                                    <div style="font-size: var(--tm-font-size-xl); color: var(--tm-text-secondary); margin-bottom: 1rem;">hectares successfully restored</div>
+
+                                    <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); margin-top: 1rem;">
+                                        <span style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">Target: 1,500 ha</span>
+                                        <span style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">• 110% achieved</span>
+                                    </div>
+
+                                    <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(76, 175, 80, 0.1); border-radius: var(--tm-radius-sm); text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                                        <p style="font-size: var(--tm-font-size-sm); line-height: 1.6; margin: 0;">
+                                            <strong style="color: var(--tm-success);">Bond outcome achieved:</strong> Verified hectares exceed target. All sites meet established thresholds for tree density, survival, and species diversity. Independent verification confirms restoration success.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
+                                    <strong>Note:</strong> This is a placeholder showing post-verification state. Actual outcome data will be displayed here after Year 5 verification is complete.
+                                </div>
+                            </div>
+
+                            <!-- OPTION C: OUTCOME BREAKDOWN -->
+                            <div class="viz-option" data-option="breakdown" aria-hidden="true">
+                                <div style="padding: 1rem 0;">
+                                    <div style="text-align: center; margin-bottom: 2rem;">
+                                        <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">⏳ Available after verification</div>
+                                        <div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-top: 0.5rem;">Breakdown by Criteria</div>
+                                    </div>
+
+                                    <div style="opacity: 0.5; pointer-events: none;">
+                                        <h4 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary); margin-bottom: 1rem;">Hectares Meeting Each Criterion</h4>
+
+                                        <div class="bar-chart">
+                                            <div class="bar-item">
+                                                <div class="bar-label">
+                                                    <span class="bar-label-primary">Tree Density (≥400/ha)</span>
+                                                    <span class="bar-label-secondary">1,654 ha (100%)</span>
+                                                </div>
+                                                <div class="bar-track">
+                                                    <div class="bar-fill" style="width: 100%; background: var(--tm-success);"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="bar-item">
+                                                <div class="bar-label">
+                                                    <span class="bar-label-primary">Survival Rate (≥80%)</span>
+                                                    <span class="bar-label-secondary">1,654 ha (100%)</span>
+                                                </div>
+                                                <div class="bar-track">
+                                                    <div class="bar-fill" style="width: 100%; background: var(--tm-success);"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="bar-item">
+                                                <div class="bar-label">
+                                                    <span class="bar-label-primary">Species Diversity (≥12 species)</span>
+                                                    <span class="bar-label-secondary">1,654 ha (100%)</span>
+                                                </div>
+                                                <div class="bar-track">
+                                                    <div class="bar-fill" style="width: 100%; background: var(--tm-success);"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="bar-item">
+                                                <div class="bar-label">
+                                                    <span class="bar-label-primary">Canopy Cover (≥60%)</span>
+                                                    <span class="bar-label-secondary">1,654 ha (100%)</span>
+                                                </div>
+                                                <div class="bar-track">
+                                                    <div class="bar-fill" style="width: 100%; background: var(--tm-success);"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
+                                        <strong>Preview only:</strong> Actual breakdown will show which hectares met each restoration criterion. This ensures transparency in outcome measurement.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPTION D: NARRATIVE SUMMARY -->
+                            <div class="viz-option" data-option="narrative" aria-hidden="true">
+                                <div style="padding: 2rem; max-width: 700px; margin: 0 auto;">
+                                    <div style="text-align: center; margin-bottom: 2rem;">
+                                        <div style="font-size: 3rem; margin-bottom: 1rem;">📖</div>
+                                        <div style="font-size: var(--tm-font-size-xl); font-weight: var(--tm-font-weight-semibold); color: var(--tm-primary);">Outcome Summary</div>
+                                    </div>
+
+                                    <div style="background: var(--tm-gray-50); padding: 1.5rem; border-radius: var(--tm-radius-sm); border-left: 4px solid var(--tm-info); margin-bottom: 1.5rem;">
+                                        <h5 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); margin-bottom: 1rem; color: var(--tm-primary);">Pre-Verification Status</h5>
+                                        <p style="font-size: var(--tm-font-size-sm); line-height: 1.8; margin: 0; color: var(--tm-text-primary);">
+                                            The Rwanda Wildlife Conservation Bond restoration program is currently in the implementation phase (Years 1-5). Final outcome measurement will occur at the end of Year 5, followed by independent verification in early 2029.
+                                        </p>
+                                    </div>
+
+                                    <div style="background: var(--tm-gray-50); padding: 1.5rem; border-radius: var(--tm-radius-sm); opacity: 0.5;">
+                                        <h5 style="font-size: var(--tm-font-size-base); font-weight: var(--tm-font-weight-semibold); margin-bottom: 1rem; color: var(--tm-primary);">Post-Verification Summary (Placeholder)</h5>
+                                        <p style="font-size: var(--tm-font-size-sm); line-height: 1.8; margin: 0 0 1rem 0;">
+                                            After verification, this section will provide a comprehensive narrative summary of restoration outcomes, including:
+                                        </p>
+                                        <ul style="font-size: var(--tm-font-size-sm); line-height: 1.8; margin: 0 0 0 1.5rem;">
+                                            <li>Total hectares meeting restoration criteria</li>
+                                            <li>Performance against bond targets</li>
+                                            <li>Key ecological outcomes achieved</li>
+                                            <li>Lessons learned and challenges overcome</li>
+                                            <li>Long-term monitoring and maintenance plans</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="callout callout-info" style="margin-top: 1.5rem;">
+                                        <strong>📘 For Public Audiences:</strong> This narrative format provides the most accessible view of restoration outcomes, explaining what was achieved and why it matters in plain language.
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <aside class="indicator-context">
+                            <details>
+                                <summary>About this metric</summary>
+                                <div class="context-content">
+                                    <h5>What This Measures</h5>
+                                    <p>The total hectares that meet defined restoration success criteria at the end of Year 5. This is the <strong>bond outcome metric</strong>—the final measure of whether restoration commitments were achieved.</p>
+
+                                    <h5>Why It Matters</h5>
+                                    <p>This is the ultimate accountability measure. Bond performance payments are tied to verified hectares restored. Unlike progress indicators (planting, survival), this measures <strong>final verified outcomes</strong>.</p>
+
+                                    <h5>Critical Design Requirement</h5>
+                                    <p><strong>Two distinct states:</strong></p>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6;">
+                                        <li><strong>Pre-verification (Years 1-5):</strong> Shows timeline to verification. NO projections or estimates allowed—would create false expectations.</li>
+                                        <li><strong>Post-verification (Year 5+):</strong> Shows verified outcome with independent validation badge. Final, auditable number.</li>
+                                    </ul>
+
+                                    <p style="margin-top: 1rem;"><strong>Why no projections?</strong> Showing projected outcomes would undermine the verification process and create expectations that may not be met. The dashboard shows progress indicators (planting, survival, etc.) but does not extrapolate to final outcomes.</p>
+
+                                    <h5>Key Questions This Helps Answer</h5>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.6;">
+                                        <li>Did the restoration program achieve its commitments?</li>
+                                        <li>How many hectares meet restoration success criteria?</li>
+                                        <li>Was the bond outcome verified independently?</li>
+                                        <li>What is the relationship between effort (trees planted) and outcomes (hectares restored)?</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </aside>
+                    </article>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="assets/scripts/dashboard-controller.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+    // Initialize maps when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ========================================
+        // HERO MAP - Gishwati-Mukura National Park
+        // ========================================
+        const heroMap = L.map('hero-map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([-1.9403, 29.4167], 11);
+
+        // Add zoom control to bottom right
+        L.control.zoom({ position: 'bottomright' }).addTo(heroMap);
+
+        // Satellite/terrain tile layer
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(heroMap);
+
+        // Park boundary polygon (simplified coordinates for Gishwati-Mukura)
+        const parkBoundary = L.polygon([
+            [-1.8903, 29.3667],
+            [-1.8803, 29.4267],
+            [-1.9103, 29.4667],
+            [-1.9703, 29.4767],
+            [-2.0003, 29.4467],
+            [-1.9903, 29.3867],
+            [-1.9503, 29.3567],
+            [-1.9103, 29.3567]
+        ], {
+            color: '#477010',
+            weight: 3,
+            fillColor: '#477010',
+            fillOpacity: 0.2,
+            dashArray: '5, 5'
+        }).addTo(heroMap);
+
+        // Site markers with custom icons
+        const siteIcon = L.divIcon({
+            className: 'site-marker-icon',
+            html: '<div style="background: #477010; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        // Gishwati Forest marker
+        L.marker([-1.9203, 29.4067], { icon: siteIcon })
+            .bindPopup('<strong>Gishwati Forest</strong><br>Primary restoration site<br>842 hectares')
+            .addTo(heroMap);
+
+        // Mukura Forest marker
+        L.marker([-1.9603, 29.4367], { icon: siteIcon })
+            .bindPopup('<strong>Mukura Forest</strong><br>Secondary restoration site<br>612 hectares')
+            .addTo(heroMap);
+
+        // Buffer Zone marker
+        L.marker([-1.9403, 29.4567], { icon: siteIcon })
+            .bindPopup('<strong>Buffer Zone</strong><br>Community-managed area<br>393 hectares')
+            .addTo(heroMap);
+
+        // Add scale
+        L.control.scale({ position: 'bottomleft', imperial: false }).addTo(heroMap);
+
+        // ========================================
+        // HABITAT MAP - Chimpanzee Habitat Suitability
+        // ========================================
+        let habitatMap = null;
+
+        function initHabitatMap() {
+            if (habitatMap) return; // Already initialized
+
+            habitatMap = L.map('habitat-map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([-1.9403, 29.4167], 12);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(habitatMap);
+
+            // Terrain base layer
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri'
+            }).addTo(habitatMap);
+
+            // High suitability zones (darker green)
+            L.polygon([
+                [-1.9103, 29.3967],
+                [-1.9003, 29.4267],
+                [-1.9203, 29.4467],
+                [-1.9403, 29.4367],
+                [-1.9303, 29.4067]
+            ], {
+                color: '#2d5a0d',
+                weight: 2,
+                fillColor: '#2d5a0d',
+                fillOpacity: 0.5
+            }).bindPopup('<strong>High Suitability</strong><br>Core habitat area').addTo(habitatMap);
+
+            // Medium suitability zones (lighter green)
+            L.polygon([
+                [-1.9403, 29.4367],
+                [-1.9303, 29.4567],
+                [-1.9603, 29.4667],
+                [-1.9703, 29.4467],
+                [-1.9503, 29.4267]
+            ], {
+                color: '#477010',
+                weight: 2,
+                fillColor: '#477010',
+                fillOpacity: 0.4
+            }).bindPopup('<strong>Medium Suitability</strong><br>Corridor habitat').addTo(habitatMap);
+
+            // Lower suitability / restoration zones (lightest green)
+            L.polygon([
+                [-1.9603, 29.4167],
+                [-1.9503, 29.4367],
+                [-1.9803, 29.4467],
+                [-1.9903, 29.4267],
+                [-1.9703, 29.4067]
+            ], {
+                color: '#7cb07c',
+                weight: 2,
+                fillColor: '#7cb07c',
+                fillOpacity: 0.3
+            }).bindPopup('<strong>Restoration Zone</strong><br>Habitat recovery area').addTo(habitatMap);
+
+            // Chimpanzee observation points
+            const chimpIcon = L.divIcon({
+                className: 'chimp-marker-icon',
+                html: '<div style="background: #8B4513; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
+            });
+
+            L.marker([-1.9153, 29.4167], { icon: chimpIcon })
+                .bindPopup('<strong>Observation Point A</strong><br>Group size: 12 individuals')
+                .addTo(habitatMap);
+
+            L.marker([-1.9353, 29.4317], { icon: chimpIcon })
+                .bindPopup('<strong>Observation Point B</strong><br>Group size: 8 individuals')
+                .addTo(habitatMap);
+
+            L.marker([-1.9553, 29.4217], { icon: chimpIcon })
+                .bindPopup('<strong>Observation Point C</strong><br>Group size: 15 individuals')
+                .addTo(habitatMap);
+
+            // Add legend
+            const legend = L.control({ position: 'topright' });
+            legend.onAdd = function() {
+                const div = L.DomUtil.create('div', 'map-legend');
+                div.innerHTML = `
+                    <div style="background: white; padding: 10px; border-radius: 6px; font-size: 11px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                        <strong style="display: block; margin-bottom: 6px;">Habitat Suitability</strong>
+                        <div style="display: flex; align-items: center; margin: 4px 0;"><span style="width: 16px; height: 12px; background: #2d5a0d; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> High</div>
+                        <div style="display: flex; align-items: center; margin: 4px 0;"><span style="width: 16px; height: 12px; background: #477010; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> Medium</div>
+                        <div style="display: flex; align-items: center; margin: 4px 0;"><span style="width: 16px; height: 12px; background: #7cb07c; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> Restoration</div>
+                        <div style="display: flex; align-items: center; margin: 4px 0;"><span style="width: 10px; height: 10px; background: #8B4513; display: inline-block; margin-right: 6px; border-radius: 50%;"></span> Observations</div>
+                    </div>
+                `;
+                return div;
+            };
+            legend.addTo(habitatMap);
+
+            L.control.scale({ position: 'bottomleft', imperial: false }).addTo(habitatMap);
+        }
+
+        // Initialize habitat map when its container becomes visible
+        const habitatMapContainer = document.getElementById('habitat-map');
+        if (habitatMapContainer) {
+            // Use MutationObserver to detect when the map becomes visible
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
+                        const vizOption = habitatMapContainer.closest('.viz-option');
+                        if (vizOption && vizOption.getAttribute('aria-hidden') === 'false') {
+                            setTimeout(function() {
+                                initHabitatMap();
+                                habitatMap.invalidateSize();
+                            }, 100);
+                        }
+                    }
+                });
+            });
+
+            const vizOption = habitatMapContainer.closest('.viz-option');
+            if (vizOption) {
+                observer.observe(vizOption, { attributes: true });
+            }
+
+            // Also initialize if already visible
+            if (vizOption && vizOption.getAttribute('aria-hidden') === 'false') {
+                initHabitatMap();
+            }
+        }
+
+        // ========================================
+        // SCROLL-SPY NAVIGATION
+        // ========================================
+        const navItems = document.querySelectorAll('.tm-nav-item');
+        const indicatorCards = document.querySelectorAll('.indicator-card');
+
+        // Map section types to their indicators
+        const sectionMap = {
+            'operational': ['hectares-under-restoration', 'seedlings', 'trees-planted', 'survival-rate'],
+            'ecological': ['natural-regeneration', 'species-diversity', 'chimpanzee-habitat'],
+            'outcome': ['hectares-restored']
+        };
+
+        function updateActiveNav() {
+            const scrollPos = window.scrollY + 150; // Offset for header
+
+            // Find which section is currently in view
+            let currentSection = 'operational';
+
+            indicatorCards.forEach(card => {
+                const indicator = card.dataset.indicator;
+                const cardTop = card.offsetTop;
+
+                if (scrollPos >= cardTop) {
+                    // Find which section this indicator belongs to
+                    for (const [section, indicators] of Object.entries(sectionMap)) {
+                        if (indicators.includes(indicator)) {
+                            currentSection = section;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Update nav active state
+            navItems.forEach(item => {
+                const section = item.dataset.section;
+                if (section === currentSection) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'true');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Throttled scroll handler
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    updateActiveNav();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Initial update
+        updateActiveNav();
+    });
+    </script>
+</body>
+</html>
