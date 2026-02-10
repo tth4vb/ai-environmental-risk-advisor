@@ -1,0 +1,16 @@
+
+> ai-environmental-risk-advisor@0.1.0 dev
+> next dev
+
+   ▲ Next.js 14.0.4
+   - Local:        http://localhost:3000
+   - Environments: .env.local
+
+ ✓ Ready in 7.9s
+ ○ Compiling / ...
+ ✓ Compiled / in 4.9s (689 modules)
+ ✓ Compiled in 653ms (349 modules)
+ ✓ Compiled in 676ms (349 modules)
+ ○ Compiling /assessment/[projectId] ...
+ ✓ Compiled /assessment/[projectId] in 2.2s (940 modules)
+[?25h
