@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { TrendingUp, TrendingDown, Minus, Info } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface ComparativeAnalysisProps {
   project: MiningProject;
@@ -12,32 +13,34 @@ interface ComparativeAnalysisProps {
 }
 
 export function ComparativeAnalysis({ project, risks }: ComparativeAnalysisProps) {
+  const { t } = useTranslation();
+
   // Mock comparative data
   const comparisons = [
     {
-      metric: 'Water Usage',
+      metric: t('comparison.waterUsage'),
       yourProject: project.mineralType === 'lithium' ? '2M L/day' : '500K L/day',
       regional: project.mineralType === 'lithium' ? '1.5M L/day' : '600K L/day',
       global: project.mineralType === 'lithium' ? '1.8M L/day' : '450K L/day',
       trend: project.mineralType === 'lithium' ? 'higher' : 'average'
     },
     {
-      metric: 'Land Footprint',
-      yourProject: project.size === 'large' ? '1,500 ha' : '300 ha',
+      metric: t('comparison.landFootprint'),
+      yourProject: (project.size ?? 'medium') === 'large' ? '1,500 ha' : '300 ha',
       regional: '800 ha',
       global: '650 ha',
-      trend: project.size === 'large' ? 'higher' : 'lower'
+      trend: (project.size ?? 'medium') === 'large' ? 'higher' : 'lower'
     },
     {
-      metric: 'Community Distance',
-      yourProject: project.communityDistance === 'near' ? '<5 km' : '>10 km',
+      metric: t('comparison.communityDistance'),
+      yourProject: (project.communityDistance ?? 'medium') === 'near' ? '<5 km' : '>10 km',
       regional: '8 km',
       global: '12 km',
-      trend: project.communityDistance === 'near' ? 'concerning' : 'average'
+      trend: (project.communityDistance ?? 'medium') === 'near' ? 'concerning' : 'average'
     },
     {
-      metric: 'Protected Areas',
-      yourProject: project.hasProtectedAreas ? 'Overlaps' : 'No overlap',
+      metric: t('comparison.protectedAreas'),
+      yourProject: project.hasProtectedAreas ? t('comparison.overlaps') : t('comparison.noOverlap'),
       regional: '15% overlap',
       global: '10% overlap',
       trend: project.hasProtectedAreas ? 'concerning' : 'better'
@@ -54,13 +57,13 @@ export function ComparativeAnalysis({ project, risks }: ComparativeAnalysisProps
     },
     {
       name: 'Grasberg Mine',
-      location: 'Indonesia', 
+      location: 'Indonesia',
       similarity: 'medium',
       outcome: 'Environmental damage, tailings failures',
       lesson: 'Independent monitoring critical'
     },
     {
-      name: 'Jáchal Lithium',
+      name: 'Jachal Lithium',
       location: 'Argentina',
       similarity: 'high',
       outcome: 'Groundwater depletion, ecosystem collapse',
@@ -86,9 +89,9 @@ export function ComparativeAnalysis({ project, risks }: ComparativeAnalysisProps
       {/* Metrics Comparison */}
       <Card>
         <CardHeader>
-          <CardTitle>Project Comparison</CardTitle>
+          <CardTitle>{t('comparison.projectComparison')}</CardTitle>
           <CardDescription>
-            How this project compares to regional and global averages
+            {t('comparison.compareDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -96,11 +99,11 @@ export function ComparativeAnalysis({ project, risks }: ComparativeAnalysisProps
             <table className="w-full">
               <thead>
                 <tr className="border-b text-sm">
-                  <th className="text-left py-2">Metric</th>
-                  <th className="text-center py-2">This Project</th>
-                  <th className="text-center py-2">Regional Avg</th>
-                  <th className="text-center py-2">Global Avg</th>
-                  <th className="text-center py-2">Trend</th>
+                  <th className="text-left py-2">{t('comparison.metric')}</th>
+                  <th className="text-center py-2">{t('comparison.thisProject')}</th>
+                  <th className="text-center py-2">{t('comparison.regionalAvg')}</th>
+                  <th className="text-center py-2">{t('comparison.globalAvg')}</th>
+                  <th className="text-center py-2">{t('comparison.trendLabel')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -126,9 +129,9 @@ export function ComparativeAnalysis({ project, risks }: ComparativeAnalysisProps
       {/* Similar Projects */}
       <Card>
         <CardHeader>
-          <CardTitle>Learn from Similar Projects</CardTitle>
+          <CardTitle>{t('comparison.similarProjects')}</CardTitle>
           <CardDescription>
-            Historical outcomes from comparable mining operations
+            {t('comparison.similarDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -140,12 +143,12 @@ export function ComparativeAnalysis({ project, risks }: ComparativeAnalysisProps
                   <p className="text-sm text-muted-foreground">{proj.location}</p>
                 </div>
                 <Badge variant={proj.similarity === 'high' ? 'default' : 'secondary'}>
-                  {proj.similarity} similarity
+                  {proj.similarity} {t('comparison.similarity')}
                 </Badge>
               </div>
               <div className="space-y-1 text-sm">
-                <p><strong>Outcome:</strong> {proj.outcome}</p>
-                <p><strong>Key Lesson:</strong> {proj.lesson}</p>
+                <p><strong>{t('comparison.outcome')}</strong> {proj.outcome}</p>
+                <p><strong>{t('comparison.keyLesson')}</strong> {proj.lesson}</p>
               </div>
             </div>
           ))}
@@ -156,8 +159,7 @@ export function ComparativeAnalysis({ project, risks }: ComparativeAnalysisProps
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          <strong>Key Insight:</strong> Projects with similar characteristics to yours have faced significant challenges. 
-          Early community organization and independent monitoring have been critical success factors for protecting community interests.
+          <strong>{t('comparison.keyInsight')}</strong> {t('comparison.keyInsightText')}
         </AlertDescription>
       </Alert>
     </div>

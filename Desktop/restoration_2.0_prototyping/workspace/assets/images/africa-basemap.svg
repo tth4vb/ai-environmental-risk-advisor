@@ -2,50 +2,134 @@
 <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" class="africa-basemap">
   <defs>
     <style>
-      .ocean { fill: var(--tm-primary-100, #f7fbfd); }
-      .continent { fill: var(--tm-neutrals-300, #e7e6e6); fill-opacity: 0.3; stroke: var(--tm-neutrals-400, #c9c9c9); stroke-width: 2; }
-      .restoration-region { fill: var(--tm-accent, #477010); fill-opacity: 0.2; stroke: var(--tm-accent, #477010); stroke-width: 1.5; transition: fill-opacity 200ms ease; }
-      .restoration-region:hover { fill-opacity: 0.3; cursor: pointer; }
-      .site-marker { fill: var(--tm-accent, #477010); stroke: white; stroke-width: 2; transition: transform 200ms ease; }
-      .site-marker:hover { transform: scale(1.25); cursor: pointer; }
+      .ocean { fill: #e8f4f8; }
+      .continent { fill: #f5f5f0; stroke: #d4d4c8; stroke-width: 1.5; }
+      .country { fill: #e8e8e0; stroke: #c9c9c0; stroke-width: 0.5; }
+      .focus-country { fill: #d4e8d4; stroke: #7cb07c; stroke-width: 1; }
+      .restoration-region {
+        fill: #477010;
+        fill-opacity: 0.3;
+        stroke: #477010;
+        stroke-width: 2;
+        transition: fill-opacity 200ms ease;
+      }
+      .restoration-region:hover { fill-opacity: 0.5; cursor: pointer; }
+      .site-marker {
+        fill: #477010;
+        stroke: white;
+        stroke-width: 2;
+      }
+      .lake { fill: #b8d4e8; stroke: #8fb8d4; stroke-width: 0.5; }
+      .label {
+        font-family: Inter, system-ui, sans-serif;
+        font-size: 11px;
+        fill: #666;
+      }
+      .label-country {
+        font-family: Inter, system-ui, sans-serif;
+        font-size: 10px;
+        fill: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .label-region {
+        font-family: Inter, system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        fill: #2d5a0d;
+      }
     </style>
   </defs>
 
   <!-- Ocean background -->
   <rect class="ocean" x="0" y="0" width="800" height="600" />
 
-  <!-- Africa continent outline (simplified) -->
-  <path class="continent" d="M 250,50 L 350,60 L 420,90 L 480,140 L 510,200 L 520,270 L 510,340 L 480,410 L 440,470 L 380,520 L 310,550 L 240,540 L 190,510 L 150,460 L 130,400 L 120,330 L 130,260 L 160,200 L 200,150 L 250,100 Z" />
+  <!-- Africa continent - more accurate outline -->
+  <path class="continent" d="
+    M 320,45
+    C 340,42 360,45 380,50
+    L 420,55 L 465,70 L 500,95 L 530,130
+    L 555,175 L 565,220 L 568,265 L 565,310
+    L 555,355 L 540,395 L 518,435 L 490,470
+    L 455,505 L 415,535 L 370,555 L 325,565
+    L 280,560 L 240,545 L 205,520 L 175,485
+    L 155,445 L 142,400 L 135,350 L 138,300
+    L 150,255 L 170,215 L 195,180 L 225,150
+    L 260,125 L 290,105 L 310,80 L 320,55
+    Z
+  "/>
 
-  <!-- Ghana Cocoa Belt region -->
-  <polygon class="restoration-region"
-           data-region="ghana"
-           points="180,280 220,270 230,310 210,330 180,320">
-    <title>Ghana Cocoa Belt</title>
-  </polygon>
+  <!-- Great Lakes region highlight -->
+  <ellipse class="focus-country" cx="450" cy="340" rx="60" ry="45" opacity="0.4"/>
 
-  <!-- Greater Rift Valley of Kenya region -->
-  <polygon class="restoration-region"
-           data-region="rift-valley"
-           points="420,320 450,310 460,350 440,370 420,360">
-    <title>Greater Rift Valley of Kenya</title>
-  </polygon>
+  <!-- Major lakes -->
+  <ellipse class="lake" cx="445" cy="310" rx="15" ry="25">
+    <title>Lake Victoria</title>
+  </ellipse>
+  <ellipse class="lake" cx="420" cy="355" rx="8" ry="18">
+    <title>Lake Tanganyika</title>
+  </ellipse>
+  <ellipse class="lake" cx="432" cy="340" rx="5" ry="10">
+    <title>Lake Kivu</title>
+  </ellipse>
 
-  <!-- Lake Kivu & Rusizi Basin region -->
-  <polygon class="restoration-region"
-           data-region="lake-kivu"
-           points="380,360 400,350 410,380 395,395 380,385">
-    <title>Lake Kivu & Rusizi River Basin</title>
-  </polygon>
+  <!-- Rwanda outline (simplified) -->
+  <path class="focus-country" d="
+    M 438,330 L 455,328 L 460,340 L 455,355 L 440,358 L 432,350 L 435,338 Z
+  " stroke-width="1.5">
+    <title>Rwanda</title>
+  </path>
 
-  <!-- Site markers -->
-  <circle class="site-marker" cx="200" cy="295" r="8" data-site="Ghana Site 1">
-    <title>Ghana Site 1</title>
+  <!-- Gishwati-Mukura National Park - Restoration Area -->
+  <path class="restoration-region" d="
+    M 436,335 L 445,333 L 448,340 L 446,348 L 440,350 L 435,345 L 436,338 Z
+  ">
+    <title>Gishwati-Mukura National Park</title>
+  </path>
+
+  <!-- Site markers for Gishwati-Mukura -->
+  <circle class="site-marker" cx="440" cy="338" r="6">
+    <title>Gishwati Forest</title>
   </circle>
-  <circle class="site-marker" cx="435" cy="335" r="8" data-site="Kenya Site 1">
-    <title>Kenya Site 1</title>
+  <circle class="site-marker" cx="444" cy="345" r="5">
+    <title>Mukura Forest</title>
   </circle>
-  <circle class="site-marker" cx="390" cy="375" r="8" data-site="Rwanda Site 1">
-    <title>Rwanda Site 1</title>
+  <circle class="site-marker" cx="438" cy="343" r="4">
+    <title>Buffer Zone</title>
   </circle>
+
+  <!-- Country labels -->
+  <text class="label-country" x="440" y="365">Rwanda</text>
+  <text class="label-country" x="460" y="310">Uganda</text>
+  <text class="label-country" x="395" y="370">DRC</text>
+  <text class="label-country" x="470" y="355">Tanzania</text>
+  <text class="label-country" x="420" y="385">Burundi</text>
+
+  <!-- Region label -->
+  <text class="label-region" x="425" cy="328">
+    <tspan x="415" dy="0">Gishwati-Mukura</tspan>
+    <tspan x="415" dy="14">National Park</tspan>
+  </text>
+
+  <!-- Scale indicator -->
+  <g transform="translate(680, 560)">
+    <line x1="0" y1="0" x2="60" y2="0" stroke="#999" stroke-width="1"/>
+    <line x1="0" y1="-3" x2="0" y2="3" stroke="#999" stroke-width="1"/>
+    <line x1="60" y1="-3" x2="60" y2="3" stroke="#999" stroke-width="1"/>
+    <text class="label" x="30" y="15" text-anchor="middle">100 km</text>
+  </g>
+
+  <!-- Compass -->
+  <g transform="translate(750, 80)">
+    <circle cx="0" cy="0" r="20" fill="white" stroke="#ccc" stroke-width="1"/>
+    <polygon points="0,-15 4,5 0,0 -4,5" fill="#333"/>
+    <text class="label" x="0" y="-22" text-anchor="middle" font-size="10" font-weight="600">N</text>
+  </g>
+
+  <!-- Title box -->
+  <g transform="translate(50, 50)">
+    <rect x="0" y="0" width="180" height="50" fill="white" fill-opacity="0.9" rx="4"/>
+    <text x="15" y="22" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#032230">Great Lakes Region</text>
+    <text x="15" y="40" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#666">East-Central Africa</text>
+  </g>
 </svg>

@@ -10,6 +10,9 @@
     <link rel="preload" href="assets/styles/terramatch-core.css" as="style">
     <link rel="preload" href="assets/styles/dashboard-components.css" as="style">
 
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/styles/terramatch-core.css">
     <link rel="stylesheet" href="assets/styles/bento-grid.css">
@@ -17,34 +20,147 @@
     <link rel="stylesheet" href="assets/styles/visualization-styles.css">
 
     <style>
+        /* Leaflet map containers */
+        .leaflet-map-container {
+            width: 100%;
+            height: 350px;
+            border-radius: 8px;
+            z-index: 1;
+        }
+        .leaflet-map-container.hero-map {
+            height: 400px;
+        }
+        .leaflet-map-container.habitat-map {
+            height: 300px;
+        }
+        /* Custom Leaflet controls */
+        .leaflet-control-attribution {
+            font-size: 10px;
+        }
+        .map-legend {
+            background: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        .map-legend h4 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        .map-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .map-legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+        .restoration-popup {
+            font-family: Inter, system-ui, sans-serif;
+        }
+        .restoration-popup h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #032230;
+        }
+        .restoration-popup p {
+            margin: 4px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .restoration-popup .stat {
+            font-size: 18px;
+            font-weight: 700;
+            color: #477010;
+        }
+    </style>
+
+    <style>
         /* Inline critical visualization styles for first paint */
+        /* Tufte Principle: Make numbers prominent, labels subtle */
         .sparkline-chart {
             width: 100%;
-            margin: 1.5rem 0;
+            margin: 1rem 0;
         }
         .sparkline-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
         .sparkline-value {
-            font-size: 2.5rem;
-            font-weight: 600;
+            font-size: 3.5rem;
+            font-weight: 700;
             color: var(--tm-primary);
             line-height: 1;
+            letter-spacing: -0.02em;
         }
         .sparkline-label {
-            font-size: var(--tm-font-size-sm);
+            font-size: 11px;
             color: var(--tm-text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+            opacity: 0.8;
         }
         .supply-warning {
-            font-size: var(--tm-font-size-sm);
-            color: var(--tm-warning);
-            margin-top: 0.5rem;
-            font-weight: var(--tm-font-weight-medium);
+            font-size: 11px;
+            color: var(--tm-text-secondary);
+            margin-top: 0.25rem;
+            font-weight: var(--tm-font-weight-normal);
+            opacity: 0.7;
+        }
+
+        /* Metric Pulse Row - At-a-glance summary (Tufte sparklines) */
+        .metric-pulse-row {
+            display: flex;
+            gap: 24px;
+            padding: 16px 24px;
+            background: var(--tm-white);
+            border-bottom: 1px solid var(--tm-border-light);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .pulse-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 160px;
+        }
+        .pulse-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .pulse-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--tm-text-secondary);
+            opacity: 0.8;
+        }
+        .pulse-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--tm-primary);
+            line-height: 1.2;
+        }
+        .pulse-spark {
+            width: 48px;
+            height: 20px;
+        }
+        .pulse-context {
+            font-size: 10px;
+            color: var(--tm-text-secondary);
+            opacity: 0.7;
         }
     </style>
 </head>
@@ -104,12 +220,60 @@
                 </div>
             </header>
 
+            <!-- Metric Pulse Row - At-a-glance summary (Tufte sparklines principle) -->
+            <div class="metric-pulse-row" role="region" aria-label="Key metrics summary">
+                <div class="pulse-item">
+                    <div class="pulse-content">
+                        <span class="pulse-label">Hectares</span>
+                        <span class="pulse-value">1,847</span>
+                        <span class="pulse-context">Locked</span>
+                    </div>
+                    <svg class="pulse-spark" viewBox="0 0 48 20" aria-hidden="true">
+                        <polyline points="0,18 16,14 32,10 48,8" fill="none" stroke="var(--tm-accent)" stroke-width="2"/>
+                        <circle cx="48" cy="8" r="2" fill="var(--tm-accent)"/>
+                    </svg>
+                </div>
+                <div class="pulse-item">
+                    <div class="pulse-content">
+                        <span class="pulse-label">Trees Planted</span>
+                        <span class="pulse-value">158K</span>
+                        <span class="pulse-context">79% of target</span>
+                    </div>
+                    <svg class="pulse-spark" viewBox="0 0 48 20" aria-hidden="true">
+                        <polyline points="0,18 16,12 32,8 48,6" fill="none" stroke="var(--tm-accent)" stroke-width="2"/>
+                        <circle cx="48" cy="6" r="2" fill="var(--tm-accent)"/>
+                    </svg>
+                </div>
+                <div class="pulse-item">
+                    <div class="pulse-content">
+                        <span class="pulse-label">Survival Rate</span>
+                        <span class="pulse-value">85%</span>
+                        <span class="pulse-context">vs 70% avg</span>
+                    </div>
+                    <svg class="pulse-spark" viewBox="0 0 48 20" aria-hidden="true">
+                        <polyline points="0,16 16,12 32,8 48,5" fill="none" stroke="var(--tm-success)" stroke-width="2"/>
+                        <circle cx="48" cy="5" r="2" fill="var(--tm-success)"/>
+                    </svg>
+                </div>
+                <div class="pulse-item">
+                    <div class="pulse-content">
+                        <span class="pulse-label">Regeneration</span>
+                        <span class="pulse-value">8-12K</span>
+                        <span class="pulse-context">Moderate conf.</span>
+                    </div>
+                    <svg class="pulse-spark" viewBox="0 0 48 20" aria-hidden="true">
+                        <polyline points="0,14 16,11 32,8 48,6" fill="none" stroke="var(--tm-info)" stroke-width="2"/>
+                        <circle cx="48" cy="6" r="2" fill="var(--tm-info)"/>
+                    </svg>
+                </div>
+            </div>
+
             <!-- Indicators Container -->
             <div class="dashboard-bento-grid">
                 <!-- =====================================
                      INDICATOR 1: HECTARES UNDER RESTORATION (HERO)
                      ===================================== -->
-<article class="tm-card indicator-card indicator-card--hero indicator-card--section-start" data-indicator="hectares-under-restoration">
+<article class="tm-card indicator-card indicator-card--hero indicator-card--visual-first indicator-card--section-start" data-indicator="hectares-under-restoration">
                         <header class="indicator-header">
                             <div>
                                 <h2 class="indicator-title">Hectares Under Restoration</h2>
@@ -119,28 +283,29 @@
                                 </div>
                             </div>
                             <select class="view-dropdown" aria-label="View options for Hectares Under Restoration">
-                                <option value="map" selected>🗺️ Map</option>
-                                <option value="timeline">📅 Timeline</option>
-                                <option value="breakdown">📊 By Site</option>
-                                <option value="simple">🔢 Simple</option>
+                                <option value="map" selected>Map</option>
+                                <option value="timeline">Timeline</option>
+                                <option value="breakdown">By Site</option>
+                                <option value="simple">Simple</option>
                             </select>
-                            </div>
-                                <div class="map-container" style="border: 3px solid var(--tm-success); position: relative;">
-                                    <svg viewBox="0 0 400 300" style="width: 100%; height: 400px;" style="width: 100%; height: 300px;">
-                                        <defs><pattern id="mapPattern" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="1" fill="#ccc"/></pattern></defs>
-                                        <rect width="400" height="300" fill="#f0f0f0"/>
-                                        <polygon points="80,60 320,70 340,120 310,220 180,240 100,190 70,120" fill="var(--tm-accent)" opacity="0.3" stroke="var(--tm-success)" stroke-width="3"/>
-                                        <circle cx="200" cy="140" r="6" fill="var(--tm-success)"/>
-                                        <text x="200" y="155" font-size="12" fill="var(--tm-primary)" text-anchor="middle" font-weight="600">Gishwati-Mukura</text>
-                                        <g transform="translate(340, 40)"><rect x="0" y="8" width="20" height="15" fill="var(--tm-success)" rx="2"/><path d="M 4 8 L 4 4 A 6 6 0 0 1 16 4 L 16 8" stroke="var(--tm-success)" stroke-width="2.5" fill="none"/><circle cx="10" cy="15" r="2" fill="white"/></g>
-                                    </svg>
-                                    <div style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem; background: white; padding: 1rem; border-radius: var(--tm-radius-sm); box-shadow: var(--tm-shadow-md);">
-                                        <div style="font-size: 2rem; font-weight: var(--tm-font-weight-bold); color: var(--tm-primary);">1,847 hectares</div>
-                                        <div style="font-size: var(--tm-font-size-sm); color: var(--tm-success); font-weight: var(--tm-font-weight-semibold); margin-top: 0.25rem;">✓ Finalized & Locked (Sep 2024)</div>
+                        </header>
+                        <div class="indicator-viz-container">
+                            <div class="viz-option" data-option="map" aria-hidden="false">
+                                <div class="card-visual" style="position: relative;">
+                                    <div id="hero-map" class="leaflet-map-container hero-map"></div>
+                                    <div class="visual-overlay">
+                                        <h3 class="stat-large">1,847 hectares</h3>
+                                        <p class="stat-label">Gishwati-Mukura National Park, Rwanda</p>
                                     </div>
                                 </div>
-                                <div style="margin-top: 1rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); font-size: var(--tm-font-size-sm);">
-                                    <strong>Note:</strong> Site boundaries are now locked. No further changes expected. Minor boundary corrections in Years 1-2 are normal; major changes later would require explanation.
+                                <div class="card-content">
+                                    <div class="status-indicator" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <span style="color: var(--tm-success);">🔒</span>
+                                        <span style="font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">Finalized & Locked (Sep 2024)</span>
+                                    </div>
+                                    <p class="supporting-text" style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary);">
+                                        Site boundaries are now locked. No further changes expected.
+                                    </p>
                                 </div>
                             </div>
                             <!-- OPTION B: TIMELINE -->
@@ -174,7 +339,7 @@
                             </div>
                         </div>
                         <aside class="indicator-context">
-                            <details open><summary>About this metric</summary>
+                            <details><summary>About this metric</summary>
                                 <div class="context-content">
                                     <h5>What This Measures</h5>
                                     <p>The total area (in hectares) of land under active restoration management. This includes all restoration sites, regardless of approach (planting, ANR, or mixed). Reported bi-annually until Year 2, when site boundaries are finalized and the metric "locks."</p>
@@ -203,38 +368,12 @@
                                 </div>
                             </div>
 
-                            <!-- Visualization Toggle Group -->
-                            <div class="viz-toggle-group" role="group"
-                                 aria-label="Visualization options for Seedlings Produced">
-                                <button class="viz-toggle active"
-                                        data-option="sparkline"
-                                        aria-pressed="true"
-                                        aria-label="Show as trend sparkline">
-                                    <span class="toggle-icon" aria-hidden="true">📈</span>
-                                    <span class="toggle-label">Trend</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="progress"
-                                        aria-pressed="false"
-                                        aria-label="Show as progress bar">
-                                    <span class="toggle-icon" aria-hidden="true">📊</span>
-                                    <span class="toggle-label">Progress</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="breakdown"
-                                        aria-pressed="false"
-                                        aria-label="Show breakdown by nursery">
-                                    <span class="toggle-icon" aria-hidden="true">🗂️</span>
-                                    <span class="toggle-label">By Site</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="table"
-                                        aria-pressed="false"
-                                        aria-label="Show as data table">
-                                    <span class="toggle-icon" aria-hidden="true">📋</span>
-                                    <span class="toggle-label">Table</span>
-                                </button>
-                            </div>
+                            <select class="view-dropdown" aria-label="View options for Seedlings Produced">
+                                <option value="sparkline" selected>Trend</option>
+                                <option value="progress">Progress</option>
+                                <option value="breakdown">By Nursery</option>
+                                <option value="table">Table</option>
+                            </select>
                         </header>
 
                         <!-- Visualization Container -->
@@ -274,9 +413,7 @@
                                         <circle cx="0" cy="70" r="4" fill="var(--tm-success)"/>
                                         <circle cx="133" cy="50" r="4" fill="var(--tm-success)"/>
                                         <circle cx="266" cy="30" r="5" fill="var(--tm-success)"/>
-                                        <circle cx="400" cy="22" r="6" fill="var(--tm-success)" stroke="white" stroke-width="2">
-                                            <animate attributeName="r" values="6;8;6" dur="2s" repeatCount="indefinite"/>
-                                        </circle>
+                                        <circle cx="400" cy="22" r="6" fill="var(--tm-success)" stroke="white" stroke-width="2"/>
 
                                         <!-- Value labels -->
                                         <text x="0" y="65" font-size="10" fill="#666" text-anchor="start">12K</text>
@@ -453,7 +590,7 @@
 
                         <!-- Context Panel (Collapsible) -->
                         <aside class="indicator-context">
-                            <details open>
+                            <details>
                                 <summary>About this metric</summary>
                                 <div class="context-content">
                                     <h5>What This Measures</h5>
@@ -487,38 +624,12 @@
                                 </div>
                             </div>
 
-                            <!-- Visualization Toggle Group -->
-                            <div class="viz-toggle-group" role="group"
-                                 aria-label="Visualization options for Trees Planted">
-                                <button class="viz-toggle active"
-                                        data-option="cumulative"
-                                        aria-pressed="true"
-                                        aria-label="Show cumulative progress vs plan">
-                                    <span class="toggle-icon" aria-hidden="true">📈</span>
-                                    <span class="toggle-label">Progress</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="sparkline"
-                                        aria-pressed="false"
-                                        aria-label="Show as sparkline with big number">
-                                    <span class="toggle-icon" aria-hidden="true">🔢</span>
-                                    <span class="toggle-label">At a Glance</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="sites"
-                                        aria-pressed="false"
-                                        aria-label="Show breakdown by site">
-                                    <span class="toggle-icon" aria-hidden="true">🗂️</span>
-                                    <span class="toggle-label">By Site</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="velocity"
-                                        aria-pressed="false"
-                                        aria-label="Show planting velocity over time">
-                                    <span class="toggle-icon" aria-hidden="true">⚡</span>
-                                    <span class="toggle-label">Velocity</span>
-                                </button>
-                            </div>
+                            <select class="view-dropdown" aria-label="View options for Trees Planted">
+                                <option value="cumulative" selected>Progress</option>
+                                <option value="sparkline">Sparkline</option>
+                                <option value="sites">By Site</option>
+                                <option value="velocity">Velocity</option>
+                            </select>
                         </header>
 
                         <!-- Visualization Container -->
@@ -756,7 +867,7 @@
 
                         <!-- Context Panel (Collapsible) -->
                         <aside class="indicator-context">
-                            <details open>
+                            <details>
                                 <summary>About this metric</summary>
                                 <div class="context-content">
                                     <h5>What This Measures</h5>
@@ -797,38 +908,12 @@
                                 </div>
                             </div>
 
-                            <!-- Visualization Toggle Group -->
-                            <div class="viz-toggle-group" role="group"
-                                 aria-label="Visualization options for Survival Rate">
-                                <button class="viz-toggle active"
-                                        data-option="confidence-band"
-                                        aria-pressed="true"
-                                        aria-label="Show with confidence bands">
-                                    <span class="toggle-icon" aria-hidden="true">📊</span>
-                                    <span class="toggle-label">Trend</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="cohort-table"
-                                        aria-pressed="false"
-                                        aria-label="Show cohort comparison table">
-                                    <span class="toggle-icon" aria-hidden="true">📋</span>
-                                    <span class="toggle-label">Cohorts</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="risk-dashboard"
-                                        aria-pressed="false"
-                                        aria-label="Show risk status by site">
-                                    <span class="toggle-icon" aria-hidden="true">🚦</span>
-                                    <span class="toggle-label">Risk</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="simplified"
-                                        aria-pressed="false"
-                                        aria-label="Show simplified trend for public">
-                                    <span class="toggle-icon" aria-hidden="true">📈</span>
-                                    <span class="toggle-label">Simple</span>
-                                </button>
-                            </div>
+                            <select class="view-dropdown" aria-label="View options for Survival Rate">
+                                <option value="confidence-band" selected>Confidence Bands</option>
+                                <option value="cohort-table">Cohort Table</option>
+                                <option value="risk-dashboard">Risk Dashboard</option>
+                                <option value="simplified">Simple</option>
+                            </select>
                         </header>
 
                         <!-- Visualization Container -->
@@ -874,8 +959,7 @@
                                         <circle cx="210" cy="115" r="4" fill="var(--tm-info)"/>
                                         <circle cx="315" cy="105" r="5" fill="var(--tm-info)" stroke="white" stroke-width="2"/>
                                         <circle cx="420" cy="95" r="5" fill="var(--tm-info)" stroke="white" stroke-width="2">
-                                            <animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/>
-                                        </circle>
+                                                                                    </circle>
 
                                         <!-- Phase labels -->
                                         <text x="105" y="240" font-size="11" fill="#666" text-anchor="middle" font-style="italic">Volatile Phase</text>
@@ -884,11 +968,12 @@
                                         <line x1="210" y1="235" x2="525" y2="235" stroke="var(--tm-success)" stroke-width="1.5"/>
                                     </svg>
 
-                                    <!-- Current status -->
+                                    <!-- Current status with benchmark -->
                                     <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
                                         <div>
                                             <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Current Survival (Y3)</div>
                                             <div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">85%</div>
+                                            <div style="font-size: 11px; color: var(--tm-text-secondary); margin-top: 2px;">vs 70% regional avg</div>
                                         </div>
                                         <div style="text-align: right;">
                                             <div style="font-size: var(--tm-font-size-sm); color: var(--tm-text-secondary); margin-bottom: 0.25rem;">Expected Range</div>
@@ -1040,7 +1125,7 @@
 
                         <!-- Context Panel (Collapsible) -->
                         <aside class="indicator-context">
-                            <details open>
+                            <details>
                                 <summary>About this metric</summary>
                                 <div class="context-content">
                                     <h5>What This Measures</h5>
@@ -1066,7 +1151,7 @@
                 <!-- =====================================
                      INDICATOR 5: NATURAL REGENERATION
                      ===================================== -->
-<article class="tm-card indicator-card" data-indicator="natural-regeneration">
+<article class="tm-card indicator-card indicator-card--visual-first" data-indicator="natural-regeneration">
                         <!-- Card Header -->
                         <header class="indicator-header">
                             <div>
@@ -1077,45 +1162,42 @@
                                 </div>
                             </div>
 
-                            <!-- Visualization Toggle Group -->
-                            <div class="viz-toggle-group" role="group"
-                                 aria-label="Visualization options for Natural Regeneration">
-                                <button class="viz-toggle active"
-                                        data-option="qualitative"
-                                        aria-pressed="true"
-                                        aria-label="Show qualitative assessment with photos">
-                                    <span class="toggle-icon" aria-hidden="true">🌱</span>
-                                    <span class="toggle-label">Status</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="distribution"
-                                        aria-pressed="false"
-                                        aria-label="Show distribution by abundance">
-                                    <span class="toggle-icon" aria-hidden="true">📊</span>
-                                    <span class="toggle-label">Distribution</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="photos"
-                                        aria-pressed="false"
-                                        aria-label="Show before and after photos">
-                                    <span class="toggle-icon" aria-hidden="true">📷</span>
-                                    <span class="toggle-label">Photos</span>
-                                </button>
-                                <button class="viz-toggle"
-                                        data-option="details"
-                                        aria-pressed="false"
-                                        aria-label="Show detailed site table">
-                                    <span class="toggle-icon" aria-hidden="true">📋</span>
-                                    <span class="toggle-label">Details</span>
-                                </button>
-                            </div>
+                            <select class="view-dropdown" aria-label="View options for Natural Regeneration">
+                                <option value="qualitative" selected>Photos + Status</option>
+                                <option value="distribution">Distribution</option>
+                                <option value="photos">Before/After</option>
+                                <option value="details">Table</option>
+                            </select>
                         </header>
 
                         <!-- Visualization Container -->
                         
-                        <!-- Visual-First Image -->
-                        <div class="card-visual">
-                            <img src="https://via.placeholder.com/800x400/8eca3f/ffffff?text=Natural+Regeneration+Photo" alt="Natural regeneration evidence" loading="lazy">
+                        <!-- Visual-First: Data-focused distribution chart (replaces decorative illustration) -->
+                        <div class="card-visual" style="background: var(--tm-gray-50); display: flex; align-items: center; justify-content: center; padding: 24px;">
+                            <svg viewBox="0 0 400 180" style="width: 100%; max-width: 400px; height: auto;" role="img" aria-label="Distribution of natural regeneration across sites: 40% abundant, 50% moderate, 10% limited">
+                                <!-- Stacked horizontal bar showing distribution -->
+                                <rect x="20" y="60" width="144" height="60" fill="var(--tm-success)" rx="4"/>
+                                <rect x="164" y="60" width="180" height="60" fill="var(--tm-accent)" rx="0"/>
+                                <rect x="344" y="60" width="36" height="60" fill="var(--tm-warning)" rx="4"/>
+
+                                <!-- Labels above bars -->
+                                <text x="92" y="45" font-size="12" fill="var(--tm-text-secondary)" text-anchor="middle">Abundant</text>
+                                <text x="254" y="45" font-size="12" fill="var(--tm-text-secondary)" text-anchor="middle">Moderate</text>
+                                <text x="362" y="45" font-size="12" fill="var(--tm-text-secondary)" text-anchor="middle">Limited</text>
+
+                                <!-- Percentages inside bars -->
+                                <text x="92" y="97" font-size="20" font-weight="600" fill="white" text-anchor="middle">40%</text>
+                                <text x="254" y="97" font-size="20" font-weight="600" fill="white" text-anchor="middle">50%</text>
+                                <text x="362" y="97" font-size="14" font-weight="600" fill="white" text-anchor="middle">10%</text>
+
+                                <!-- Site counts below -->
+                                <text x="92" y="140" font-size="11" fill="var(--tm-text-secondary)" text-anchor="middle">4 sites</text>
+                                <text x="254" y="140" font-size="11" fill="var(--tm-text-secondary)" text-anchor="middle">5 sites</text>
+                                <text x="362" y="140" font-size="11" fill="var(--tm-text-secondary)" text-anchor="middle">1 site</text>
+
+                                <!-- Summary text -->
+                                <text x="200" y="170" font-size="11" fill="var(--tm-text-secondary)" text-anchor="middle">90% of sites showing moderate to abundant natural regeneration</text>
+                            </svg>
                         </div>
 
                         <!-- Card Content -->
@@ -1379,7 +1461,7 @@
                         </div>
                         
                         <aside class="indicator-context">
-                            <details open>
+                            <details>
                                 <summary>About this metric</summary>
                                 <div class="context-content">
                                     <h5>What This Measures</h5>
@@ -1421,12 +1503,15 @@
                                 </div>
                             </div>
                             <select class="view-dropdown" aria-label="View options for Tree Species Diversity">
-                                <option value="status" selected>🌳 Status</option>
-                                <option value="trend">📈 Trend</option>
-                                <option value="checklist">✓ Species</option>
-                                <option value="simple">📊 Simple</option>
+                                <option value="status" selected>Status</option>
+                                <option value="trend">Trend</option>
+                                <option value="checklist">Species</option>
+                                <option value="simple">Simple</option>
                             </select>
-                            </div>
+                        </header>
+                        <div class="indicator-viz-container">
+                            <div class="viz-option" data-option="status" aria-hidden="false">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
                                     <div style="font-size: 4rem; color: var(--tm-success);">↗</div>
                                 </div>
                                 <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm);">
@@ -1457,7 +1542,7 @@
                                     <circle cx="100" cy="200" r="4" fill="var(--tm-accent)"/>
                                     <circle cx="250" cy="170" r="4" fill="var(--tm-accent)"/>
                                     <circle cx="400" cy="130" r="5" fill="var(--tm-accent)"/>
-                                    <circle cx="520" cy="100" r="5" fill="var(--tm-accent)"><animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/></circle>
+                                    <circle cx="520" cy="100" r="5" fill="var(--tm-accent)"/>
                                     <text x="100" y="220" font-size="11" fill="#666">2024</text>
                                     <text x="250" y="220" font-size="11" fill="#666">2025</text>
                                     <text x="400" y="220" font-size="11" fill="#666">2026</text>
@@ -1483,7 +1568,7 @@
                             </div>
                         </div>
                         <aside class="indicator-context">
-                            <details open><summary>About this metric</summary>
+                            <details><summary>About this metric</summary>
                                 <div class="context-content">
                                     <h5>What This Measures</h5>
                                     <p>A composite index measuring the variety of native tree species present across restoration sites. Combines species richness (number of species) with evenness (balanced distribution) to assess biodiversity recovery.</p>
@@ -1497,7 +1582,37 @@
                 <!-- =====================================
                      INDICATOR 7: CHIMPANZEE HABITAT SUITABILITY
                      ===================================== -->
-<article class="tm-card indicator-card" data-indicator="habitat-suitability">
+<article class="tm-card indicator-card indicator-card--visual-first" data-indicator="habitat-suitability">
+                        <div class="card-visual">
+                            <svg viewBox="0 0 800 300" style="width: 100%; height: 100%;">
+                                <defs>
+                                    <linearGradient id="forestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#1a4a1a"/>
+                                        <stop offset="50%" style="stop-color:#2d5a0d"/>
+                                        <stop offset="100%" style="stop-color:#477010"/>
+                                    </linearGradient>
+                                </defs>
+                                <rect width="800" height="300" fill="url(#forestGrad)"/>
+                                <!-- Forest canopy texture -->
+                                <circle cx="100" cy="80" r="40" fill="#2d5a0d" opacity="0.5"/>
+                                <circle cx="200" cy="120" r="50" fill="#1a4a1a" opacity="0.4"/>
+                                <circle cx="350" cy="60" r="45" fill="#3d6a1d" opacity="0.5"/>
+                                <circle cx="500" cy="100" r="55" fill="#2d5a0d" opacity="0.4"/>
+                                <circle cx="650" cy="70" r="40" fill="#1a4a1a" opacity="0.5"/>
+                                <circle cx="750" cy="130" r="35" fill="#3d6a1d" opacity="0.4"/>
+                                <circle cx="150" cy="200" r="60" fill="#2d5a0d" opacity="0.3"/>
+                                <circle cx="400" cy="180" r="70" fill="#1a4a1a" opacity="0.3"/>
+                                <circle cx="600" cy="220" r="50" fill="#3d6a1d" opacity="0.3"/>
+                                <!-- Chimpanzee silhouettes -->
+                                <text x="300" y="150" font-size="48" opacity="0.3">🦍</text>
+                                <text x="500" y="180" font-size="36" opacity="0.25">🦍</text>
+                                <text x="180" y="200" font-size="28" opacity="0.2">🦍</text>
+                            </svg>
+                            <div class="visual-overlay">
+                                <h3 class="stat-large">Improving ↗</h3>
+                                <p class="stat-label">Habitat suitability index increasing</p>
+                            </div>
+                        </div>
                         <header class="indicator-header">
                             <div>
                                 <h2 class="indicator-title">Chimpanzee Habitat Suitability</h2>
@@ -1507,13 +1622,14 @@
                                 </div>
                             </div>
                             <select class="view-dropdown" aria-label="View options for Chimpanzee Habitat Suitability">
-                                <option value="directional" selected>↗ Status</option>
-                                <option value="index">📈 Index</option>
-                                <option value="map">🗺️ Map</option>
-                                <option value="simple">🦍 Simple</option>
+                                <option value="directional" selected>Status</option>
+                                <option value="index">Index</option>
+                                <option value="map">Map</option>
+                                <option value="simple">Simple</option>
                             </select>
-                            </div>
-                                </div>
+                        </header>
+                        <div class="indicator-viz-container">
+                            <div class="viz-option" data-option="directional" aria-hidden="false">
                                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
                                     <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;"><div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success);">+18%</div><div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Food availability</div></div>
                                     <div style="padding: 1rem; background: var(--tm-gray-50); border-radius: var(--tm-radius-sm); text-align: center;"><div style="font-size: 1.5rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-accent);">+12%</div><div style="font-size: var(--tm-font-size-xs); color: var(--tm-text-secondary);">Canopy cover</div></div>
@@ -1533,29 +1649,21 @@
                                     <text x="30" y="105" font-size="12" fill="#999" text-anchor="end">0.7</text>
                                     <text x="30" y="55" font-size="12" fill="#999" text-anchor="end">0.8</text>
                                     <polyline points="100,180 250,150 400,110 520,80" stroke="var(--tm-success)" stroke-width="3" fill="none"/>
-                                    <circle cx="520" cy="80" r="5" fill="var(--tm-success)"><animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/></circle>
+                                    <circle cx="520" cy="80" r="5" fill="var(--tm-success)"/>
                                 </svg>
                             </div>
                             <!-- OPTION C: MAP -->
                             <div class="viz-option" data-option="map" aria-hidden="true">
-                                <div class="map-container">
-                                    <svg viewBox="0 0 400 300" style="width: 100%; height: 300px;">
-                                        <rect width="400" height="300" fill="#f0f0f0"/>
-                                        <polygon points="80,60 320,70 340,120 310,220 180,240 100,190 70,120" fill="var(--tm-success)" opacity="0.4" stroke="var(--tm-success)" stroke-width="2"/>
-                                        <polygon points="120,100 280,105 290,160 250,200 160,210 130,170" fill="var(--tm-accent)" opacity="0.3" stroke="var(--tm-accent)" stroke-width="2"/>
-                                        <text x="200" y="155" font-size="12" fill="var(--tm-primary)" text-anchor="middle" font-weight="600">High Suitability</text>
-                                    </svg>
-                                </div>
+                                <div id="habitat-map" class="leaflet-map-container habitat-map"></div>
                             </div>
                             <!-- OPTION D: SIMPLE -->
                             <div class="viz-option" data-option="simple" aria-hidden="true">
                                 <div style="text-align: center; padding: 2rem 0;"><div style="font-size: 4rem; margin-bottom: 1rem;">🦍</div><div style="font-size: 2rem; font-weight: var(--tm-font-weight-semibold); color: var(--tm-success); margin-bottom: 1rem;">Habitat Quality Improving</div><p style="font-size: var(--tm-font-size-lg); line-height: 1.6; max-width: 500px; margin: 0 auto; color: var(--tm-text-secondary);">Forest conditions are becoming more suitable for chimpanzees. More food sources, better tree cover, and improved forest connectivity create a healthier habitat.</p></div>
                             </div>
                         </div>
-                        </div>
-                        
+
                         <aside class="indicator-context">
-                            <details open><summary>About this metric</summary>
+                            <details><summary>About this metric</summary>
                                 <div class="context-content">
                                     <h5>What This Measures</h5>
                                     <p>An index measuring habitat suitability for chimpanzees based on food availability, canopy cover, forest structure, and connectivity. This is a <strong>habitat proxy</strong>, not a population measure.</p>
@@ -1575,7 +1683,13 @@
                 <!-- =====================================
                      INDICATOR 8: HECTARES RESTORED (HERO)
                      ===================================== -->
-<article class="tm-card indicator-card indicator-card--hero indicator-card--section-start" data-indicator="hectares-restored">
+<article class="tm-card indicator-card indicator-card--hero indicator-card--visual-first indicator-card--section-start" data-indicator="hectares-restored">
+                        <div class="card-visual" style="background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-700, #1a4a5e) 100%);">
+                            <div class="visual-overlay" style="background: transparent;">
+                                <h3 class="stat-large">Pending</h3>
+                                <p class="stat-label">Independent verification in 2029</p>
+                            </div>
+                        </div>
                         <header class="indicator-header">
                             <div>
                                 <h2 class="indicator-title">Hectares Restored (Final Outcome)</h2>
@@ -1585,13 +1699,17 @@
                                 </div>
                             </div>
                             <select class="view-dropdown" aria-label="View options for Hectares Restored (Final Outcome)">
-                                <option value="timeline" selected>📅 Timeline</option>
-                                <option value="outcome">🎯 Result</option>
-                                <option value="breakdown">📊 Breakdown</option>
-                                <option value="narrative">📝 Summary</option>
+                                <option value="timeline" selected>Timeline</option>
+                                <option value="outcome">Result</option>
+                                <option value="breakdown">Breakdown</option>
+                                <option value="narrative">Summary</option>
                             </select>
-                            </div>
-                                            <div class="timeline-item">
+                        </header>
+                        <div class="indicator-viz-container">
+                            <div class="viz-option" data-option="timeline" aria-hidden="false">
+                                <div class="timeline">
+                                    <div class="timeline-line"></div>
+                                    <div class="timeline-item">
                                                 <div class="timeline-dot" style="background: var(--tm-info);"></div>
                                                 <div class="timeline-date">Late 2028</div>
                                                 <div class="timeline-content"><strong>Final Assessment</strong><br>Comprehensive site evaluation</div>
@@ -1605,8 +1723,6 @@
                                                 <div class="timeline-dot" style="background: var(--tm-gray-200);"></div>
                                                 <div class="timeline-date">2029</div>
                                                 <div class="timeline-content"><strong>Outcome Published</strong><br>Results released publicly</div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -1748,7 +1864,7 @@
                         </div>
 
                         <aside class="indicator-context">
-                            <details open>
+                            <details>
                                 <summary>About this metric</summary>
                                 <div class="context-content">
                                     <h5>What This Measures</h5>
@@ -1777,8 +1893,6 @@
                             </details>
                         </aside>
                     </article>
-            
-                </div>
 
             </div>
         </main>
@@ -1786,5 +1900,267 @@
 
     <!-- JavaScript -->
     <script src="assets/scripts/dashboard-controller.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+    // Initialize maps when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ========================================
+        // HERO MAP - Gishwati-Mukura National Park
+        // ========================================
+        const heroMap = L.map('hero-map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([-1.9403, 29.4167], 11);
+
+        // Add zoom control to bottom right
+        L.control.zoom({ position: 'bottomright' }).addTo(heroMap);
+
+        // Satellite/terrain tile layer
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(heroMap);
+
+        // Park boundary polygon (simplified coordinates for Gishwati-Mukura)
+        const parkBoundary = L.polygon([
+            [-1.8903, 29.3667],
+            [-1.8803, 29.4267],
+            [-1.9103, 29.4667],
+            [-1.9703, 29.4767],
+            [-2.0003, 29.4467],
+            [-1.9903, 29.3867],
+            [-1.9503, 29.3567],
+            [-1.9103, 29.3567]
+        ], {
+            color: '#477010',
+            weight: 3,
+            fillColor: '#477010',
+            fillOpacity: 0.2,
+            dashArray: '5, 5'
+        }).addTo(heroMap);
+
+        // Site markers with custom icons
+        const siteIcon = L.divIcon({
+            className: 'site-marker-icon',
+            html: '<div style="background: #477010; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        // Gishwati Forest marker
+        L.marker([-1.9203, 29.4067], { icon: siteIcon })
+            .bindPopup('<strong>Gishwati Forest</strong><br>Primary restoration site<br>842 hectares')
+            .addTo(heroMap);
+
+        // Mukura Forest marker
+        L.marker([-1.9603, 29.4367], { icon: siteIcon })
+            .bindPopup('<strong>Mukura Forest</strong><br>Secondary restoration site<br>612 hectares')
+            .addTo(heroMap);
+
+        // Buffer Zone marker
+        L.marker([-1.9403, 29.4567], { icon: siteIcon })
+            .bindPopup('<strong>Buffer Zone</strong><br>Community-managed area<br>393 hectares')
+            .addTo(heroMap);
+
+        // Add scale
+        L.control.scale({ position: 'bottomleft', imperial: false }).addTo(heroMap);
+
+        // ========================================
+        // HABITAT MAP - Chimpanzee Habitat Suitability
+        // ========================================
+        let habitatMap = null;
+
+        function initHabitatMap() {
+            if (habitatMap) return; // Already initialized
+
+            habitatMap = L.map('habitat-map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([-1.9403, 29.4167], 12);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(habitatMap);
+
+            // Terrain base layer
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri'
+            }).addTo(habitatMap);
+
+            // High suitability zones (darker green)
+            L.polygon([
+                [-1.9103, 29.3967],
+                [-1.9003, 29.4267],
+                [-1.9203, 29.4467],
+                [-1.9403, 29.4367],
+                [-1.9303, 29.4067]
+            ], {
+                color: '#2d5a0d',
+                weight: 2,
+                fillColor: '#2d5a0d',
+                fillOpacity: 0.5
+            }).bindPopup('<strong>High Suitability</strong><br>Core habitat area').addTo(habitatMap);
+
+            // Medium suitability zones (lighter green)
+            L.polygon([
+                [-1.9403, 29.4367],
+                [-1.9303, 29.4567],
+                [-1.9603, 29.4667],
+                [-1.9703, 29.4467],
+                [-1.9503, 29.4267]
+            ], {
+                color: '#477010',
+                weight: 2,
+                fillColor: '#477010',
+                fillOpacity: 0.4
+            }).bindPopup('<strong>Medium Suitability</strong><br>Corridor habitat').addTo(habitatMap);
+
+            // Lower suitability / restoration zones (lightest green)
+            L.polygon([
+                [-1.9603, 29.4167],
+                [-1.9503, 29.4367],
+                [-1.9803, 29.4467],
+                [-1.9903, 29.4267],
+                [-1.9703, 29.4067]
+            ], {
+                color: '#7cb07c',
+                weight: 2,
+                fillColor: '#7cb07c',
+                fillOpacity: 0.3
+            }).bindPopup('<strong>Restoration Zone</strong><br>Habitat recovery area').addTo(habitatMap);
+
+            // Chimpanzee observation points
+            const chimpIcon = L.divIcon({
+                className: 'chimp-marker-icon',
+                html: '<div style="background: #8B4513; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
+            });
+
+            L.marker([-1.9153, 29.4167], { icon: chimpIcon })
+                .bindPopup('<strong>Observation Point A</strong><br>Group size: 12 individuals')
+                .addTo(habitatMap);
+
+            L.marker([-1.9353, 29.4317], { icon: chimpIcon })
+                .bindPopup('<strong>Observation Point B</strong><br>Group size: 8 individuals')
+                .addTo(habitatMap);
+
+            L.marker([-1.9553, 29.4217], { icon: chimpIcon })
+                .bindPopup('<strong>Observation Point C</strong><br>Group size: 15 individuals')
+                .addTo(habitatMap);
+
+            // Add legend
+            const legend = L.control({ position: 'topright' });
+            legend.onAdd = function() {
+                const div = L.DomUtil.create('div', 'map-legend');
+                div.innerHTML = `
+                    <div style="background: white; padding: 10px; border-radius: 6px; font-size: 11px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                        <strong style="display: block; margin-bottom: 6px;">Habitat Suitability</strong>
+                        <div style="display: flex; align-items: center; margin: 4px 0;"><span style="width: 16px; height: 12px; background: #2d5a0d; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> High</div>
+                        <div style="display: flex; align-items: center; margin: 4px 0;"><span style="width: 16px; height: 12px; background: #477010; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> Medium</div>
+                        <div style="display: flex; align-items: center; margin: 4px 0;"><span style="width: 16px; height: 12px; background: #7cb07c; display: inline-block; margin-right: 6px; border-radius: 2px;"></span> Restoration</div>
+                        <div style="display: flex; align-items: center; margin: 4px 0;"><span style="width: 10px; height: 10px; background: #8B4513; display: inline-block; margin-right: 6px; border-radius: 50%;"></span> Observations</div>
+                    </div>
+                `;
+                return div;
+            };
+            legend.addTo(habitatMap);
+
+            L.control.scale({ position: 'bottomleft', imperial: false }).addTo(habitatMap);
+        }
+
+        // Initialize habitat map when its container becomes visible
+        const habitatMapContainer = document.getElementById('habitat-map');
+        if (habitatMapContainer) {
+            // Use MutationObserver to detect when the map becomes visible
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
+                        const vizOption = habitatMapContainer.closest('.viz-option');
+                        if (vizOption && vizOption.getAttribute('aria-hidden') === 'false') {
+                            setTimeout(function() {
+                                initHabitatMap();
+                                habitatMap.invalidateSize();
+                            }, 100);
+                        }
+                    }
+                });
+            });
+
+            const vizOption = habitatMapContainer.closest('.viz-option');
+            if (vizOption) {
+                observer.observe(vizOption, { attributes: true });
+            }
+
+            // Also initialize if already visible
+            if (vizOption && vizOption.getAttribute('aria-hidden') === 'false') {
+                initHabitatMap();
+            }
+        }
+
+        // ========================================
+        // SCROLL-SPY NAVIGATION
+        // ========================================
+        const navItems = document.querySelectorAll('.tm-nav-item');
+        const indicatorCards = document.querySelectorAll('.indicator-card');
+
+        // Map section types to their indicators
+        const sectionMap = {
+            'operational': ['hectares-under-restoration', 'seedlings', 'trees-planted', 'survival-rate'],
+            'ecological': ['natural-regeneration', 'species-diversity', 'chimpanzee-habitat'],
+            'outcome': ['hectares-restored']
+        };
+
+        function updateActiveNav() {
+            const scrollPos = window.scrollY + 150; // Offset for header
+
+            // Find which section is currently in view
+            let currentSection = 'operational';
+
+            indicatorCards.forEach(card => {
+                const indicator = card.dataset.indicator;
+                const cardTop = card.offsetTop;
+
+                if (scrollPos >= cardTop) {
+                    // Find which section this indicator belongs to
+                    for (const [section, indicators] of Object.entries(sectionMap)) {
+                        if (indicators.includes(indicator)) {
+                            currentSection = section;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Update nav active state
+            navItems.forEach(item => {
+                const section = item.dataset.section;
+                if (section === currentSection) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-current', 'true');
+                } else {
+                    item.classList.remove('active');
+                    item.removeAttribute('aria-current');
+                }
+            });
+        }
+
+        // Throttled scroll handler
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    updateActiveNav();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Initial update
+        updateActiveNav();
+    });
+    </script>
 </body>
 </html>

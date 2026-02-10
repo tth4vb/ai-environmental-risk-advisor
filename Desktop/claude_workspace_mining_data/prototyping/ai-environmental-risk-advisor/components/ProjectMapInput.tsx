@@ -11,10 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { CaseStudySelector } from '@/components/map/CaseStudySelector';
 import { sampleMines, SampleMine } from '@/lib/dummy-data';
 import { MiningProject } from '@/types';
 import { MapPin, Loader2, ArrowLeft, ArrowRight, Search } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 // ── Nominatim types ──
 interface NominatimResult {
@@ -41,6 +43,7 @@ function LocationSearch({ onSelect }: { onSelect: (result: NominatimResult) => v
   const [showDropdown, setShowDropdown] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -94,7 +97,7 @@ function LocationSearch({ onSelect }: { onSelect: (result: NominatimResult) => v
           value={query}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => results.length > 0 && setShowDropdown(true)}
-          placeholder="Search for a city or town..."
+          placeholder={t('mapInput.searchPlaceholder')}
           className="pl-9 h-10"
         />
         {isSearching && (
@@ -127,14 +130,14 @@ const MapLocationPicker = dynamic(
 
 const formSchema = z.object({
   mineralType: z.enum(['copper', 'nickel', 'lithium', 'cobalt']),
-  stage: z.enum(['exploration', 'feasibility', 'environmental-assessment', 'permitting', 'construction']),
-  country: z.string().min(2, 'Country is required'),
-  region: z.string().min(2, 'Region/Province is required'),
-  nearestCity: z.string().min(2, 'Nearest city is required'),
-  size: z.enum(['small', 'medium', 'large']),
-  waterSource: z.enum(['groundwater', 'surface', 'both', 'unknown']),
-  communityDistance: z.enum(['near', 'medium', 'far']),
-  hasProtectedAreas: z.enum(['yes', 'no', 'unknown']),
+  stage: z.enum(['exploration', 'feasibility', 'environmental-assessment', 'permitting', 'construction']).optional(),
+  country: z.string().optional(),
+  region: z.string().optional(),
+  nearestCity: z.string().optional(),
+  size: z.enum(['small', 'medium', 'large']).optional(),
+  waterSource: z.enum(['groundwater', 'surface', 'both', 'unknown']).optional(),
+  communityDistance: z.enum(['near', 'medium', 'far']).optional(),
+  hasProtectedAreas: z.enum(['yes', 'no', 'unknown']).optional(),
   projectName: z.string().optional(),
   companyName: z.string().optional(),
   coordinates: z.object({
@@ -149,6 +152,7 @@ interface ProjectMapInputProps {
 
 export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSampleId, setSelectedSampleId] = useState<string | undefined>();
   const [locationSelected, setLocationSelected] = useState(false);
@@ -251,23 +255,30 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
+    // Apply sensible defaults for optional fields
+    const stage = values.stage ?? 'exploration';
+    const size = values.size ?? 'medium';
+    const waterSource = values.waterSource ?? 'unknown';
+    const communityDistance = values.communityDistance ?? 'medium';
+    const hasProtectedAreasRaw = values.hasProtectedAreas ?? 'unknown';
+
     const project: MiningProject = {
       id: Date.now().toString(),
       mineralType: values.mineralType,
-      stage: values.stage,
+      stage,
       location: {
-        country: values.country,
-        region: values.region,
-        nearestCity: values.nearestCity,
+        country: values.country || '',
+        region: values.region || '',
+        nearestCity: values.nearestCity || '',
         coordinates: values.coordinates,
       },
-      size: values.size,
-      waterSource: values.waterSource,
-      communityDistance: values.communityDistance,
+      size,
+      waterSource,
+      communityDistance,
       hasProtectedAreas:
-        values.hasProtectedAreas === 'yes'
+        hasProtectedAreasRaw === 'yes'
           ? true
-          : values.hasProtectedAreas === 'no'
+          : hasProtectedAreasRaw === 'no'
           ? false
           : null,
       projectName: values.projectName,
@@ -317,12 +328,12 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
                   onClick={handleChangeLocation}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Change location
+                  {t('mapInput.changeLocation')}
                 </button>
               </div>
             </div>
             <Button onClick={handleNext} size="lg">
-              Next: Add Details
+              {t('mapInput.nextAddDetails')}
               <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </div>
@@ -337,7 +348,7 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg">Project Details</CardTitle>
+            <CardTitle className="text-lg">{t('mapInput.projectDetails')}</CardTitle>
             <CardDescription className="flex items-center gap-2 mt-1">
               <MapPin className="w-4 h-4 text-primary" />
               <span className="font-medium text-foreground">{selectedLocationName}</span>
@@ -348,73 +359,25 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Row 1: Core fields */}
+            {/* Required: Mineral type */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="mineralType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm">Mineral Type</FormLabel>
+                    <FormLabel className="text-sm">{t('mapInput.mineralType')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select mineral" />
+                          <SelectValue placeholder={t('mapInput.selectMineral')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="copper">Copper</SelectItem>
-                        <SelectItem value="nickel">Nickel</SelectItem>
-                        <SelectItem value="lithium">Lithium</SelectItem>
-                        <SelectItem value="cobalt">Cobalt</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="stage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Project Stage</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select stage" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="exploration">Exploration</SelectItem>
-                        <SelectItem value="feasibility">Feasibility Study</SelectItem>
-                        <SelectItem value="environmental-assessment">Environmental Assessment</SelectItem>
-                        <SelectItem value="permitting">Permitting</SelectItem>
-                        <SelectItem value="construction">Construction</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="size"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Project Size</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select size" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="small">Small (&lt;100 ha)</SelectItem>
-                        <SelectItem value="medium">Medium (100-1000 ha)</SelectItem>
-                        <SelectItem value="large">Large (&gt;1000 ha)</SelectItem>
+                        <SelectItem value="copper">{t('mapInput.copper')}</SelectItem>
+                        <SelectItem value="nickel">{t('mapInput.nickel')}</SelectItem>
+                        <SelectItem value="lithium">{t('mapInput.lithium')}</SelectItem>
+                        <SelectItem value="cobalt">{t('mapInput.cobalt')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -423,168 +386,234 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
               />
             </div>
 
-            {/* Row 2: Environmental context */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="waterSource"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Water Source</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select source" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="groundwater">Groundwater</SelectItem>
-                        <SelectItem value="surface">Surface Water</SelectItem>
-                        <SelectItem value="both">Both</SelectItem>
-                        <SelectItem value="unknown">Unknown</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* Optional details */}
+            <Accordion type="single" collapsible>
+              <AccordionItem value="optional-details" className="border rounded-lg">
+                <AccordionTrigger className="px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:no-underline">
+                  {t('mapInput.additionalDetails')}
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4">
+                  <p className="text-xs text-muted-foreground mb-4">
+                    {t('mapInput.additionalDetailsDescription')}
+                  </p>
+                  <div className="space-y-4">
+                    {/* Row: Project context */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="stage"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.projectStage')}</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder={t('mapInput.selectStage')} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="exploration">{t('mapInput.exploration')}</SelectItem>
+                                <SelectItem value="feasibility">{t('mapInput.feasibilityStudy')}</SelectItem>
+                                <SelectItem value="environmental-assessment">{t('mapInput.environmentalAssessment')}</SelectItem>
+                                <SelectItem value="permitting">{t('mapInput.permitting')}</SelectItem>
+                                <SelectItem value="construction">{t('mapInput.construction')}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-              <FormField
-                control={form.control}
-                name="communityDistance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Distance to Communities</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select distance" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="near">Near (&lt;5km)</SelectItem>
-                        <SelectItem value="medium">Medium (5-20km)</SelectItem>
-                        <SelectItem value="far">Far (&gt;20km)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormField
+                        control={form.control}
+                        name="size"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.projectSize')}</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder={t('mapInput.selectSize')} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="small">{t('mapInput.small')}</SelectItem>
+                                <SelectItem value="medium">{t('mapInput.medium')}</SelectItem>
+                                <SelectItem value="large">{t('mapInput.large')}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-              <FormField
-                control={form.control}
-                name="hasProtectedAreas"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Protected Areas Nearby</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select option" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="yes">Yes</SelectItem>
-                        <SelectItem value="no">No</SelectItem>
-                        <SelectItem value="unknown">Unknown</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                      <FormField
+                        control={form.control}
+                        name="waterSource"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.waterSource')}</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder={t('mapInput.selectSource')} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="groundwater">{t('mapInput.groundwater')}</SelectItem>
+                                <SelectItem value="surface">{t('mapInput.surfaceWater')}</SelectItem>
+                                <SelectItem value="both">{t('mapInput.both')}</SelectItem>
+                                <SelectItem value="unknown">{t('common.unknown')}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-            {/* Row 3: Location details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Country</FormLabel>
-                    <FormControl>
-                      <Input className="h-9" placeholder="e.g., Indonesia" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    {/* Row: Environmental context */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="communityDistance"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.communityDistance')}</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder={t('mapInput.selectDistance')} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="near">{t('mapInput.near')}</SelectItem>
+                                <SelectItem value="medium">{t('mapInput.mediumDist')}</SelectItem>
+                                <SelectItem value="far">{t('mapInput.far')}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-              <FormField
-                control={form.control}
-                name="region"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Region/Province</FormLabel>
-                    <FormControl>
-                      <Input className="h-9" placeholder="e.g., Central Sulawesi" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormField
+                        control={form.control}
+                        name="hasProtectedAreas"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.protectedAreas')}</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder={t('mapInput.selectOption')} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="yes">{t('common.yes')}</SelectItem>
+                                <SelectItem value="no">{t('common.no')}</SelectItem>
+                                <SelectItem value="unknown">{t('common.unknown')}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-              <FormField
-                control={form.control}
-                name="nearestCity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Nearest City/Town</FormLabel>
-                    <FormControl>
-                      <Input className="h-9" placeholder="e.g., Morowali" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                    {/* Row: Location details */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.country')}</FormLabel>
+                            <FormControl>
+                              <Input className="h-9" placeholder={t('mapInput.countryPlaceholder')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-            {/* Row 4: Optional fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="projectName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Project Name (Optional)</FormLabel>
-                    <FormControl>
-                      <Input className="h-9" placeholder="If known" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormField
+                        control={form.control}
+                        name="region"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.regionProvince')}</FormLabel>
+                            <FormControl>
+                              <Input className="h-9" placeholder={t('mapInput.regionPlaceholder')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-              <FormField
-                control={form.control}
-                name="companyName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Company Name (Optional)</FormLabel>
-                    <FormControl>
-                      <Input className="h-9" placeholder="If known" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                      <FormField
+                        control={form.control}
+                        name="nearestCity"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.nearestCity')}</FormLabel>
+                            <FormControl>
+                              <Input className="h-9" placeholder={t('mapInput.cityPlaceholder')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Row: Project & company names */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="projectName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.projectNameOptional')}</FormLabel>
+                            <FormControl>
+                              <Input className="h-9" placeholder={t('mapInput.ifKnown')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="companyName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.companyNameOptional')}</FormLabel>
+                            <FormControl>
+                              <Input className="h-9" placeholder={t('mapInput.ifKnown')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
 
             <div className="flex items-center gap-3">
               <Button type="button" variant="outline" size="lg" onClick={() => goToStep(0)} disabled={isLoading}>
                 <ArrowLeft className="mr-2 w-4 h-4" />
-                Back
+                {t('common.back')}
               </Button>
               <Button type="submit" size="lg" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
+                    {t('mapInput.analyzing')}
                   </>
                 ) : (
-                  'Get Assessment'
+                  t('mapInput.getAssessment')
                 )}
               </Button>
             </div>

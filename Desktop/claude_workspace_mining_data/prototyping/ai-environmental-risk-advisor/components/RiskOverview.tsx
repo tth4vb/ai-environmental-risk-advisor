@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { SourcesMethodology } from './SourcesMethodology';
 import { withGlossaryTerms } from '@/lib/glossary-utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface RiskOverviewProps {
   risks: RiskAssessment[];
@@ -78,6 +79,7 @@ function RiskLevelIcon({ level }: { level: RiskLevel }) {
 }
 
 export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
+  const { t } = useTranslation();
   const criticalRisks = risks.filter(r => r.level === 'critical').length;
   const highRisks = risks.filter(r => r.level === 'high').length;
   const [isDisclosureOpen, setIsDisclosureOpen] = useState(false);
@@ -89,8 +91,7 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
         <Alert className="border-destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="font-medium">
-            {criticalRisks} critical risk{criticalRisks > 1 ? 's' : ''} identified that require immediate attention.
-            These issues could significantly impact community wellbeing and environment.
+            {t('riskOverview.criticalAlert', { count: criticalRisks, plural: criticalRisks > 1 ? 's' : '' })}
           </AlertDescription>
         </Alert>
       )}
@@ -111,7 +112,7 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
                   <RiskLevelIcon level={risk.level} />
                 </div>
                 <Badge variant={riskBadgeVariants[risk.level]} className="w-fit">
-                  {risk.level.toUpperCase()} RISK
+                  {t('riskOverview.riskLabel', { level: risk.level.toUpperCase() })}
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -124,13 +125,13 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
 
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="text-xs">
-                    {risk.confidence} confidence
+                    {t('riskOverview.confidence', { level: risk.confidence })}
                   </Badge>
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="ghost" size="sm">
                         <Info className="w-4 h-4 mr-1" />
-                        Details
+                        {t('common.details')}
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -140,26 +141,26 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
                           {risk.title}
                         </DialogTitle>
                         <Badge variant={riskBadgeVariants[risk.level]} className="w-fit">
-                          {risk.level.toUpperCase()} RISK
+                          {t('riskOverview.riskLabel', { level: risk.level.toUpperCase() })}
                         </Badge>
                       </DialogHeader>
                       <div className="space-y-4 pt-4">
                         <div>
-                          <h4 className="font-medium mb-2">Assessment Details</h4>
+                          <h4 className="font-medium mb-2">{t('riskOverview.assessmentDetails')}</h4>
                           <p className="text-sm text-muted-foreground">{withGlossaryTerms(risk.details)}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="font-medium">Data Source:</span>
+                            <span className="font-medium">{t('riskOverview.dataSource')}</span>
                             <p className="text-muted-foreground">{risk.dataSource}</p>
                           </div>
                           <div>
-                            <span className="font-medium">Last Updated:</span>
+                            <span className="font-medium">{t('riskOverview.lastUpdated')}</span>
                             <p className="text-muted-foreground">{risk.lastUpdated}</p>
                           </div>
                           <div>
-                            <span className="font-medium">Confidence Level:</span>
+                            <span className="font-medium">{t('riskOverview.confidenceLevel')}</span>
                             <p className="text-muted-foreground capitalize">{risk.confidence}</p>
                           </div>
                         </div>
@@ -167,18 +168,18 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
                         <Alert>
                           <Info className="h-4 w-4" />
                           <AlertDescription>
-                            This assessment is based on publicly available data and should be verified with local knowledge and current conditions.
+                            {t('riskOverview.verificationAlert')}
                           </AlertDescription>
                         </Alert>
 
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
                             <FileText className="w-4 h-4 mr-1" />
-                            Download Report
+                            {t('common.downloadReport')}
                           </Button>
                           <Button variant="outline" size="sm">
                             <ExternalLink className="w-4 h-4 mr-1" />
-                            View Data Sources
+                            {t('common.viewDataSources')}
                           </Button>
                         </div>
                       </div>
@@ -199,7 +200,7 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Info className="w-5 h-5 text-muted-foreground" />
-                  <CardTitle className="text-base font-medium">About This Assessment</CardTitle>
+                  <CardTitle className="text-base font-medium">{t('riskOverview.aboutAssessment')}</CardTitle>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isDisclosureOpen ? 'rotate-180' : ''}`} />
               </div>
@@ -210,65 +211,65 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
               <div className="grid gap-4 md:grid-cols-2">
                 {/* What's covered */}
                 <div>
-                  <h4 className="text-sm font-medium mb-2 text-foreground">What&apos;s covered</h4>
+                  <h4 className="text-sm font-medium mb-2 text-foreground">{t('riskOverview.whatsCovered')}</h4>
                   <ul className="space-y-1.5 text-sm text-muted-foreground">
                     <li className="flex items-center gap-2">
                       <Droplets className="w-3.5 h-3.5 flex-shrink-0" />
-                      Water stress &amp; contamination risk
+                      {t('riskOverview.waterStressContamination')}
                     </li>
                     <li className="flex items-center gap-2">
                       <Trees className="w-3.5 h-3.5 flex-shrink-0" />
-                      Biodiversity &amp; habitat impact
+                      {t('riskOverview.biodiversityHabitat')}
                     </li>
                     <li className="flex items-center gap-2">
                       <Users className="w-3.5 h-3.5 flex-shrink-0" />
-                      Community displacement risk
+                      {t('riskOverview.communityDisplacement')}
                     </li>
                     <li className="flex items-center gap-2">
                       <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                      Indigenous &amp; traditional lands
+                      {t('riskOverview.indigenousLands')}
                     </li>
                     <li className="flex items-center gap-2">
                       <Wheat className="w-3.5 h-3.5 flex-shrink-0" />
-                      Food security impact
+                      {t('riskOverview.foodSecurityImpact')}
                     </li>
                   </ul>
                 </div>
 
                 {/* Not yet covered */}
                 <div>
-                  <h4 className="text-sm font-medium mb-2 text-foreground">Not yet covered</h4>
+                  <h4 className="text-sm font-medium mb-2 text-foreground">{t('riskOverview.notYetCovered')}</h4>
                   <ul className="space-y-1.5 text-sm text-muted-foreground">
                     <li className="flex items-center gap-2">
                       <Wind className="w-3.5 h-3.5 flex-shrink-0" />
-                      Air quality &amp; dust emissions
+                      {t('riskOverview.airQualityDust')}
                     </li>
                     <li className="flex items-center gap-2">
                       <Volume2 className="w-3.5 h-3.5 flex-shrink-0" />
-                      Noise &amp; vibration
+                      {t('riskOverview.noiseVibration')}
                     </li>
                     <li className="flex items-center gap-2">
                       <Mountain className="w-3.5 h-3.5 flex-shrink-0" />
-                      Seismic &amp; geotechnical risk
+                      {t('riskOverview.seismicGeotech')}
                     </li>
                     <li className="flex items-center gap-2">
                       <Flame className="w-3.5 h-3.5 flex-shrink-0" />
-                      Greenhouse gas emissions
+                      {t('riskOverview.ghgEmissions')}
                     </li>
                     <li className="flex items-center gap-2">
                       <Trash2 className="w-3.5 h-3.5 flex-shrink-0" />
-                      Waste &amp; tailings management
+                      {t('riskOverview.wasteTailings')}
                     </li>
                     <li className="flex items-center gap-2">
                       <HardHat className="w-3.5 h-3.5 flex-shrink-0" />
-                      Worker health &amp; safety
+                      {t('riskOverview.workerSafety')}
                     </li>
                   </ul>
                 </div>
               </div>
 
               <p className="text-xs text-muted-foreground border-t pt-3">
-                Assessments use publicly available global datasets (WRI Aqueduct, Global Forest Watch, LandMark, and others) and may not reflect local conditions. We recommend consulting local environmental experts and community knowledge to validate findings.
+                {t('riskOverview.disclaimerText')}
               </p>
             </CardContent>
           </CollapsibleContent>

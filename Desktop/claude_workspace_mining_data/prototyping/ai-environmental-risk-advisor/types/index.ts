@@ -25,7 +25,7 @@ export type RiskCategory =
 export interface MiningProject {
   id: string;
   mineralType: MineralType;
-  stage: ProjectStage;
+  stage?: ProjectStage;
   location: {
     country: string;
     region: string;
@@ -35,10 +35,10 @@ export interface MiningProject {
       lng: number;
     };
   };
-  size: ProjectSize;
-  waterSource: WaterSource;
-  communityDistance: CommunityDistance;
-  hasProtectedAreas: boolean | null;
+  size?: ProjectSize;
+  waterSource?: WaterSource;
+  communityDistance?: CommunityDistance;
+  hasProtectedAreas?: boolean | null;
   companyName?: string;
   projectName?: string;
 }

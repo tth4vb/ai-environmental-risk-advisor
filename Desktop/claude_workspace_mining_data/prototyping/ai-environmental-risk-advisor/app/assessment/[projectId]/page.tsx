@@ -6,8 +6,10 @@ import { MiningProject } from '@/types';
 import { AssessmentDashboard } from '@/components/AssessmentDashboard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function AssessmentPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const [project, setProject] = useState<MiningProject | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,10 +18,10 @@ export default function AssessmentPage() {
     // Simulate loading project data
     const loadProject = async () => {
       setLoading(true);
-      
+
       // Get project from sessionStorage (in real app, would fetch from API)
       const storedProject = sessionStorage.getItem('currentProject');
-      
+
       if (storedProject) {
         const projectData = JSON.parse(storedProject);
         // Ensure the project ID matches
@@ -27,7 +29,7 @@ export default function AssessmentPage() {
           setProject(projectData);
         }
       }
-      
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       setLoading(false);
@@ -43,7 +45,7 @@ export default function AssessmentPage() {
           <CardContent className="pt-6">
             <div className="flex items-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Analyzing environmental data...</span>
+              <span>{t('assessment.analyzingData')}</span>
             </div>
           </CardContent>
         </Card>
@@ -56,7 +58,7 @@ export default function AssessmentPage() {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="pt-6">
-            <p>Project not found. Please start a new assessment.</p>
+            <p>{t('assessment.projectNotFound')}</p>
           </CardContent>
         </Card>
       </div>

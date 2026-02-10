@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Droplets, AlertTriangle, Info, MapPin, Layers, Download } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { DEFAULT_COORDS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 // Dynamically import map components
-const BaseMap = dynamic(() => import('./BaseMap').then(mod => mod.BaseMap), { 
+const BaseMap = dynamic(() => import('./BaseMap').then(mod => mod.BaseMap), {
   ssr: false,
   loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
 });
@@ -52,6 +53,7 @@ interface WaterRiskMapEnhancedProps {
 }
 
 export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
+  const { t } = useTranslation();
   const [activeLayer, setActiveLayer] = useState<WaterLayer>('water_stress');
   const [showRaster, setShowRaster] = useState(true);
   const [showRivers, setShowRivers] = useState(false);
@@ -103,7 +105,7 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
         </div>
         <Button variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
-          Export Data
+          {t('common.exportData')}
         </Button>
       </div>
 
@@ -114,11 +116,11 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium flex items-center gap-2">
                 <Layers className="w-4 h-4" />
-                Water Risk Layers
+                {t('waterRisk.waterRiskLayers')}
               </h4>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm">Show Raster</label>
+                  <label className="text-sm">{t('waterRisk.showRaster')}</label>
                   <input
                     type="checkbox"
                     checked={showRaster}
@@ -127,7 +129,7 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm">Show Rivers</label>
+                  <label className="text-sm">{t('waterRisk.showRivers')}</label>
                   <input
                     type="checkbox"
                     checked={showRivers}
@@ -137,18 +139,18 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
                 </div>
               </div>
             </div>
-            
+
             <Tabs value={activeLayer} onValueChange={(v) => setActiveLayer(v as WaterLayer)}>
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="water_stress">Water Stress</TabsTrigger>
-                <TabsTrigger value="water_depletion">Water Depletion</TabsTrigger>
-                <TabsTrigger value="drought_risk">Drought Risk</TabsTrigger>
+                <TabsTrigger value="water_stress">{t('waterRisk.waterStress')}</TabsTrigger>
+                <TabsTrigger value="water_depletion">{t('waterRisk.waterDepletion')}</TabsTrigger>
+                <TabsTrigger value="drought_risk">{t('waterRisk.droughtRisk')}</TabsTrigger>
               </TabsList>
             </Tabs>
 
             {showRaster && (
               <div className="flex items-center gap-2">
-                <label className="text-sm">Opacity</label>
+                <label className="text-sm">{t('common.opacity')}</label>
                 <input
                   type="range"
                   min="0"
@@ -173,7 +175,7 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
               {showRaster && (
                 <AqueductRasterLayer riskType={activeLayer} opacity={rasterOpacity} />
               )}
-              
+
               {/* River network */}
               {showRivers && (
                 <RiversLayer center={coordinates} />
@@ -193,9 +195,9 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
             {/* Metrics Overlay */}
             <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 space-y-2 z-[1000] max-w-xs">
               <div className="text-sm font-medium">
-                {activeLayer === 'water_stress' && 'Baseline Water Stress'}
-                {activeLayer === 'water_depletion' && 'Water Depletion Rate'}
-                {activeLayer === 'drought_risk' && 'Drought Risk'}
+                {activeLayer === 'water_stress' && t('waterRisk.baselineWaterStress')}
+                {activeLayer === 'water_depletion' && t('waterRisk.waterDepletionRate')}
+                {activeLayer === 'drought_risk' && t('waterRisk.droughtRisk')}
               </div>
               <Badge variant={metrics.color} className="w-fit">
                 {metrics.category}
@@ -203,21 +205,21 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
               <div className="text-xs space-y-1">
                 {isFlowMetrics(metrics) && activeLayer === 'water_stress' && (
                   <>
-                    <p>Current: {metrics.current}</p>
-                    <p>With mining: {metrics.projected}</p>
+                    <p>{t('waterRisk.current')} {metrics.current}</p>
+                    <p>{t('waterRisk.withMining')} {metrics.projected}</p>
                   </>
                 )}
                 {isFlowMetrics(metrics) && activeLayer === 'water_depletion' && (
                   <>
-                    <p>Current: {metrics.current}</p>
-                    <p>Projected: {metrics.projected}</p>
+                    <p>{t('waterRisk.current')} {metrics.current}</p>
+                    <p>{t('waterRisk.projected')} {metrics.projected}</p>
                   </>
                 )}
                 {!isFlowMetrics(metrics) && activeLayer === 'drought_risk' && (
                   <>
-                    <p>Frequency: {metrics.frequency}</p>
-                    <p>Severity: {metrics.severity}</p>
-                    <p>Trend: {metrics.trend}</p>
+                    <p>{t('waterRisk.frequency')} {metrics.frequency}</p>
+                    <p>{t('waterRisk.severity')} {metrics.severity}</p>
+                    <p>{t('waterRisk.trend')} {metrics.trend}</p>
                   </>
                 )}
               </div>
@@ -232,31 +234,31 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-3">
               <Droplets className="w-5 h-5 text-blue-600" />
-              <h4 className="font-medium">Key Findings</h4>
+              <h4 className="font-medium">{t('waterRisk.keyFindings')}</h4>
             </div>
             <div className="space-y-2 text-sm">
               {isFlowMetrics(metrics) && activeLayer === 'water_stress' && (
                 <>
-                  <p>• Basin already faces {metrics.current} water stress</p>
-                  <p>• Mining would increase stress to {metrics.projected}</p>
-                  <p>• 3 communities compete for same water source</p>
-                  <p>• Aquifer recharge rate: 50+ years</p>
+                  <p>• {t('waterRisk.stressFinding1', { current: metrics.current })}</p>
+                  <p>• {t('waterRisk.stressFinding2', { projected: metrics.projected })}</p>
+                  <p>• {t('waterRisk.stressFinding3')}</p>
+                  <p>• {t('waterRisk.stressFinding4')}</p>
                 </>
               )}
               {isFlowMetrics(metrics) && activeLayer === 'water_depletion' && (
                 <>
-                  <p>• Current extraction: {metrics.current}</p>
-                  <p>• Mining addition: {metrics.projected}</p>
-                  <p>• Exceeds sustainable yield by 230%</p>
-                  <p>• Groundwater dropping 2m/year</p>
+                  <p>• {t('waterRisk.depletionFinding1', { current: metrics.current })}</p>
+                  <p>• {t('waterRisk.depletionFinding2', { projected: metrics.projected })}</p>
+                  <p>• {t('waterRisk.depletionFinding3')}</p>
+                  <p>• {t('waterRisk.depletionFinding4')}</p>
                 </>
               )}
               {!isFlowMetrics(metrics) && activeLayer === 'drought_risk' && (
                 <>
-                  <p>• Severe drought every 5 years</p>
-                  <p>• 40% increase in frequency since 2000</p>
-                  <p>• Last drought: 60% crop loss</p>
-                  <p>• No drought contingency plan exists</p>
+                  <p>• {t('waterRisk.droughtFinding1')}</p>
+                  <p>• {t('waterRisk.droughtFinding2')}</p>
+                  <p>• {t('waterRisk.droughtFinding3')}</p>
+                  <p>• {t('waterRisk.droughtFinding4')}</p>
                 </>
               )}
             </div>
@@ -267,20 +269,20 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-3">
               <AlertTriangle className="w-5 h-5 text-destructive" />
-              <h4 className="font-medium">Risk Implications</h4>
+              <h4 className="font-medium">{t('waterRisk.riskImplications')}</h4>
             </div>
             <div className="space-y-2 text-sm">
-              <p className="font-medium">For Communities:</p>
+              <p className="font-medium">{t('waterRisk.forCommunities')}</p>
               <ul className="space-y-1 ml-4">
-                <li>• Drinking water security threatened</li>
-                <li>• Agricultural productivity at risk</li>
-                <li>• Increased water costs likely</li>
+                <li>• {t('waterRisk.drinkingWater')}</li>
+                <li>• {t('waterRisk.agriculturalRisk')}</li>
+                <li>• {t('waterRisk.waterCosts')}</li>
               </ul>
-              <p className="font-medium mt-2">For Mining Operations:</p>
+              <p className="font-medium mt-2">{t('waterRisk.forMining')}</p>
               <ul className="space-y-1 ml-4">
-                <li>• Social license challenges</li>
-                <li>• Operational disruptions possible</li>
-                <li>• Regulatory restrictions likely</li>
+                <li>• {t('waterRisk.socialLicense')}</li>
+                <li>• {t('waterRisk.operationalDisruptions')}</li>
+                <li>• {t('waterRisk.regulatoryRestrictions')}</li>
               </ul>
             </div>
           </CardContent>
@@ -291,12 +293,9 @@ export function WaterRiskMapEnhanced({ project }: WaterRiskMapEnhancedProps) {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          <strong>Methodology:</strong> This analysis uses WRI Aqueduct 4.0 baseline water stress data,
-          combined with projected mining water demand based on ore processing requirements and regional
-          evaporation rates. Raster visualization shows 5km resolution water risk indicators.
-          Drought projections incorporate IPCC climate scenarios.
-          {showRivers && ' River network data sourced from HydroRIVERS (WWF HydroSHEDS), showing stream order classification and estimated discharge.'}
-          {' '}All data subject to ground-truthing.
+          <strong>{t('common.methodology')}:</strong> {t('waterRisk.methodologyText')}
+          {showRivers && ` ${t('waterRisk.riverNote')}`}
+          {' '}{t('waterRisk.groundTruth')}
         </AlertDescription>
       </Alert>
     </div>

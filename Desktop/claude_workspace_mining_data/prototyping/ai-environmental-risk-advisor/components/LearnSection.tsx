@@ -8,14 +8,9 @@ import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { ArrowLeft, ChevronRight, Lightbulb, FileText, Download, FileCheck, Shield, Droplets, ClipboardList, Users, Scale, MessageSquare, BookOpen } from 'lucide-react';
 import { learningArticles, LearningArticle } from '@/lib/dummy-data';
+import { useTranslation } from '@/lib/i18n';
 
-const articleCategories = [
-  { value: 'all', label: 'All' },
-  { value: 'water', label: 'Water & Environment' },
-  { value: 'rights', label: 'Your Rights' },
-  { value: 'mining-basics', label: 'Mining Basics' },
-  { value: 'data-literacy', label: 'Understanding Data' },
-] as const;
+const articleCategoryValues = ['all', 'water', 'rights', 'mining-basics', 'data-literacy'] as const;
 
 const categoryColors: Record<LearningArticle['category'], string> = {
   water: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
@@ -25,13 +20,15 @@ const categoryColors: Record<LearningArticle['category'], string> = {
 };
 
 function ArticleBody() {
+  const { t } = useTranslation();
+
   return (
     <div className="prose prose-sm max-w-none space-y-4">
       <p className="text-gray-700 leading-relaxed">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
       </p>
 
-      <h3 className="text-lg font-semibold text-gray-900 pt-2">Why This Matters for Your Community</h3>
+      <h3 className="text-lg font-semibold text-gray-900 pt-2">{t('learn.whyMatters')}</h3>
       <p className="text-gray-700 leading-relaxed">
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
       </p>
@@ -39,7 +36,7 @@ function ArticleBody() {
         Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.
       </p>
 
-      <h3 className="text-lg font-semibold text-gray-900 pt-2">What You Can Do</h3>
+      <h3 className="text-lg font-semibold text-gray-900 pt-2">{t('learn.whatYouCanDo')}</h3>
       <p className="text-gray-700 leading-relaxed">
         At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.
       </p>
@@ -49,7 +46,7 @@ function ArticleBody() {
 
       <Alert className="mt-6">
         <Lightbulb className="h-4 w-4" />
-        <AlertTitle>Key Takeaways</AlertTitle>
+        <AlertTitle>{t('common.keyTakeaways')}</AlertTitle>
         <AlertDescription>
           <ul className="list-disc pl-4 mt-2 space-y-1">
             <li>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint.</li>
@@ -146,8 +143,22 @@ const sampleDocuments = [
 ];
 
 export function LearnSection() {
+  const { t } = useTranslation();
   const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  const categoryLabels: Record<string, string> = {
+    all: t('learn.categoryAll'),
+    water: t('learn.categoryWater'),
+    rights: t('learn.categoryRights'),
+    'mining-basics': t('learn.categoryMiningBasics'),
+    'data-literacy': t('learn.categoryDataLiteracy'),
+  };
+
+  const articleCategories = articleCategoryValues.map(value => ({
+    value,
+    label: categoryLabels[value],
+  }));
 
   const selectedArticle = selectedArticleId
     ? learningArticles.find(a => a.id === selectedArticleId) ?? null
@@ -173,7 +184,7 @@ export function LearnSection() {
             className="-ml-2"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Learn
+            {t('common.backToLearn')}
           </Button>
 
           <div className="space-y-2">
@@ -194,7 +205,7 @@ export function LearnSection() {
 
           {relatedArticles.length > 0 && (
             <div className="border-t pt-6 mt-6">
-              <h3 className="text-sm font-semibold text-gray-500 mb-3">Related Articles</h3>
+              <h3 className="text-sm font-semibold text-gray-500 mb-3">{t('common.relatedArticles')}</h3>
               <div className="space-y-2">
                 {relatedArticles.map(related => (
                   <button
@@ -225,9 +236,9 @@ export function LearnSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Learn About Mining & Your Rights</CardTitle>
+        <CardTitle>{t('learn.title')}</CardTitle>
         <CardDescription>
-          Educational articles and practical documents to help your community understand environmental risks, know your rights, and take action.
+          {t('learn.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -235,11 +246,11 @@ export function LearnSection() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="articles">
               <BookOpen className="w-4 h-4 mr-1.5" />
-              Articles
+              {t('learn.tabArticles')}
             </TabsTrigger>
             <TabsTrigger value="documents">
               <FileText className="w-4 h-4 mr-1.5" />
-              Documents & Templates
+              {t('learn.tabDocuments')}
             </TabsTrigger>
           </TabsList>
 
@@ -289,7 +300,7 @@ export function LearnSection() {
           {/* Documents & Templates Tab */}
           <TabsContent value="documents" className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Downloadable templates, checklists, and guides based on real community needs identified through interviews across the US, Indonesia, and DRC.
+              {t('learn.documentsDescription')}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {sampleDocuments.map((doc) => {
@@ -307,14 +318,14 @@ export function LearnSection() {
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-3 text-xs opacity-60">
                         <span>{doc.format}</span>
-                        <span>{doc.pages} pages</span>
+                        <span>{doc.pages} {t('common.pages')}</span>
                         <Badge variant="outline" className="text-xs py-0 h-5">
                           {doc.category}
                         </Badge>
                       </div>
                       <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" disabled>
                         <Download className="w-3 h-3" />
-                        Coming Soon
+                        {t('common.comingSoon')}
                       </Button>
                     </div>
                   </div>

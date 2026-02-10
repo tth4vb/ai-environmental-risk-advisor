@@ -3,14 +3,14 @@
  * Consumer-app inspired masonry grid for RWCB dashboard
  */
 
-/* Main Grid Container */
+/* Main Grid Container - Tighter spacing for higher information density */
 .dashboard-bento-grid {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
-  gap: 16px !important;
+  gap: 12px !important;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px;
+  padding: 24px;
 }
 
 /* Hero Cards (Full-width) */
@@ -18,9 +18,9 @@
   grid-column: 1 / -1 !important;
 }
 
-/* Section Visual Breaks (32px spacing) */
+/* Section Visual Breaks (24px spacing) */
 .indicator-card--section-start {
-  margin-top: 32px;
+  margin-top: 24px;
 }
 
 /* Visual-First Treatment */

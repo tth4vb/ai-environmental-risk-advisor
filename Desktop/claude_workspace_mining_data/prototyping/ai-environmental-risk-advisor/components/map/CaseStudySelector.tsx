@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Mountain, Droplets, MousePointerClick } from 'lucide-react';
 import { SampleMine } from '@/lib/dummy-data';
 import { MINERAL_COLORS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 interface CaseStudySelectorProps {
   samples: SampleMine[];
@@ -20,12 +21,14 @@ const mineralIcons: Record<string, React.ReactNode> = {
 };
 
 export function CaseStudySelector({ samples, onSelect, selectedId }: CaseStudySelectorProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-3">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-1">Sample Case Studies</h3>
+        <h3 className="text-lg font-semibold mb-1">{t('caseStudy.title')}</h3>
         <p className="text-sm text-muted-foreground">
-          Select a mining project to explore
+          {t('caseStudy.description')}
         </p>
       </div>
 
@@ -73,7 +76,7 @@ export function CaseStudySelector({ samples, onSelect, selectedId }: CaseStudySe
       <div className="pt-3 mt-3 border-t">
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <MousePointerClick className="w-4 h-4" />
-          Or click anywhere on the map to place your own marker
+          {t('caseStudy.mapHint')}
         </p>
       </div>
     </div>

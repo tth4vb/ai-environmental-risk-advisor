@@ -9,6 +9,7 @@ import { ImpactRadius } from './ImpactRadius';
 import { ComparativeAnalysis } from './ComparativeAnalysis';
 import { LandBiodiversityTab } from './LandBiodiversityTab';
 import { MapPin, Droplets, BarChart3, Leaf } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface DataVisualizationsProps {
   project: MiningProject;
@@ -16,13 +17,15 @@ interface DataVisualizationsProps {
 }
 
 export function DataVisualizations({ project, risks }: DataVisualizationsProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Interactive Data Visualizations</CardTitle>
+          <CardTitle>{t('visualizations.title')}</CardTitle>
           <CardDescription>
-            Explore environmental data and project impacts through interactive maps and charts
+            {t('visualizations.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -30,20 +33,20 @@ export function DataVisualizations({ project, risks }: DataVisualizationsProps) 
             <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
               <TabsTrigger value="water">
                 <Droplets className="w-4 h-4 mr-1" />
-                Water Risk
+                {t('visualizations.tabWaterRisk')}
               </TabsTrigger>
               <TabsTrigger value="land">
                 <Leaf className="w-4 h-4 mr-1" />
-                Land & Biodiversity
+                {t('visualizations.tabLandBiodiversity')}
               </TabsTrigger>
               <TabsTrigger value="impact">
                 <MapPin className="w-4 h-4 mr-1" />
-                Impact Zone
+                {t('visualizations.tabImpactZone')}
               </TabsTrigger>
 
               <TabsTrigger value="comparison">
                 <BarChart3 className="w-4 h-4 mr-1" />
-                Comparison
+                {t('visualizations.tabComparison')}
               </TabsTrigger>
             </TabsList>
 

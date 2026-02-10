@@ -1,4 +1,4 @@
-import { MiningProject, RiskAssessment, ProjectPhase, TechnicalDocument } from '@/types';
+import { MiningProject, RiskAssessment, ProjectPhase, TechnicalDocument, ProjectStage, ProjectSize, WaterSource, CommunityDistance } from '@/types';
 
 export const sampleProjects: Record<string, Partial<MiningProject>> = {
   'lithium-argentina': {
@@ -44,10 +44,10 @@ export interface SampleMine {
   mineralType: MiningProject['mineralType'];
   coordinates: { lat: number; lng: number };
   description: string;
-  projectStage: MiningProject['stage'];
-  size: MiningProject['size'];
-  waterSource: MiningProject['waterSource'];
-  communityDistance: MiningProject['communityDistance'];
+  projectStage: ProjectStage;
+  size: ProjectSize;
+  waterSource: WaterSource;
+  communityDistance: CommunityDistance;
   hasProtectedAreas: boolean;
   companyName?: string;
   country: string;
@@ -127,6 +127,11 @@ export const sampleMines: SampleMine[] = [
 ];
 
 export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => {
+  const size = project.size ?? 'medium';
+  const communityDistance = project.communityDistance ?? 'medium';
+  const hasProtectedAreas = project.hasProtectedAreas ?? null;
+  const waterSource = project.waterSource ?? 'unknown';
+
   const baseRisks: RiskAssessment[] = [
     {
       category: 'water',
@@ -140,12 +145,12 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
     },
     {
       category: 'biodiversity',
-      level: project.hasProtectedAreas ? 'critical' : 'medium',
+      level: hasProtectedAreas ? 'critical' : 'medium',
       title: 'Biodiversity and Habitat Impact',
-      summary: project.hasProtectedAreas 
-        ? 'Project overlaps with protected areas and critical habitats' 
+      summary: hasProtectedAreas
+        ? 'Project overlaps with protected areas and critical habitats'
         : 'Some endemic species habitats may be affected',
-      details: project.hasProtectedAreas
+      details: hasProtectedAreas
         ? 'The project area overlaps with a Key Biodiversity Area (KBA) and is within 5km of a protected reserve. Three endangered species have been documented in the impact zone.'
         : 'While no protected areas directly overlap, the project may fragment wildlife corridors. Environmental assessment should include detailed species surveys.',
       dataSource: 'IBAT Alliance + National Environmental Registry',
@@ -154,12 +159,12 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
     },
     {
       category: 'community-displacement',
-      level: project.communityDistance === 'near' ? 'high' : 'medium',
+      level: communityDistance === 'near' ? 'high' : 'medium',
       title: 'Community Displacement Concerns',
-      summary: project.communityDistance === 'near' 
+      summary: communityDistance === 'near'
         ? 'Multiple communities within direct impact zone'
         : 'Indirect impacts on nearby communities likely',
-      details: project.communityDistance === 'near'
+      details: communityDistance === 'near'
         ? 'Approximately 1,200 households in 3 villages are within the proposed project footprint. Resettlement planning and fair compensation negotiations will be critical.'
         : 'While no direct displacement is anticipated, noise, dust, and traffic impacts will affect communities. Benefit-sharing agreements should be established.',
       dataSource: 'Community Mapping Initiative 2023',
@@ -178,10 +183,10 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
     },
     {
       category: 'food-security',
-      level: project.size === 'large' ? 'high' : 'medium',
+      level: size === 'large' ? 'high' : 'medium',
       title: 'Agricultural Land and Food Security',
       summary: 'Mining may impact local food production capacity',
-      details: project.size === 'large'
+      details: size === 'large'
         ? 'The project would convert approximately 2,000 hectares of agricultural land. This represents 15% of the district\'s arable land, potentially affecting food security for 5,000+ people.'
         : 'Some agricultural lands will be affected. Compensation should include support for alternative livelihoods and food security programs.',
       dataSource: 'Agricultural Census 2022 + Satellite Analysis',
@@ -191,7 +196,7 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
   ];
 
   // Adjust risks based on specific mineral types
-  if (project.mineralType === 'lithium' && project.waterSource !== 'unknown') {
+  if (project.mineralType === 'lithium' && waterSource !== 'unknown') {
     const waterRisk = baseRisks.find(r => r.category === 'water');
     if (waterRisk) {
       waterRisk.level = 'critical';
@@ -203,13 +208,14 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
 };
 
 export const getProjectPhases = (project: MiningProject): ProjectPhase[] => {
+  const stage = project.stage ?? 'exploration';
   const currentStageIndex = [
     'exploration',
     'feasibility',
     'environmental-assessment',
     'permitting',
     'construction'
-  ].indexOf(project.stage);
+  ].indexOf(stage);
 
   return [
     {

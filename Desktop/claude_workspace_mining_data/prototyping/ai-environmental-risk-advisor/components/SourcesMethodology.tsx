@@ -21,43 +21,45 @@ import {
   ShieldCheck,
   Info,
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface SourcesMethodologyProps {
   risks: RiskAssessment[];
   projectName?: string;
 }
 
-const confidenceDescriptions: Record<string, string> = {
-  high: 'Based on multiple, recent, peer-reviewed or government-verified datasets with strong local calibration. Suitable for formal citations.',
-  medium: 'Based on reputable global datasets that may not reflect all local conditions. Recommended to verify with local experts before citing in formal proceedings.',
-  low: 'Based on limited or outdated data, or inferred from regional patterns. Use as a starting point only — independent verification is strongly recommended.',
-};
-
-const methodologyByCategory: Record<string, { title: string; description: string }> = {
-  water: {
-    title: 'Water Risk',
-    description: 'Water risk scores use the WRI Aqueduct 4.0 framework combining baseline water stress, inter-annual variability, seasonal depletion, and groundwater table decline. Where available, local basin studies provide calibrated adjustments for arid-region salars and confined aquifers.',
-  },
-  biodiversity: {
-    title: 'Biodiversity & Habitat',
-    description: 'Biodiversity assessments overlay project footprints against Key Biodiversity Areas (KBAs), IUCN protected area categories, and species range maps from the IBAT Alliance. Proximity to critical habitats and documented endangered species observations are factored into the risk level.',
-  },
-  'community-displacement': {
-    title: 'Community Displacement',
-    description: 'Displacement risk is estimated using community mapping data, settlement proximity analysis, and population density within projected impact zones. Household counts and village boundaries are cross-referenced with satellite imagery and census records.',
-  },
-  'indigenous-lands': {
-    title: 'Indigenous Territory',
-    description: 'Indigenous land overlap is assessed using LandMark global platform data on indigenous and community lands, supplemented by national land registries and local tenure records where available. FPIC status is tracked when disclosed.',
-  },
-  'food-security': {
-    title: 'Food Security',
-    description: 'Food security impact is estimated from agricultural census data, satellite-derived land use classification, and crop productivity indices. The assessment considers the share of arable land within the project area relative to the surrounding district.',
-  },
-};
-
 export function SourcesMethodology({ risks, projectName }: SourcesMethodologyProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+
+  const confidenceDescriptions: Record<string, string> = {
+    high: t('sources.confidenceHigh'),
+    medium: t('sources.confidenceMedium'),
+    low: t('sources.confidenceLow'),
+  };
+
+  const methodologyByCategory: Record<string, { title: string; description: string }> = {
+    water: {
+      title: t('sources.waterRisk'),
+      description: t('sources.waterRiskDesc'),
+    },
+    biodiversity: {
+      title: t('sources.biodiversityHabitat'),
+      description: t('sources.biodiversityHabitatDesc'),
+    },
+    'community-displacement': {
+      title: t('sources.communityDisplacement'),
+      description: t('sources.communityDisplacementDesc'),
+    },
+    'indigenous-lands': {
+      title: t('sources.indigenousTerritory'),
+      description: t('sources.indigenousTerritoryDesc'),
+    },
+    'food-security': {
+      title: t('sources.foodSecurity'),
+      description: t('sources.foodSecurityDesc'),
+    },
+  };
 
   // Deduplicate data sources
   const sourcesMap = new Map<
@@ -108,7 +110,7 @@ export function SourcesMethodology({ risks, projectName }: SourcesMethodologyPro
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-muted-foreground" />
-            <CardTitle className="text-base font-medium">Sources &amp; Methodology</CardTitle>
+            <CardTitle className="text-base font-medium">{t('sources.title')}</CardTitle>
           </div>
           <Button
             variant="outline"
@@ -119,12 +121,12 @@ export function SourcesMethodology({ risks, projectName }: SourcesMethodologyPro
             {copied ? (
               <>
                 <Check className="w-3.5 h-3.5" />
-                Copied
+                {t('common.copied')}
               </>
             ) : (
               <>
                 <Copy className="w-3.5 h-3.5" />
-                Copy Citation
+                {t('common.copyCitation')}
               </>
             )}
           </Button>
@@ -137,7 +139,7 @@ export function SourcesMethodology({ risks, projectName }: SourcesMethodologyPro
             <AccordionTrigger className="text-sm">
               <span className="flex items-center gap-2">
                 <Database className="w-4 h-4" />
-                Data Sources ({sourcesMap.size})
+                {t('sources.dataSources')} ({sourcesMap.size})
               </span>
             </AccordionTrigger>
             <AccordionContent>
@@ -147,7 +149,7 @@ export function SourcesMethodology({ risks, projectName }: SourcesMethodologyPro
                     <div className="min-w-0">
                       <p className="text-sm font-medium">{source}</p>
                       <p className="text-xs text-muted-foreground">
-                        Used for: {info.categories.join(', ')}
+                        {t('sources.usedFor')} {info.categories.join(', ')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
@@ -169,7 +171,7 @@ export function SourcesMethodology({ risks, projectName }: SourcesMethodologyPro
             <AccordionTrigger className="text-sm">
               <span className="flex items-center gap-2">
                 <FlaskConical className="w-4 h-4" />
-                How Risks Are Assessed
+                {t('sources.howRisksAssessed')}
               </span>
             </AccordionTrigger>
             <AccordionContent>
@@ -193,7 +195,7 @@ export function SourcesMethodology({ risks, projectName }: SourcesMethodologyPro
             <AccordionTrigger className="text-sm">
               <span className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4" />
-                What Confidence Levels Mean
+                {t('sources.confidenceLevels')}
               </span>
             </AccordionTrigger>
             <AccordionContent>
@@ -217,10 +219,7 @@ export function SourcesMethodology({ risks, projectName }: SourcesMethodologyPro
         <Alert className="mt-4">
           <Info className="h-4 w-4" />
           <AlertDescription className="text-xs">
-            <strong>How to cite:</strong> Estimated using the WRI Environmental Risk Advisor
-            based on publicly available global datasets. Assessment generated for{' '}
-            {projectName || 'this project'}. Data confidence levels and limitations are noted in
-            the full assessment. We recommend supplementing with local expert review.
+            <strong>{t('sources.howToCite')}</strong> {t('sources.citationText', { name: projectName || 'this project' })}
           </AlertDescription>
         </Alert>
       </CardContent>

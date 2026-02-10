@@ -7,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Home, Trees, Wheat, School, MapPin, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { DEFAULT_COORDS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 // Dynamically import map components
-const BaseMap = dynamic(() => import('./BaseMap').then(mod => mod.BaseMap), { 
+const BaseMap = dynamic(() => import('./BaseMap').then(mod => mod.BaseMap), {
   ssr: false,
   loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
 });
@@ -36,6 +37,8 @@ function generateRandomPoints(center: [number, number], count: number, minRadius
 }
 
 export function ImpactRadius({ project }: ImpactRadiusProps) {
+  const { t } = useTranslation();
+
   // Get coordinates
   const coordinates = useMemo((): [number, number] => {
     if (project.location.coordinates) {
@@ -46,7 +49,8 @@ export function ImpactRadius({ project }: ImpactRadiusProps) {
 
   // Generate random asset locations for demo
   const assetLocations = useMemo(() => {
-    const multiplier = project.size === 'large' ? 1.5 : 1;
+    const size = project.size ?? 'medium';
+    const multiplier = size === 'large' ? 1.5 : 1;
     return {
       households: generateRandomPoints(coordinates, Math.floor(12 * multiplier), 1, 5),
       schools: generateRandomPoints(coordinates, Math.floor(3 * multiplier), 2, 8),
@@ -55,11 +59,12 @@ export function ImpactRadius({ project }: ImpactRadiusProps) {
     };
   }, [coordinates, project.size]);
 
+  const size = project.size ?? 'medium';
   const impactedAssets = [
-    { icon: Home, label: 'Households', count: project.size === 'large' ? '1,200' : '400', distance: '0-5km', color: '#3b82f6' },
-    { icon: School, label: 'Schools', count: project.size === 'large' ? '3' : '1', distance: '2-8km', color: '#8b5cf6' },
-    { icon: Wheat, label: 'Farmland', count: project.size === 'large' ? '2,000 ha' : '500 ha', distance: '0-10km', color: '#f59e0b' },
-    { icon: Trees, label: 'Forest', count: project.size === 'large' ? '500 ha' : '100 ha', distance: '0-15km', color: '#10b981' },
+    { icon: Home, label: t('impactRadius.households'), count: size === 'large' ? '1,200' : '400', distance: '0-5km', color: '#3b82f6' },
+    { icon: School, label: t('impactRadius.schools'), count: size === 'large' ? '3' : '1', distance: '2-8km', color: '#8b5cf6' },
+    { icon: Wheat, label: t('impactRadius.farmland'), count: size === 'large' ? '2,000 ha' : '500 ha', distance: '0-10km', color: '#f59e0b' },
+    { icon: Trees, label: t('impactRadius.forest'), count: size === 'large' ? '500 ha' : '100 ha', distance: '0-15km', color: '#10b981' },
   ];
 
   // Create custom icons for different asset types
@@ -109,25 +114,25 @@ export function ImpactRadius({ project }: ImpactRadiusProps) {
         <CardContent className="p-0">
           <BaseMap center={coordinates} zoom={10}>
             {/* Mine location */}
-            <MineMarker 
-              position={coordinates} 
+            <MineMarker
+              position={coordinates}
               label={project.projectName || `${project.mineralType} Mining Project`}
             />
-            
+
             {/* Impact zones */}
             <RiskOverlay
               center={coordinates}
               radiusKm={5}
               color="#dc2626"
               fillOpacity={0.2}
-              label="Direct Impact Zone (0-5km)"
+              label={t('impactRadius.directImpactZone')}
             />
             <RiskOverlay
               center={coordinates}
               radiusKm={15}
               color="#f59e0b"
               fillOpacity={0.1}
-              label="Indirect Impact Zone (5-15km)"
+              label={t('impactRadius.indirectImpactZone')}
             />
 
             {/* Asset markers */}
@@ -135,39 +140,39 @@ export function ImpactRadius({ project }: ImpactRadiusProps) {
               <>
                 {assetLocations.households.map((pos, i) => (
                   <Marker key={`house-${i}`} position={pos} icon={createAssetIcon('#3b82f6', Home)}>
-                    <Popup>Household Settlement</Popup>
+                    <Popup>{t('impactRadius.householdSettlement')}</Popup>
                   </Marker>
                 ))}
                 {assetLocations.schools.map((pos, i) => (
                   <Marker key={`school-${i}`} position={pos} icon={createAssetIcon('#8b5cf6', School)}>
-                    <Popup>School</Popup>
+                    <Popup>{t('impactRadius.school')}</Popup>
                   </Marker>
                 ))}
                 {assetLocations.farmland.map((pos, i) => (
                   <Marker key={`farm-${i}`} position={pos} icon={createAssetIcon('#f59e0b', Wheat)}>
-                    <Popup>Agricultural Land</Popup>
+                    <Popup>{t('impactRadius.agriculturalLand')}</Popup>
                   </Marker>
                 ))}
                 {assetLocations.forest.map((pos, i) => (
                   <Marker key={`forest-${i}`} position={pos} icon={createAssetIcon('#10b981', Trees)}>
-                    <Popup>Forest Area</Popup>
+                    <Popup>{t('impactRadius.forestArea')}</Popup>
                   </Marker>
                 ))}
               </>
             )}
           </BaseMap>
-          
+
           {/* Legend */}
           <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 space-y-2 z-[1000]">
-            <div className="text-xs font-medium mb-1">Impact Zones</div>
+            <div className="text-xs font-medium mb-1">{t('impactRadius.impactZones')}</div>
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs">
                 <div className="w-3 h-3 bg-destructive/60 rounded" />
-                <span>Direct (0-5km)</span>
+                <span>{t('impactRadius.direct')}</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <div className="w-3 h-3 bg-warning/60 rounded" />
-                <span>Indirect (5-15km)</span>
+                <span>{t('impactRadius.indirect')}</span>
               </div>
             </div>
           </div>
@@ -180,7 +185,7 @@ export function ImpactRadius({ project }: ImpactRadiusProps) {
           <Card key={label}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-2">
-                <div 
+                <div
                   className="w-10 h-10 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: `${color}20` }}
                 >
@@ -190,7 +195,7 @@ export function ImpactRadius({ project }: ImpactRadiusProps) {
               </div>
               <div className="space-y-1">
                 <p className="text-2xl font-bold">{count}</p>
-                <p className="text-sm text-muted-foreground">{label} affected</p>
+                <p className="text-sm text-muted-foreground">{label} {t('impactRadius.affected')}</p>
               </div>
             </CardContent>
           </Card>
@@ -203,11 +208,9 @@ export function ImpactRadius({ project }: ImpactRadiusProps) {
           <div className="flex items-start gap-2">
             <Users className="w-5 h-5 text-muted-foreground mt-0.5" />
             <div className="space-y-1 text-sm">
-              <p className="font-medium">Community Impact Assessment</p>
+              <p className="font-medium">{t('impactRadius.communityImpact')}</p>
               <p className="text-muted-foreground">
-                This visualization shows estimated impacts based on typical mining operations of this scale. 
-                Actual impacts depend on mitigation measures, local topography, and operational practices. 
-                Communities should request detailed impact assessments for their specific areas.
+                {t('impactRadius.communityImpactDesc')}
               </p>
             </div>
           </div>

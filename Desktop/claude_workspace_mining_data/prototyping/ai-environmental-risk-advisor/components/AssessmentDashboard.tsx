@@ -22,6 +22,8 @@ import { DataVisualizations } from './visualizations/DataVisualizations';
 import { LearnSection } from './LearnSection';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/lib/i18n';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface AssessmentDashboardProps {
   project: MiningProject;
@@ -30,21 +32,22 @@ interface AssessmentDashboardProps {
 export function AssessmentDashboard({ project }: AssessmentDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
-  
+  const { t } = useTranslation();
+
   const risks = getRiskAssessments(project);
   const phases = getProjectPhases(project);
 
   const handleShare = () => {
     toast({
-      title: "Coming Soon",
-      description: "Share functionality will allow you to collaborate with community members and advisors.",
+      title: t('common.comingSoon'),
+      description: t('assessment.shareDescription'),
     });
   };
 
   const handleDownload = () => {
     toast({
-      title: "Coming Soon", 
-      description: "Download full assessment report as PDF with all data and recommendations.",
+      title: t('common.comingSoon'),
+      description: t('assessment.downloadDescription'),
     });
   };
 
@@ -57,23 +60,24 @@ export function AssessmentDashboard({ project }: AssessmentDashboardProps) {
             <Link href="/">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Start
+                {t('assessment.backToStart')}
               </Button>
             </Link>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <LanguageSwitcher />
               <Button variant="outline" size="sm" onClick={handleShare}>
                 <Share2 className="w-4 h-4 mr-2" />
-                Share
+                {t('common.share')}
               </Button>
               <Button variant="outline" size="sm" onClick={handleDownload}>
                 <Download className="w-4 h-4 mr-2" />
-                Download Report
+                {t('common.downloadReport')}
               </Button>
             </div>
           </div>
-          
+
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Environmental Risk Assessment</h1>
+            <h1 className="text-3xl font-bold">{t('assessment.title')}</h1>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">
                 {project.projectName || `${project.mineralType} Mining Project`}
@@ -81,9 +85,11 @@ export function AssessmentDashboard({ project }: AssessmentDashboardProps) {
               <Badge variant="outline">
                 {project.location.nearestCity}, {project.location.region}
               </Badge>
-              <Badge variant="outline">
-                {project.stage.replace('-', ' ')}
-              </Badge>
+              {project.stage && (
+                <Badge variant="outline">
+                  {project.stage.replace('-', ' ')}
+                </Badge>
+              )}
               {project.companyName && (
                 <Badge variant="outline">{project.companyName}</Badge>
               )}
@@ -96,32 +102,32 @@ export function AssessmentDashboard({ project }: AssessmentDashboardProps) {
           <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 h-auto">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <AlertCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Risk Overview</span>
-              <span className="sm:hidden">Risks</span>
+              <span className="hidden sm:inline">{t('assessment.tabRiskOverview')}</span>
+              <span className="sm:hidden">{t('assessment.tabRisks')}</span>
             </TabsTrigger>
             <TabsTrigger value="data" className="flex items-center gap-1">
               <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">Explore Data</span>
-              <span className="sm:hidden">Data</span>
+              <span className="hidden sm:inline">{t('assessment.tabExploreData')}</span>
+              <span className="sm:hidden">{t('assessment.tabData')}</span>
             </TabsTrigger>
             <TabsTrigger value="actions" className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Your Action Plan</span>
-              <span className="sm:hidden">Actions</span>
+              <span className="hidden sm:inline">{t('assessment.tabActionPlan')}</span>
+              <span className="sm:hidden">{t('assessment.tabActions')}</span>
             </TabsTrigger>
             <TabsTrigger value="learn" className="flex items-center gap-1">
               <BookOpen className="w-4 h-4" />
-              <span className="hidden sm:inline">Learn</span>
-              <span className="sm:hidden">Learn</span>
+              <span className="hidden sm:inline">{t('assessment.tabLearn')}</span>
+              <span className="sm:hidden">{t('assessment.tabLearn')}</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Environmental Risk Summary</CardTitle>
+                <CardTitle>{t('riskOverview.envRiskSummary')}</CardTitle>
                 <CardDescription>
-                  Independent assessment based on publicly available data and environmental standards
+                  {t('riskOverview.envRiskDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -137,13 +143,13 @@ export function AssessmentDashboard({ project }: AssessmentDashboardProps) {
           <TabsContent value="actions" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Your Action Plan</CardTitle>
+                <CardTitle>{t('actionPlanner.title')}</CardTitle>
                 <CardDescription>
-                  Know your rights and what actions to take at each project phase
+                  {t('actionPlanner.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ActionPlanner phases={phases} currentStage={project.stage} />
+                <ActionPlanner phases={phases} currentStage={project.stage ?? 'exploration'} />
               </CardContent>
             </Card>
           </TabsContent>
