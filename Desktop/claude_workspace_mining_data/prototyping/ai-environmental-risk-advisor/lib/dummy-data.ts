@@ -171,7 +171,7 @@ export const sampleMines: SampleMine[] = [
 
 function getWaterRiskLevel(size: ProjectSize, waterSource: WaterSource, mineralType: string): RiskLevel {
   if (mineralType === 'lithium' && (waterSource === 'groundwater' || waterSource === 'both')) return 'critical';
-  if (size === 'large' && (waterSource === 'groundwater' || waterSource === 'both')) return 'high';
+  if (size === 'large') return 'high';
   if (size === 'medium' || (size === 'small' && waterSource === 'groundwater')) return 'medium';
   return 'low';
 }

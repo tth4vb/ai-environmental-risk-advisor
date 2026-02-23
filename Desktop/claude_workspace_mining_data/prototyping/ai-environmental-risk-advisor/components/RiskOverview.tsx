@@ -59,11 +59,11 @@ const riskColors = {
   critical: 'text-destructive border-destructive bg-destructive/20',
 };
 
-const riskBadgeVariants = {
-  low: 'outline' as const,
-  medium: 'outline' as const,
-  high: 'destructive' as const,
-  critical: 'destructive' as const,
+const riskBadgeColors: Record<RiskLevel, string> = {
+  low: 'bg-success/15 text-success border-success/30',
+  medium: 'bg-warning/15 text-warning border-warning/30',
+  high: 'bg-destructive/15 text-destructive border-destructive/30',
+  critical: 'bg-destructive text-destructive-foreground border-destructive',
 };
 
 function RiskLevelIcon({ level }: { level: RiskLevel }) {
@@ -111,7 +111,7 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
                   </div>
                   <RiskLevelIcon level={risk.level} />
                 </div>
-                <Badge variant={riskBadgeVariants[risk.level]} className="w-fit">
+                <Badge variant="outline" className={`w-fit ${riskBadgeColors[risk.level]}`}>
                   {t('riskOverview.riskLabel', { level: risk.level.toUpperCase() })}
                 </Badge>
               </CardHeader>
@@ -140,7 +140,7 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
                           <Icon className="w-5 h-5" />
                           {risk.title}
                         </DialogTitle>
-                        <Badge variant={riskBadgeVariants[risk.level]} className="w-fit">
+                        <Badge variant="outline" className={`w-fit ${riskBadgeColors[risk.level]}`}>
                           {t('riskOverview.riskLabel', { level: risk.level.toUpperCase() })}
                         </Badge>
                       </DialogHeader>
