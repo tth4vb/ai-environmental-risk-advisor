@@ -1,4 +1,4 @@
-import { MiningProject, RiskAssessment, ProjectPhase, TechnicalDocument, ProjectStage, ProjectSize, WaterSource, CommunityDistance } from '@/types';
+import { MiningProject, RiskAssessment, RiskLevel, ProjectPhase, TechnicalDocument, ProjectStage, ProjectSize, WaterSource, CommunityDistance, IndigenousLandsStatus } from '@/types';
 
 export const sampleProjects: Record<string, Partial<MiningProject>> = {
   'lithium-argentina': {
@@ -49,6 +49,7 @@ export interface SampleMine {
   waterSource: WaterSource;
   communityDistance: CommunityDistance;
   hasProtectedAreas: boolean;
+  indigenousLandsStatus: IndigenousLandsStatus;
   companyName?: string;
   country: string;
   region: string;
@@ -67,6 +68,7 @@ export const sampleMines: SampleMine[] = [
     waterSource: 'groundwater',
     communityDistance: 'near',
     hasProtectedAreas: true,
+    indigenousLandsStatus: 'adjacent',
     description: 'Geothermal lithium extraction project in Imperial County. Uses innovative brine extraction methods from geothermal power operations, raising concerns about water depletion and impacts on agricultural communities in the region.',
     companyName: 'Various operators',
     country: 'United States',
@@ -84,6 +86,7 @@ export const sampleMines: SampleMine[] = [
     waterSource: 'both',
     communityDistance: 'medium',
     hasProtectedAreas: false,
+    indigenousLandsStatus: 'overlap',
     description: 'Large-scale copper mining operation in the Atacama Desert. Critical concerns include extreme water scarcity in the driest desert on Earth, impacts on Indigenous communities, and competition with local water needs.',
     companyName: 'Chilean Copper Industries',
     country: 'Chile',
@@ -101,6 +104,7 @@ export const sampleMines: SampleMine[] = [
     waterSource: 'surface',
     communityDistance: 'near',
     hasProtectedAreas: true,
+    indigenousLandsStatus: 'overlap',
     description: 'Nickel laterite mining and processing facility in Central Sulawesi. Major environmental concerns include deforestation, proximity to marine protected areas, impacts on coral reefs from tailings, and displacement of local fishing communities.',
     companyName: 'Pacific Nickel Resources',
     country: 'Indonesia',
@@ -118,93 +122,214 @@ export const sampleMines: SampleMine[] = [
     waterSource: 'groundwater',
     communityDistance: 'near',
     hasProtectedAreas: false,
+    indigenousLandsStatus: 'adjacent',
     description: 'Cobalt extraction project in the DRC copper belt. Critical concerns include artisanal mining conflicts, child labor risks, community displacement, water contamination, and lack of benefit-sharing with local populations.',
     companyName: 'Global Copper Mining Ltd',
     country: 'Democratic Republic of Congo',
     region: 'Lualaba Province',
     nearestCity: 'Kolwezi'
+  },
+  {
+    id: 'copper-nevada',
+    name: 'Nevada Basin Copper Exploration',
+    location: 'Humboldt County, Nevada, USA',
+    coordinates: { lat: 41.2, lng: -117.5 },
+    mineralType: 'copper',
+    projectStage: 'exploration',
+    size: 'small',
+    waterSource: 'surface',
+    communityDistance: 'far',
+    hasProtectedAreas: false,
+    indigenousLandsStatus: 'none',
+    description: 'Early-stage copper exploration on BLM land in a sparsely populated basin. Low environmental sensitivity with no protected areas or indigenous land overlap. Surface water sourcing minimizes groundwater impacts.',
+    companyName: 'Basin Range Minerals',
+    country: 'United States',
+    region: 'Nevada',
+    nearestCity: 'Winnemucca'
+  },
+  {
+    id: 'nickel-pilbara',
+    name: 'Pilbara Nickel Survey',
+    location: 'Pilbara Region, Western Australia',
+    coordinates: { lat: -22.3, lng: 118.8 },
+    mineralType: 'nickel',
+    projectStage: 'exploration',
+    size: 'small',
+    waterSource: 'surface',
+    communityDistance: 'far',
+    hasProtectedAreas: false,
+    indigenousLandsStatus: 'adjacent',
+    description: 'Small-scale nickel survey in the Pilbara region. Located far from communities with no protected area overlap. Adjacent to Aboriginal lands requiring early engagement but no direct overlap with registered native title areas.',
+    companyName: 'Pilbara Minerals Pty Ltd',
+    country: 'Australia',
+    region: 'Western Australia',
+    nearestCity: 'Newman'
   }
 ];
+
+// ── Risk-level helper functions ──
+
+function getWaterRiskLevel(size: ProjectSize, waterSource: WaterSource, mineralType: string): RiskLevel {
+  if (mineralType === 'lithium' && (waterSource === 'groundwater' || waterSource === 'both')) return 'critical';
+  if (size === 'large' && (waterSource === 'groundwater' || waterSource === 'both')) return 'high';
+  if (size === 'medium' || (size === 'small' && waterSource === 'groundwater')) return 'medium';
+  return 'low';
+}
+
+function getBiodiversityRiskLevel(hasProtectedAreas: boolean | null, size: ProjectSize): RiskLevel {
+  const isProtected = hasProtectedAreas === true;
+  if (isProtected && size === 'large') return 'critical';
+  if (isProtected) return 'high';
+  if (hasProtectedAreas === null || size === 'large') return 'medium';
+  return 'low';
+}
+
+function getCommunityRiskLevel(communityDistance: CommunityDistance, size: ProjectSize): RiskLevel {
+  if (communityDistance === 'near' && size === 'large') return 'critical';
+  if ((communityDistance === 'near' && size === 'medium') || (communityDistance === 'medium' && size === 'large')) return 'high';
+  if ((communityDistance === 'far' && size === 'large') || (communityDistance === 'medium' && (size === 'medium' || size === 'small'))) return 'medium';
+  return 'low';
+}
+
+function getIndigenousRiskLevel(status: IndigenousLandsStatus, size: ProjectSize): RiskLevel {
+  if (status === 'overlap' && size === 'large') return 'critical';
+  if (status === 'overlap' || (status === 'adjacent' && size === 'large')) return 'high';
+  if ((status === 'adjacent' && (size === 'small' || size === 'medium')) || status === 'unknown') return 'medium';
+  return 'low';
+}
+
+function getFoodSecurityRiskLevel(size: ProjectSize, communityDistance: CommunityDistance): RiskLevel {
+  if (size === 'large' && communityDistance === 'near') return 'critical';
+  if ((size === 'medium' && communityDistance === 'near') || (size === 'large' && communityDistance === 'medium')) return 'high';
+  if ((size === 'small' && communityDistance === 'near') || (size === 'medium' && communityDistance === 'medium') || (size === 'large' && communityDistance === 'far')) return 'medium';
+  return 'low';
+}
 
 export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => {
   const size = project.size ?? 'medium';
   const communityDistance = project.communityDistance ?? 'medium';
   const hasProtectedAreas = project.hasProtectedAreas ?? null;
   const waterSource = project.waterSource ?? 'unknown';
+  const indigenousStatus = project.indigenousLandsStatus ?? 'unknown';
 
-  const baseRisks: RiskAssessment[] = [
+  const waterLevel = getWaterRiskLevel(size, waterSource, project.mineralType);
+  const bioLevel = getBiodiversityRiskLevel(hasProtectedAreas, size);
+  const communityLevel = getCommunityRiskLevel(communityDistance, size);
+  const indigenousLevel = getIndigenousRiskLevel(indigenousStatus, size);
+  const foodLevel = getFoodSecurityRiskLevel(size, communityDistance);
+
+  return [
     {
       category: 'water',
-      level: 'high',
+      level: waterLevel,
       title: 'Water Resource Depletion Risk',
-      summary: 'Mining operations may significantly impact local water availability',
-      details: `Based on hydrological modeling, the proposed ${project.mineralType} extraction could reduce groundwater levels by 15-30% within a 10km radius. This poses risks to local agriculture and community water access. Current water stress index shows the region is already experiencing moderate scarcity.`,
+      summary: waterLevel === 'critical'
+        ? 'Severe water depletion expected from extraction process'
+        : waterLevel === 'high'
+        ? 'Mining operations may significantly impact local water availability'
+        : waterLevel === 'medium'
+        ? 'Moderate water impacts possible depending on extraction methods'
+        : 'Low water impact expected based on project scale and water source',
+      details: waterLevel === 'critical'
+        ? 'Lithium extraction requires massive amounts of water (2 million liters per ton of lithium). In this arid region, this will severely impact water availability for communities and ecosystems. Alternative brine processing methods should be mandated.'
+        : waterLevel === 'high'
+        ? `Based on hydrological modeling, the proposed ${project.mineralType} extraction could reduce groundwater levels by 15-30% within a 10km radius. This poses risks to local agriculture and community water access. Current water stress index shows the region is already experiencing moderate scarcity.`
+        : waterLevel === 'medium'
+        ? `The proposed ${project.mineralType} operation will require moderate water resources. While not expected to cause severe depletion, monitoring of groundwater levels and surface water flows is recommended to detect early signs of stress.`
+        : `The small scale of this project and reliance on surface water suggest limited impact on local water resources. Standard monitoring protocols should be sufficient, though baseline measurements are still recommended.`,
       dataSource: 'WRI Aqueduct 4.0 + Local Basin Study 2023',
       confidence: 'high',
       lastUpdated: '2024-01-15'
     },
     {
       category: 'biodiversity',
-      level: hasProtectedAreas ? 'critical' : 'medium',
+      level: bioLevel,
       title: 'Biodiversity and Habitat Impact',
-      summary: hasProtectedAreas
+      summary: bioLevel === 'critical'
         ? 'Project overlaps with protected areas and critical habitats'
-        : 'Some endemic species habitats may be affected',
-      details: hasProtectedAreas
-        ? 'The project area overlaps with a Key Biodiversity Area (KBA) and is within 5km of a protected reserve. Three endangered species have been documented in the impact zone.'
-        : 'While no protected areas directly overlap, the project may fragment wildlife corridors. Environmental assessment should include detailed species surveys.',
+        : bioLevel === 'high'
+        ? 'Protected areas nearby could be significantly affected'
+        : bioLevel === 'medium'
+        ? 'Some endemic species habitats may be affected'
+        : 'Low biodiversity impact expected based on available data',
+      details: bioLevel === 'critical'
+        ? 'The project area overlaps with a Key Biodiversity Area (KBA) and is within 5km of a protected reserve. Three endangered species have been documented in the impact zone. The large scale of the project amplifies habitat fragmentation risks.'
+        : bioLevel === 'high'
+        ? 'The project area overlaps with a Key Biodiversity Area (KBA). Environmental assessment should include detailed species surveys and mitigation plans for any endangered species in the impact zone.'
+        : bioLevel === 'medium'
+        ? 'While no protected areas directly overlap, the project may fragment wildlife corridors. Environmental assessment should include detailed species surveys.'
+        : 'No protected areas or Key Biodiversity Areas overlap with the project footprint. The small scale limits habitat fragmentation, though a basic ecological survey is still recommended.',
       dataSource: 'IBAT Alliance + National Environmental Registry',
       confidence: 'medium',
       lastUpdated: '2024-01-10'
     },
     {
       category: 'community-displacement',
-      level: communityDistance === 'near' ? 'high' : 'medium',
+      level: communityLevel,
       title: 'Community Displacement Concerns',
-      summary: communityDistance === 'near'
-        ? 'Multiple communities within direct impact zone'
-        : 'Indirect impacts on nearby communities likely',
-      details: communityDistance === 'near'
-        ? 'Approximately 1,200 households in 3 villages are within the proposed project footprint. Resettlement planning and fair compensation negotiations will be critical.'
-        : 'While no direct displacement is anticipated, noise, dust, and traffic impacts will affect communities. Benefit-sharing agreements should be established.',
+      summary: communityLevel === 'critical'
+        ? 'Multiple communities face direct displacement from large-scale operations'
+        : communityLevel === 'high'
+        ? 'Communities within direct impact zone may face significant disruption'
+        : communityLevel === 'medium'
+        ? 'Indirect impacts on nearby communities likely'
+        : 'Minimal community impact expected due to distance and project scale',
+      details: communityLevel === 'critical'
+        ? 'Approximately 1,200 households in 3 villages are within the proposed project footprint. The large scale of operations will require resettlement planning and fair compensation negotiations. Dust, noise, and traffic impacts will significantly affect daily life.'
+        : communityLevel === 'high'
+        ? 'Communities are within the direct impact zone. Resettlement or significant disruption is possible. Benefit-sharing agreements and community development plans should be established early.'
+        : communityLevel === 'medium'
+        ? 'While no direct displacement is anticipated, noise, dust, and traffic impacts will affect communities. Benefit-sharing agreements should be established.'
+        : 'The project is located far from communities with a small footprint. Direct impacts are unlikely, though transport routes should be planned to minimize disruption.',
       dataSource: 'Community Mapping Initiative 2023',
       confidence: 'high',
       lastUpdated: '2024-01-20'
     },
     {
       category: 'indigenous-lands',
-      level: 'high',
+      level: indigenousLevel,
       title: 'Indigenous Territory Overlap',
-      summary: 'Project area includes traditional indigenous lands',
-      details: 'Historical and current maps indicate this area is part of traditional indigenous territory. Free, Prior, and Informed Consent (FPIC) processes must be initiated before any project activities. Local indigenous groups have ancestral ties and ongoing use of these lands for cultural practices.',
+      summary: indigenousLevel === 'critical'
+        ? 'Large-scale project directly overlaps indigenous territory'
+        : indigenousLevel === 'high'
+        ? 'Project area includes traditional indigenous lands'
+        : indigenousLevel === 'medium'
+        ? 'Indigenous lands are nearby; engagement recommended'
+        : 'No known indigenous land overlap identified',
+      details: indigenousLevel === 'critical'
+        ? 'The project directly overlaps with registered indigenous territory at a large scale. Free, Prior, and Informed Consent (FPIC) processes are legally required and must be completed before any project activities. Failure to obtain FPIC may expose the project to legal challenges and reputational risks.'
+        : indigenousLevel === 'high'
+        ? 'Historical and current maps indicate this area is part of traditional indigenous territory. Free, Prior, and Informed Consent (FPIC) processes must be initiated before any project activities. Local indigenous groups have ancestral ties and ongoing use of these lands for cultural practices.'
+        : indigenousLevel === 'medium'
+        ? 'Indigenous or community lands are adjacent to or in the vicinity of the project area. Early engagement with indigenous communities is recommended to understand potential cultural and livelihood impacts, even if direct overlap has not been confirmed.'
+        : 'Available data from LandMark and national registries show no known indigenous or community land claims overlapping the project area. Standard community engagement practices should still be followed.',
       dataSource: 'LandMark Indigenous Mapping + Local Records',
-      confidence: 'high',
+      confidence: indigenousLevel === 'low' ? 'medium' : 'high',
       lastUpdated: '2024-01-18'
     },
     {
       category: 'food-security',
-      level: size === 'large' ? 'high' : 'medium',
+      level: foodLevel,
       title: 'Agricultural Land and Food Security',
-      summary: 'Mining may impact local food production capacity',
-      details: size === 'large'
-        ? 'The project would convert approximately 2,000 hectares of agricultural land. This represents 15% of the district\'s arable land, potentially affecting food security for 5,000+ people.'
-        : 'Some agricultural lands will be affected. Compensation should include support for alternative livelihoods and food security programs.',
+      summary: foodLevel === 'critical'
+        ? 'Large-scale conversion of agricultural land near communities threatens food security'
+        : foodLevel === 'high'
+        ? 'Significant agricultural land may be affected by mining operations'
+        : foodLevel === 'medium'
+        ? 'Mining may impact local food production capacity'
+        : 'Minimal impact on agricultural land and food security expected',
+      details: foodLevel === 'critical'
+        ? 'The project would convert approximately 2,000 hectares of agricultural land near populated areas. This represents 15% of the district\'s arable land, potentially affecting food security for 5,000+ people. Dust and water diversion could further reduce yields on adjacent farms.'
+        : foodLevel === 'high'
+        ? 'Significant agricultural land is within the project impact area. Compensation should include support for alternative livelihoods and food security programs. Water diversion for mining could also reduce irrigation availability.'
+        : foodLevel === 'medium'
+        ? 'Some agricultural lands will be affected. Compensation should include support for alternative livelihoods and food security programs.'
+        : 'The project\'s small footprint and distance from farming communities suggest minimal impact on food production. Standard environmental monitoring should confirm no indirect effects on soil or water used for agriculture.',
       dataSource: 'Agricultural Census 2022 + Satellite Analysis',
       confidence: 'medium',
       lastUpdated: '2024-01-12'
     }
   ];
-
-  // Adjust risks based on specific mineral types
-  if (project.mineralType === 'lithium' && waterSource !== 'unknown') {
-    const waterRisk = baseRisks.find(r => r.category === 'water');
-    if (waterRisk) {
-      waterRisk.level = 'critical';
-      waterRisk.details = 'Lithium extraction requires massive amounts of water (2 million liters per ton of lithium). In this arid region, this will severely impact water availability for communities and ecosystems. Alternative brine processing methods should be mandated.';
-    }
-  }
-
-  return baseRisks;
 };
 
 export const getProjectPhases = (project: MiningProject): ProjectPhase[] => {

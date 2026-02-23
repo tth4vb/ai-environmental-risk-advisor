@@ -13,6 +13,8 @@ export type WaterSource = 'groundwater' | 'surface' | 'both' | 'unknown';
 
 export type CommunityDistance = 'near' | 'medium' | 'far';
 
+export type IndigenousLandsStatus = 'overlap' | 'adjacent' | 'none' | 'unknown';
+
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
 export type RiskCategory = 
@@ -39,6 +41,7 @@ export interface MiningProject {
   waterSource?: WaterSource;
   communityDistance?: CommunityDistance;
   hasProtectedAreas?: boolean | null;
+  indigenousLandsStatus?: IndigenousLandsStatus;
   companyName?: string;
   projectName?: string;
 }

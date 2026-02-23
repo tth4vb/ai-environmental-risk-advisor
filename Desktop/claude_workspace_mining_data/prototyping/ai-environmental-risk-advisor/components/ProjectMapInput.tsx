@@ -138,6 +138,7 @@ const formSchema = z.object({
   waterSource: z.enum(['groundwater', 'surface', 'both', 'unknown']).optional(),
   communityDistance: z.enum(['near', 'medium', 'far']).optional(),
   hasProtectedAreas: z.enum(['yes', 'no', 'unknown']).optional(),
+  indigenousLandsStatus: z.enum(['overlap', 'adjacent', 'none', 'unknown']).optional(),
   projectName: z.string().optional(),
   companyName: z.string().optional(),
   coordinates: z.object({
@@ -172,6 +173,7 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
       waterSource: undefined,
       communityDistance: undefined,
       hasProtectedAreas: undefined,
+      indigenousLandsStatus: undefined,
       projectName: '',
       companyName: '',
       coordinates: undefined,
@@ -197,6 +199,7 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
     form.setValue('waterSource', sample.waterSource);
     form.setValue('communityDistance', sample.communityDistance);
     form.setValue('hasProtectedAreas', sample.hasProtectedAreas ? 'yes' : 'no');
+    form.setValue('indigenousLandsStatus', sample.indigenousLandsStatus);
     form.setValue('companyName', sample.companyName || '');
     form.setValue('projectName', sample.name);
     form.setValue('coordinates', sample.coordinates);
@@ -261,6 +264,7 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
     const waterSource = values.waterSource ?? 'unknown';
     const communityDistance = values.communityDistance ?? 'medium';
     const hasProtectedAreasRaw = values.hasProtectedAreas ?? 'unknown';
+    const indigenousLandsStatus = values.indigenousLandsStatus ?? 'unknown';
 
     const project: MiningProject = {
       id: Date.now().toString(),
@@ -281,6 +285,7 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
           : hasProtectedAreasRaw === 'no'
           ? false
           : null,
+      indigenousLandsStatus,
       projectName: values.projectName,
       companyName: values.companyName,
     };
@@ -512,6 +517,30 @@ export function ProjectMapInput({ onStepChange }: ProjectMapInputProps) {
                               <SelectContent>
                                 <SelectItem value="yes">{t('common.yes')}</SelectItem>
                                 <SelectItem value="no">{t('common.no')}</SelectItem>
+                                <SelectItem value="unknown">{t('common.unknown')}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="indigenousLandsStatus"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">{t('mapInput.indigenousLandsLabel')}</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder={t('mapInput.selectOption')} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="overlap">{t('mapInput.indigenousOverlap')}</SelectItem>
+                                <SelectItem value="adjacent">{t('mapInput.indigenousAdjacent')}</SelectItem>
+                                <SelectItem value="none">{t('mapInput.indigenousNone')}</SelectItem>
                                 <SelectItem value="unknown">{t('common.unknown')}</SelectItem>
                               </SelectContent>
                             </Select>
