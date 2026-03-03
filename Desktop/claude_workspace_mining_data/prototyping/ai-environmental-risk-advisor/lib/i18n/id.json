@@ -93,18 +93,20 @@
   },
   "assessment": {
     "backToStart": "Kembali ke Awal",
-    "title": "Penilaian Risiko Lingkungan",
+    "title": "Tinjauan Lingkungan Komunitas",
     "analyzingData": "Menganalisis data lingkungan...",
     "projectNotFound": "Proyek tidak ditemukan. Silakan mulai penilaian baru.",
     "shareDescription": "Fitur berbagi akan memungkinkan Anda berkolaborasi dengan anggota komunitas dan penasihat.",
     "downloadDescription": "Unduh laporan penilaian lengkap sebagai PDF dengan semua data dan rekomendasi.",
-    "tabRiskOverview": "Ringkasan Risiko",
-    "tabRisks": "Risiko",
+    "tabRiskOverview": "Temuan Utama",
+    "tabRisks": "Temuan",
     "tabExploreData": "Jelajahi Data",
     "tabData": "Data",
     "tabActionPlan": "Rencana Aksi Anda",
     "tabActions": "Aksi",
-    "tabLearn": "Belajar"
+    "tabLearn": "Belajar",
+    "tabSolutions": "Solusi",
+    "tabSolutionsShort": "Solusi"
   },
   "riskOverview": {
     "criticalAlert": "{{count}} risiko kritis teridentifikasi yang memerlukan perhatian segera. Masalah ini dapat berdampak signifikan terhadap kesejahteraan masyarakat dan lingkungan.",
@@ -115,8 +117,8 @@
     "lastUpdated": "Terakhir Diperbarui:",
     "confidenceLevel": "Tingkat Kepercayaan:",
     "verificationAlert": "Penilaian ini didasarkan pada data yang tersedia secara publik dan harus diverifikasi dengan pengetahuan lokal dan kondisi terkini.",
-    "envRiskSummary": "Ringkasan Risiko Lingkungan",
-    "envRiskDescription": "Penilaian independen berdasarkan data publik dan standar lingkungan",
+    "envRiskSummary": "Apa yang Kami Temukan",
+    "envRiskDescription": "Temuan independen berdasarkan data publik dan standar lingkungan — dengan solusi untuk setiap masalah",
     "aboutAssessment": "Tentang Penilaian Ini",
     "whatsCovered": "Yang dinilai",
     "waterStressContamination": "Tekanan air & risiko kontaminasi",
@@ -131,7 +133,9 @@
     "ghgEmissions": "Emisi gas rumah kaca",
     "wasteTailings": "Pengelolaan limbah & tailing",
     "workerSafety": "Kesehatan & keselamatan pekerja",
-    "disclaimerText": "Penilaian menggunakan dataset global yang tersedia secara publik (WRI Aqueduct, Global Forest Watch, LandMark, dan lainnya) dan mungkin tidak mencerminkan kondisi lokal. Kami merekomendasikan konsultasi dengan ahli lingkungan lokal dan pengetahuan masyarakat untuk memvalidasi temuan."
+    "disclaimerText": "Penilaian menggunakan dataset global yang tersedia secara publik (WRI Aqueduct, Global Forest Watch, LandMark, dan lainnya) dan mungkin tidak mencerminkan kondisi lokal. Kami merekomendasikan konsultasi dengan ahli lingkungan lokal dan pengetahuan masyarakat untuk memvalidasi temuan.",
+    "solutionsAvailable": "{{count}} solusi teridentifikasi",
+    "viewAllSolutions": "Lihat semua solusi"
   },
   "actionPlanner": {
     "title": "Rencana Aksi Anda",
@@ -318,5 +322,22 @@
     "indigenousTerritoryDesc": "Tumpang tindih tanah adat dinilai menggunakan data platform global LandMark tentang tanah adat dan masyarakat, dilengkapi dengan registri tanah nasional dan catatan tenurial lokal jika tersedia. Status FPIC dilacak jika diungkapkan.",
     "foodSecurity": "Ketahanan Pangan",
     "foodSecurityDesc": "Dampak ketahanan pangan diperkirakan dari data sensus pertanian, klasifikasi penggunaan lahan berbasis satelit, dan indeks produktivitas tanaman. Penilaian mempertimbangkan proporsi lahan pertanian dalam area proyek relatif terhadap kecamatan sekitarnya."
+  },
+  "mitigation": {
+    "title": "Jalur Mitigasi",
+    "community": "Aksi Masyarakat",
+    "company": "Aksi Perusahaan",
+    "government": "Aksi Pemerintah",
+    "timeframe": "Jangka Waktu",
+    "successExample": "Contoh nyata",
+    "expertHelp": "Butuh bantuan ahli?"
+  },
+  "solutions": {
+    "title": "Solusi Mitigasi",
+    "subtitle": "Tindakan konstruktif yang dapat diambil oleh masyarakat, perusahaan, dan pemerintah untuk mengurangi risiko lingkungan. Gunakan ini untuk mempersiapkan konsultasi dan negosiasi.",
+    "filterAll": "Semua Pemangku Kepentingan",
+    "connectExperts": "Butuh dukungan profesional?",
+    "connectExpertsDescription": "Terhubung dengan ahli independen di bidang lingkungan, hukum, dan pengembangan masyarakat yang dapat memberikan saran mendalam dan personal untuk situasi spesifik Anda.",
+    "connectExpertsButton": "Hubungi Ahli"
   }
 }

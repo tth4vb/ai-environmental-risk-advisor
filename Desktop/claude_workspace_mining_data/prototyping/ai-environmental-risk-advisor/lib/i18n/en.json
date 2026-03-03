@@ -93,18 +93,20 @@
   },
   "assessment": {
     "backToStart": "Back to Start",
-    "title": "Environmental Risk Assessment",
+    "title": "Community Environmental Review",
     "analyzingData": "Analyzing environmental data...",
     "projectNotFound": "Project not found. Please start a new assessment.",
     "shareDescription": "Share functionality will allow you to collaborate with community members and advisors.",
     "downloadDescription": "Download full assessment report as PDF with all data and recommendations.",
-    "tabRiskOverview": "Risk Overview",
-    "tabRisks": "Risks",
+    "tabRiskOverview": "Key Findings",
+    "tabRisks": "Findings",
     "tabExploreData": "Explore Data",
     "tabData": "Data",
     "tabActionPlan": "Your Action Plan",
     "tabActions": "Actions",
-    "tabLearn": "Learn"
+    "tabLearn": "Learn",
+    "tabSolutions": "Solutions",
+    "tabSolutionsShort": "Solutions"
   },
   "riskOverview": {
     "criticalAlert": "{{count}} critical risk{{plural}} identified that require immediate attention. These issues could significantly impact community wellbeing and environment.",
@@ -115,8 +117,8 @@
     "lastUpdated": "Last Updated:",
     "confidenceLevel": "Confidence Level:",
     "verificationAlert": "This assessment is based on publicly available data and should be verified with local knowledge and current conditions.",
-    "envRiskSummary": "Environmental Risk Summary",
-    "envRiskDescription": "Independent assessment based on publicly available data and environmental standards",
+    "envRiskSummary": "What We Found",
+    "envRiskDescription": "Independent findings based on publicly available data and environmental standards — with solutions for each issue",
     "aboutAssessment": "About This Assessment",
     "whatsCovered": "What's covered",
     "waterStressContamination": "Water stress & contamination risk",
@@ -131,7 +133,9 @@
     "ghgEmissions": "Greenhouse gas emissions",
     "wasteTailings": "Waste & tailings management",
     "workerSafety": "Worker health & safety",
-    "disclaimerText": "Assessments use publicly available global datasets (WRI Aqueduct, Global Forest Watch, LandMark, and others) and may not reflect local conditions. We recommend consulting local environmental experts and community knowledge to validate findings."
+    "disclaimerText": "Assessments use publicly available global datasets (WRI Aqueduct, Global Forest Watch, LandMark, and others) and may not reflect local conditions. We recommend consulting local environmental experts and community knowledge to validate findings.",
+    "solutionsAvailable": "{{count}} solutions identified",
+    "viewAllSolutions": "View all solutions"
   },
   "actionPlanner": {
     "title": "Your Action Plan",
@@ -318,5 +322,22 @@
     "indigenousTerritoryDesc": "Indigenous land overlap is assessed using LandMark global platform data on indigenous and community lands, supplemented by national land registries and local tenure records where available. FPIC status is tracked when disclosed.",
     "foodSecurity": "Food Security",
     "foodSecurityDesc": "Food security impact is estimated from agricultural census data, satellite-derived land use classification, and crop productivity indices. The assessment considers the share of arable land within the project area relative to the surrounding district."
+  },
+  "mitigation": {
+    "title": "Mitigation Pathways",
+    "community": "Community Actions",
+    "company": "Company Actions",
+    "government": "Government Actions",
+    "timeframe": "Timeframe",
+    "successExample": "Real-world example",
+    "expertHelp": "Need expert help?"
+  },
+  "solutions": {
+    "title": "Mitigation Solutions",
+    "subtitle": "Constructive actions that communities, companies, and government can take to reduce environmental risks. Use these to prepare for consultations and negotiations.",
+    "filterAll": "All Stakeholders",
+    "connectExperts": "Need professional support?",
+    "connectExpertsDescription": "Connect with independent environmental, legal, and community development experts who can provide in-depth, non-automated advice for your specific situation.",
+    "connectExpertsButton": "Connect with Experts"
   }
 }

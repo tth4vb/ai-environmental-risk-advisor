@@ -14,12 +14,14 @@ import {
   Calendar,
   Download,
   ArrowLeft,
-  Share2
+  Share2,
+  Lightbulb,
 } from 'lucide-react';
 import { RiskOverview } from './RiskOverview';
 import { ActionPlanner } from './ActionPlanner';
 import { DataVisualizations } from './visualizations/DataVisualizations';
 import { LearnSection } from './LearnSection';
+import { MitigationSolutions } from './MitigationSolutions';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/lib/i18n';
@@ -99,11 +101,16 @@ export function AssessmentDashboard({ project }: AssessmentDashboardProps) {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 h-auto">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-5 gap-2 h-auto">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <AlertCircle className="w-4 h-4" />
               <span className="hidden sm:inline">{t('assessment.tabRiskOverview')}</span>
               <span className="sm:hidden">{t('assessment.tabRisks')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="solutions" className="flex items-center gap-1">
+              <Lightbulb className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('assessment.tabSolutions')}</span>
+              <span className="sm:hidden">{t('assessment.tabSolutionsShort')}</span>
             </TabsTrigger>
             <TabsTrigger value="data" className="flex items-center gap-1">
               <BarChart3 className="w-4 h-4" />
@@ -131,9 +138,13 @@ export function AssessmentDashboard({ project }: AssessmentDashboardProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RiskOverview risks={risks} projectName={project.projectName || `${project.mineralType} Mining Project`} />
+                <RiskOverview risks={risks} projectName={project.projectName || `${project.mineralType} Mining Project`} onNavigateToSolutions={() => setActiveTab('solutions')} />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="solutions" className="space-y-6">
+            <MitigationSolutions risks={risks} />
           </TabsContent>
 
           <TabsContent value="data" className="space-y-6">

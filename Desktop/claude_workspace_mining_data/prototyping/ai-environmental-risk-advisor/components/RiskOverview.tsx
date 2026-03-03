@@ -7,6 +7,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
   Droplets,
   Trees,
   Users,
@@ -24,9 +30,13 @@ import {
   Mountain,
   Flame,
   Trash2,
-  HardHat
+  HardHat,
+  Lightbulb,
+  Building2,
+  Landmark,
+  Clock,
 } from 'lucide-react';
-import { RiskAssessment, RiskLevel } from '@/types';
+import { RiskAssessment, RiskLevel, StakeholderRole } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -42,6 +52,7 @@ import { useTranslation } from '@/lib/i18n';
 interface RiskOverviewProps {
   risks: RiskAssessment[];
   projectName?: string;
+  onNavigateToSolutions?: () => void;
 }
 
 const riskIcons = {
@@ -78,7 +89,25 @@ function RiskLevelIcon({ level }: { level: RiskLevel }) {
   }
 }
 
-export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
+const stakeholderIcons: Record<StakeholderRole, React.ElementType> = {
+  community: Users,
+  company: Building2,
+  government: Landmark,
+};
+
+const stakeholderColors: Record<StakeholderRole, string> = {
+  community: 'text-blue-600',
+  company: 'text-amber-600',
+  government: 'text-emerald-600',
+};
+
+const priorityDots: Record<string, string> = {
+  high: 'bg-destructive',
+  medium: 'bg-warning',
+  low: 'bg-muted-foreground',
+};
+
+export function RiskOverview({ risks, projectName, onNavigateToSolutions }: RiskOverviewProps) {
   const { t } = useTranslation();
   const criticalRisks = risks.filter(r => r.level === 'critical').length;
   const highRisks = risks.filter(r => r.level === 'high').length;
@@ -123,6 +152,36 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
                   <span>{risk.dataSource}</span>
                 </div>
 
+                {/* Mitigation preview */}
+                {(() => {
+                  const topAction = risk.mitigation.actions.find(a => a.stakeholder === 'community' && a.priority === 'high')
+                    || risk.mitigation.actions.find(a => a.stakeholder === 'community')
+                    || risk.mitigation.actions[0];
+                  if (!topAction) return null;
+                  const totalActions = risk.mitigation.actions.length;
+                  return (
+                    <div className="rounded-lg bg-emerald-50 border border-emerald-200/60 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <Lightbulb className="w-3 h-3 text-emerald-600" />
+                          </div>
+                          <span className="text-xs font-semibold text-emerald-800">{t('riskOverview.solutionsAvailable', { count: totalActions })}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-emerald-900/80 leading-snug pl-[26px]">{topAction.title}</p>
+                      {onNavigateToSolutions && (
+                        <button
+                          onClick={onNavigateToSolutions}
+                          className="flex items-center gap-1 text-xs text-emerald-700 hover:text-emerald-900 font-medium pl-[26px] transition-colors"
+                        >
+                          {t('riskOverview.viewAllSolutions')} &rarr;
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="text-xs">
                     {t('riskOverview.confidence', { level: risk.confidence })}
@@ -164,6 +223,56 @@ export function RiskOverview({ risks, projectName }: RiskOverviewProps) {
                             <p className="text-muted-foreground capitalize">{risk.confidence}</p>
                           </div>
                         </div>
+
+                        {/* Mitigation Pathways */}
+                        {risk.mitigation.actions.length > 0 && (
+                          <div className="border rounded-lg p-4 bg-muted/20">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Lightbulb className="w-4 h-4 text-primary" />
+                              <h4 className="font-medium">{t('mitigation.title')}</h4>
+                            </div>
+                            <Accordion type="multiple" className="w-full">
+                              {(['community', 'company', 'government'] as StakeholderRole[]).map((role) => {
+                                const actions = risk.mitigation.actions.filter(a => a.stakeholder === role);
+                                if (actions.length === 0) return null;
+                                const RoleIcon = stakeholderIcons[role];
+                                return (
+                                  <AccordionItem key={role} value={role}>
+                                    <AccordionTrigger className="text-sm py-2">
+                                      <span className={`flex items-center gap-2 ${stakeholderColors[role]}`}>
+                                        <RoleIcon className="w-4 h-4" />
+                                        {t(`mitigation.${role}`)}
+                                      </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                      <div className="space-y-3 pt-1">
+                                        {actions.map((action, i) => (
+                                          <div key={i} className="flex gap-2">
+                                            <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${priorityDots[action.priority]}`} />
+                                            <div className="space-y-1">
+                                              <p className="text-sm font-medium">{action.title}</p>
+                                              <p className="text-xs text-muted-foreground">{action.description}</p>
+                                              <div className="flex items-center gap-1">
+                                                <Clock className="w-3 h-3 text-muted-foreground" />
+                                                <span className="text-xs text-muted-foreground">{action.timeframe}</span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                );
+                              })}
+                            </Accordion>
+                            {risk.mitigation.successExample && (
+                              <div className="mt-3 p-2 bg-primary/5 rounded text-xs text-muted-foreground border border-primary/10">
+                                <span className="font-medium text-primary">{t('mitigation.successExample')}:</span>{' '}
+                                {risk.mitigation.successExample}
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         <Alert>
                           <Info className="h-4 w-4" />
