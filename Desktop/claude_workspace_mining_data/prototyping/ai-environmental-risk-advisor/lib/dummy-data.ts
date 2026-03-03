@@ -1,4 +1,4 @@
-import { MiningProject, RiskAssessment, ProjectPhase, TechnicalDocument, ProjectStage, ProjectSize, WaterSource, CommunityDistance } from '@/types';
+import { MiningProject, RiskAssessment, ProjectPhase, TechnicalDocument, ProjectStage, ProjectSize, WaterSource, CommunityDistance, RiskCategory, RiskLevel, MitigationSummary } from '@/types';
 
 export const sampleProjects: Record<string, Partial<MiningProject>> = {
   'lithium-argentina': {
@@ -126,26 +126,216 @@ export const sampleMines: SampleMine[] = [
   }
 ];
 
+export const getMitigationForRisk = (category: RiskCategory, level: RiskLevel): MitigationSummary => {
+  const mitigationData: Record<RiskCategory, Record<RiskLevel, MitigationSummary>> = {
+    water: {
+      critical: {
+        actions: [
+          { stakeholder: 'community', title: 'Establish independent water monitoring', description: 'Partner with a local university or NGO to set up baseline monitoring stations upstream and downstream of the proposed site. Document current water quality and quantity before any project activity begins.', timeframe: '3-6 months', priority: 'high' },
+          { stakeholder: 'community', title: 'Map all community water sources', description: 'Create a comprehensive inventory of wells, springs, and surface water used by households, farms, and livestock. This becomes critical evidence if water levels change.', timeframe: '1-3 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Implement closed-loop water systems', description: 'Design water recycling systems that minimize freshwater intake and eliminate discharge to local waterways. Use dry-stack tailings to reduce water consumption.', timeframe: 'Pre-construction', priority: 'high' },
+          { stakeholder: 'government', title: 'Require water allocation limits in permits', description: 'Set legally binding maximum water extraction volumes based on independent hydrological studies, with community water needs taking priority.', timeframe: 'Permitting phase', priority: 'high' },
+        ],
+        successExample: 'Antamina Mine, Peru: Community-company water monitoring committee has operated for 20+ years with independent lab analysis and public reporting.',
+        expertHelpCta: 'Connect with a hydrologist who specializes in mining impacts',
+      },
+      high: {
+        actions: [
+          { stakeholder: 'community', title: 'Establish independent water monitoring', description: 'Partner with a local university or NGO to set up baseline monitoring stations upstream and downstream of the proposed site.', timeframe: '3-6 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Implement advanced water treatment before discharge', description: 'Multi-stage treatment systems exceeding regulatory minimums, with real-time quality monitoring at discharge points.', timeframe: 'Pre-construction', priority: 'high' },
+          { stakeholder: 'government', title: 'Require enhanced monitoring in permits', description: 'Mandate real-time water monitoring with public reporting conditions and automatic shutdown triggers if thresholds are exceeded.', timeframe: 'Permitting phase', priority: 'high' },
+        ],
+        successExample: 'Stillwater Mine, Montana: 25 years of independent water monitoring through a community-company agreement with publicly accessible data.',
+        expertHelpCta: 'Connect with a hydrologist who specializes in mining impacts',
+      },
+      medium: {
+        actions: [
+          { stakeholder: 'community', title: 'Request baseline water quality data', description: 'Ask the company and government for all existing water monitoring data. If none exists, advocate for baseline studies before project approval.', timeframe: '1-3 months', priority: 'medium' },
+          { stakeholder: 'company', title: 'Conduct comprehensive hydrological study', description: 'Commission an independent study of surface and groundwater systems, including seasonal variation and climate projections.', timeframe: 'Pre-feasibility', priority: 'medium' },
+          { stakeholder: 'government', title: 'Establish water monitoring requirements', description: 'Include standard monitoring and reporting conditions in environmental permits with community access to results.', timeframe: 'Permitting phase', priority: 'medium' },
+        ],
+        successExample: 'Tintaya Mine, Peru: Multi-stakeholder dialogue table established water monitoring protocols accepted by all parties.',
+      },
+      low: {
+        actions: [
+          { stakeholder: 'community', title: 'Stay informed about water conditions', description: 'Monitor any changes in local water availability or quality and report concerns early to environmental authorities.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'company', title: 'Maintain regular monitoring reports', description: 'Publish quarterly water monitoring results in an accessible format and location for community review.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'government', title: 'Conduct periodic compliance checks', description: 'Schedule regular inspections of water management practices and share results with affected communities.', timeframe: 'Annually', priority: 'low' },
+        ],
+      },
+    },
+    biodiversity: {
+      critical: {
+        actions: [
+          { stakeholder: 'community', title: 'Document local species and ecosystems', description: 'Work with local environmental groups to create a community biodiversity inventory including traditional ecological knowledge about species, migration routes, and seasonal patterns.', timeframe: '3-6 months', priority: 'high' },
+          { stakeholder: 'community', title: 'Advocate for project redesign', description: 'With critical biodiversity overlap, push for the project footprint to be redesigned to avoid Key Biodiversity Areas and protected habitat corridors.', timeframe: '1-3 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Commission independent biodiversity assessment', description: 'Hire an accredited independent ecologist to conduct a full species survey and habitat connectivity analysis before any land clearing.', timeframe: 'Pre-construction', priority: 'high' },
+          { stakeholder: 'government', title: 'Enforce buffer zones around protected areas', description: 'Require minimum setbacks from KBAs and protected areas, with mandatory wildlife corridors connecting fragmented habitats.', timeframe: 'Permitting phase', priority: 'high' },
+        ],
+        successExample: 'Ambatovy Mine, Madagascar: Established 12,000-hectare conservation zone and species relocation program in partnership with community conservation groups.',
+        expertHelpCta: 'Connect with a conservation biologist for an independent review',
+      },
+      high: {
+        actions: [
+          { stakeholder: 'community', title: 'Document local species and ecosystems', description: 'Create a community biodiversity inventory including species observations and traditional ecological knowledge.', timeframe: '3-6 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Develop a biodiversity offset plan', description: 'Create a measurable plan to achieve no net loss of biodiversity, including habitat restoration and species protection measures.', timeframe: 'Pre-construction', priority: 'high' },
+          { stakeholder: 'government', title: 'Require biodiversity management plan', description: 'Mandate a detailed plan with clear targets, monitoring protocols, and penalties for non-compliance as a permit condition.', timeframe: 'Permitting phase', priority: 'high' },
+        ],
+        successExample: 'QMM Mine, Madagascar: Established long-term conservation and reforestation program monitored by third-party biodiversity experts.',
+      },
+      medium: {
+        actions: [
+          { stakeholder: 'community', title: 'Participate in environmental surveys', description: 'Share local knowledge about wildlife patterns, important plant species, and ecologically sensitive areas with survey teams.', timeframe: '1-3 months', priority: 'medium' },
+          { stakeholder: 'company', title: 'Conduct species surveys before clearing', description: 'Complete seasonal biodiversity surveys covering wet and dry periods before any vegetation clearing.', timeframe: 'Pre-construction', priority: 'medium' },
+          { stakeholder: 'government', title: 'Include biodiversity conditions in permits', description: 'Set specific and measurable conditions for habitat protection and restoration in project approvals.', timeframe: 'Permitting phase', priority: 'medium' },
+        ],
+        successExample: 'Cerrejón Mine, Colombia: Community-led biological monitoring program trained local youth as wildlife monitors.',
+      },
+      low: {
+        actions: [
+          { stakeholder: 'community', title: 'Report unusual environmental changes', description: 'Keep records of any noticeable changes in local wildlife or plant health and report to environmental authorities.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'company', title: 'Follow standard biodiversity protocols', description: 'Implement industry-standard mitigation measures and publish regular monitoring reports.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'government', title: 'Monitor compliance with conditions', description: 'Schedule periodic inspections to verify biodiversity management commitments are being met.', timeframe: 'Annually', priority: 'low' },
+        ],
+      },
+    },
+    'community-displacement': {
+      critical: {
+        actions: [
+          { stakeholder: 'community', title: 'Organize a unified community position', description: 'Bring together all affected households and villages to develop shared priorities and demands before any resettlement negotiations begin. Hire a community lawyer.', timeframe: '1-3 months', priority: 'high' },
+          { stakeholder: 'community', title: 'Document land rights and livelihoods', description: 'Create a detailed inventory of all land holdings (formal and customary), housing, crops, businesses, and community infrastructure that would be affected.', timeframe: '2-4 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Follow IFC Performance Standard 5 on resettlement', description: 'Develop a Resettlement Action Plan that ensures improved or restored livelihoods, with fair compensation at full replacement cost.', timeframe: 'Pre-construction', priority: 'high' },
+          { stakeholder: 'government', title: 'Establish independent resettlement oversight', description: 'Appoint an independent monitor to oversee the resettlement process and ensure affected families receive promised compensation and support.', timeframe: 'Pre-permitting', priority: 'high' },
+        ],
+        successExample: 'Ahafo Mine, Ghana: Community negotiated a comprehensive resettlement agreement including replacement housing, livelihood restoration, and 10-year monitoring.',
+        expertHelpCta: 'Connect with a resettlement specialist or community rights lawyer',
+      },
+      high: {
+        actions: [
+          { stakeholder: 'community', title: 'Form a community negotiation committee', description: 'Elect representatives from each affected area to negotiate collectively with the company on compensation and benefit-sharing.', timeframe: '1-2 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Develop a Community Development Agreement', description: 'Negotiate a binding agreement covering compensation, local employment, infrastructure improvements, and long-term benefit-sharing.', timeframe: 'Pre-construction', priority: 'high' },
+          { stakeholder: 'government', title: 'Require livelihood restoration plans', description: 'Mandate that permits include binding commitments to restore or improve livelihoods of all affected community members.', timeframe: 'Permitting phase', priority: 'high' },
+        ],
+        successExample: 'Ramu Nickel, PNG: Community Benefit Sharing Agreement ensures 2% of revenue goes directly to landowner groups.',
+      },
+      medium: {
+        actions: [
+          { stakeholder: 'community', title: 'Document baseline living conditions', description: 'Record current housing, income sources, and community services to establish a baseline for measuring future impacts.', timeframe: '2-4 months', priority: 'medium' },
+          { stakeholder: 'company', title: 'Conduct social impact assessment', description: 'Commission a thorough study of potential direct and indirect impacts on livelihoods, services, and social cohesion.', timeframe: 'Pre-feasibility', priority: 'medium' },
+          { stakeholder: 'government', title: 'Ensure community consultation records', description: 'Require companies to document and publish records of all community consultations with community sign-off on accuracy.', timeframe: 'Permitting phase', priority: 'medium' },
+        ],
+        successExample: 'Newmont Ahafo: Social Responsibility Forum established with community, company, and government representatives for ongoing dialogue.',
+      },
+      low: {
+        actions: [
+          { stakeholder: 'community', title: 'Stay engaged in project updates', description: 'Attend information sessions and monitor any project changes that could affect nearby communities.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'company', title: 'Maintain open communication channels', description: 'Provide regular project updates and accessible grievance mechanisms for community members.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'government', title: 'Monitor community wellbeing indicators', description: 'Track changes in local employment, housing, and service access near the project area.', timeframe: 'Annually', priority: 'low' },
+        ],
+      },
+    },
+    'indigenous-lands': {
+      critical: {
+        actions: [
+          { stakeholder: 'community', title: 'Assert FPIC rights immediately', description: 'Formally notify the company and government that Free, Prior and Informed Consent is required. Document all traditional land use, sacred sites, and cultural practices tied to the project area.', timeframe: '1-2 months', priority: 'high' },
+          { stakeholder: 'community', title: 'Engage indigenous rights legal support', description: 'Connect with indigenous rights organizations (e.g., IWGIA, Forest Peoples Programme) for legal guidance on land rights and FPIC processes.', timeframe: '1-3 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Halt activities until FPIC is obtained', description: 'Suspend all project activities on indigenous lands and begin a culturally appropriate consultation process led by indigenous leadership.', timeframe: 'Immediate', priority: 'high' },
+          { stakeholder: 'government', title: 'Enforce FPIC requirements under national law', description: 'Ensure FPIC compliance as a mandatory permit condition, consistent with ILO Convention 169 and UNDRIP.', timeframe: 'Pre-permitting', priority: 'high' },
+        ],
+        successExample: 'Tampakan Project, Philippines: Indigenous communities successfully asserted FPIC rights, leading to project redesign with community-defined exclusion zones.',
+        expertHelpCta: 'Connect with an indigenous rights specialist or FPIC facilitator',
+      },
+      high: {
+        actions: [
+          { stakeholder: 'community', title: 'Document traditional land use and sacred sites', description: 'Create a community-controlled cultural mapping of areas with ancestral significance, traditional resource use, and ceremonial sites.', timeframe: '2-4 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Engage qualified FPIC facilitators', description: 'Hire independent facilitators experienced in indigenous consultation to lead a meaningful consent process.', timeframe: 'Pre-feasibility', priority: 'high' },
+          { stakeholder: 'government', title: 'Recognize customary land rights', description: 'Ensure that customary and ancestral land claims are recognized in the permitting process, even where formal titles may not exist.', timeframe: 'Permitting phase', priority: 'high' },
+        ],
+        successExample: 'Argyle Diamond Mine, Australia: Traditional Owner agreement included cultural heritage protections, employment targets, and revenue sharing.',
+      },
+      medium: {
+        actions: [
+          { stakeholder: 'community', title: 'Engage with the FPIC process', description: 'Participate actively in consultation processes and ensure all discussions are documented and translated into local languages.', timeframe: '2-4 months', priority: 'medium' },
+          { stakeholder: 'company', title: 'Conduct cultural heritage assessment', description: 'Commission a heritage impact assessment with meaningful participation of indigenous knowledge holders.', timeframe: 'Pre-feasibility', priority: 'medium' },
+          { stakeholder: 'government', title: 'Provide mediation support', description: 'Offer neutral mediation services to facilitate productive dialogue between indigenous communities and the project proponent.', timeframe: 'Permitting phase', priority: 'medium' },
+        ],
+        successExample: 'Voisey\'s Bay, Canada: Innu and Inuit Impact and Benefit Agreements included environmental monitoring roles and revenue sharing.',
+      },
+      low: {
+        actions: [
+          { stakeholder: 'community', title: 'Maintain cultural heritage records', description: 'Keep updated documentation of cultural practices and heritage sites that may be indirectly affected.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'company', title: 'Respect cultural exclusion zones', description: 'Maintain buffer zones around identified cultural and ceremonial sites.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'government', title: 'Monitor FPIC compliance', description: 'Periodically verify that ongoing operations respect the terms of any indigenous community agreements.', timeframe: 'Annually', priority: 'low' },
+        ],
+      },
+    },
+    'food-security': {
+      critical: {
+        actions: [
+          { stakeholder: 'community', title: 'Map all agricultural land at risk', description: 'Create a detailed inventory of farmland, grazing areas, fisheries, and forest food sources within the project impact zone. Calculate the percentage of local food production affected.', timeframe: '2-4 months', priority: 'high' },
+          { stakeholder: 'community', title: 'Demand agricultural protection guarantees', description: 'Insist that no productive agricultural land is converted without a binding replacement plan that ensures equivalent or improved food production capacity.', timeframe: '1-3 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Fund agricultural livelihood restoration', description: 'Establish a funded program to replace lost agricultural capacity through alternative land, irrigation, training, and market access support.', timeframe: 'Pre-construction', priority: 'high' },
+          { stakeholder: 'government', title: 'Protect food-producing land in zoning', description: 'Designate prime agricultural land as protected from conversion and require food security impact assessments before approving land use changes.', timeframe: 'Pre-permitting', priority: 'high' },
+        ],
+        successExample: 'Ok Tedi, PNG: Agricultural rehabilitation program replaced affected gardens with improved farming techniques, increasing food yields for 3,000 families.',
+        expertHelpCta: 'Connect with a food security or agricultural development specialist',
+      },
+      high: {
+        actions: [
+          { stakeholder: 'community', title: 'Assess food security baseline', description: 'Document current food sources, nutrition levels, and food supply chains to measure any future changes.', timeframe: '2-4 months', priority: 'high' },
+          { stakeholder: 'company', title: 'Minimize agricultural land conversion', description: 'Redesign the project footprint to avoid prime agricultural land and implement dust/contamination controls to protect crops on adjacent land.', timeframe: 'Pre-construction', priority: 'high' },
+          { stakeholder: 'government', title: 'Require food security impact assessment', description: 'Mandate a detailed assessment of how the project will affect local food production, supply, and prices.', timeframe: 'Permitting phase', priority: 'high' },
+        ],
+        successExample: 'Lihir Gold Mine, PNG: Community agricultural program provided alternative food production areas and improved farming techniques.',
+      },
+      medium: {
+        actions: [
+          { stakeholder: 'community', title: 'Monitor agricultural impacts', description: 'Track any changes in crop yields, water availability for irrigation, or livestock health near the project area.', timeframe: 'Ongoing', priority: 'medium' },
+          { stakeholder: 'company', title: 'Implement dust and contamination controls', description: 'Install measures to prevent mining dust and runoff from affecting nearby farmland and water sources used for agriculture.', timeframe: 'Pre-construction', priority: 'medium' },
+          { stakeholder: 'government', title: 'Include agricultural protections in permits', description: 'Add conditions requiring regular monitoring of agricultural land quality and crop productivity near the mine site.', timeframe: 'Permitting phase', priority: 'medium' },
+        ],
+        successExample: 'Geita Gold Mine, Tanzania: Agricultural development program supported 2,000 smallholder farmers with improved seeds and techniques.',
+      },
+      low: {
+        actions: [
+          { stakeholder: 'community', title: 'Maintain food production records', description: 'Keep records of agricultural output and food sources as a reference for detecting future changes.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'company', title: 'Support local food systems', description: 'Source food for mine operations locally where possible and support agricultural development programs in surrounding communities.', timeframe: 'Ongoing', priority: 'low' },
+          { stakeholder: 'government', title: 'Track regional food prices', description: 'Monitor food prices and availability in communities near mining operations to detect early signs of food insecurity.', timeframe: 'Annually', priority: 'low' },
+        ],
+      },
+    },
+  };
+
+  return mitigationData[category]?.[level] ?? { actions: [] };
+};
+
 export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => {
   const size = project.size ?? 'medium';
   const communityDistance = project.communityDistance ?? 'medium';
   const hasProtectedAreas = project.hasProtectedAreas ?? null;
   const waterSource = project.waterSource ?? 'unknown';
 
+  const waterLevel: RiskAssessment['level'] = 'high';
+  const biodiversityLevel: RiskAssessment['level'] = hasProtectedAreas ? 'critical' : 'medium';
+  const displacementLevel: RiskAssessment['level'] = communityDistance === 'near' ? 'high' : 'medium';
+  const indigenousLevel: RiskAssessment['level'] = 'high';
+  const foodLevel: RiskAssessment['level'] = size === 'large' ? 'high' : 'medium';
+
   const baseRisks: RiskAssessment[] = [
     {
       category: 'water',
-      level: 'high',
+      level: waterLevel,
       title: 'Water Resource Depletion Risk',
       summary: 'Mining operations may significantly impact local water availability',
       details: `Based on hydrological modeling, the proposed ${project.mineralType} extraction could reduce groundwater levels by 15-30% within a 10km radius. This poses risks to local agriculture and community water access. Current water stress index shows the region is already experiencing moderate scarcity.`,
       dataSource: 'WRI Aqueduct 4.0 + Local Basin Study 2023',
       confidence: 'high',
-      lastUpdated: '2024-01-15'
+      lastUpdated: '2024-01-15',
+      mitigation: getMitigationForRisk('water', waterLevel),
     },
     {
       category: 'biodiversity',
-      level: hasProtectedAreas ? 'critical' : 'medium',
+      level: biodiversityLevel,
       title: 'Biodiversity and Habitat Impact',
       summary: hasProtectedAreas
         ? 'Project overlaps with protected areas and critical habitats'
@@ -155,11 +345,12 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
         : 'While no protected areas directly overlap, the project may fragment wildlife corridors. Environmental assessment should include detailed species surveys.',
       dataSource: 'IBAT Alliance + National Environmental Registry',
       confidence: 'medium',
-      lastUpdated: '2024-01-10'
+      lastUpdated: '2024-01-10',
+      mitigation: getMitigationForRisk('biodiversity', biodiversityLevel),
     },
     {
       category: 'community-displacement',
-      level: communityDistance === 'near' ? 'high' : 'medium',
+      level: displacementLevel,
       title: 'Community Displacement Concerns',
       summary: communityDistance === 'near'
         ? 'Multiple communities within direct impact zone'
@@ -169,21 +360,23 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
         : 'While no direct displacement is anticipated, noise, dust, and traffic impacts will affect communities. Benefit-sharing agreements should be established.',
       dataSource: 'Community Mapping Initiative 2023',
       confidence: 'high',
-      lastUpdated: '2024-01-20'
+      lastUpdated: '2024-01-20',
+      mitigation: getMitigationForRisk('community-displacement', displacementLevel),
     },
     {
       category: 'indigenous-lands',
-      level: 'high',
+      level: indigenousLevel,
       title: 'Indigenous Territory Overlap',
       summary: 'Project area includes traditional indigenous lands',
       details: 'Historical and current maps indicate this area is part of traditional indigenous territory. Free, Prior, and Informed Consent (FPIC) processes must be initiated before any project activities. Local indigenous groups have ancestral ties and ongoing use of these lands for cultural practices.',
       dataSource: 'LandMark Indigenous Mapping + Local Records',
       confidence: 'high',
-      lastUpdated: '2024-01-18'
+      lastUpdated: '2024-01-18',
+      mitigation: getMitigationForRisk('indigenous-lands', indigenousLevel),
     },
     {
       category: 'food-security',
-      level: size === 'large' ? 'high' : 'medium',
+      level: foodLevel,
       title: 'Agricultural Land and Food Security',
       summary: 'Mining may impact local food production capacity',
       details: size === 'large'
@@ -191,7 +384,8 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
         : 'Some agricultural lands will be affected. Compensation should include support for alternative livelihoods and food security programs.',
       dataSource: 'Agricultural Census 2022 + Satellite Analysis',
       confidence: 'medium',
-      lastUpdated: '2024-01-12'
+      lastUpdated: '2024-01-12',
+      mitigation: getMitigationForRisk('food-security', foodLevel),
     }
   ];
 
@@ -201,6 +395,7 @@ export const getRiskAssessments = (project: MiningProject): RiskAssessment[] => 
     if (waterRisk) {
       waterRisk.level = 'critical';
       waterRisk.details = 'Lithium extraction requires massive amounts of water (2 million liters per ton of lithium). In this arid region, this will severely impact water availability for communities and ecosystems. Alternative brine processing methods should be mandated.';
+      waterRisk.mitigation = getMitigationForRisk('water', 'critical');
     }
   }
 

@@ -93,18 +93,20 @@
   },
   "assessment": {
     "backToStart": "Volver al Inicio",
-    "title": "Evaluación de Riesgos Ambientales",
+    "title": "Revisión Ambiental Comunitaria",
     "analyzingData": "Analizando datos ambientales...",
     "projectNotFound": "Proyecto no encontrado. Por favor inicie una nueva evaluación.",
     "shareDescription": "La función de compartir le permitirá colaborar con miembros de la comunidad y asesores.",
     "downloadDescription": "Descargue el informe completo de evaluación en PDF con todos los datos y recomendaciones.",
-    "tabRiskOverview": "Resumen de Riesgos",
-    "tabRisks": "Riesgos",
+    "tabRiskOverview": "Hallazgos Clave",
+    "tabRisks": "Hallazgos",
     "tabExploreData": "Explorar Datos",
     "tabData": "Datos",
     "tabActionPlan": "Su Plan de Acción",
     "tabActions": "Acciones",
-    "tabLearn": "Aprender"
+    "tabLearn": "Aprender",
+    "tabSolutions": "Soluciones",
+    "tabSolutionsShort": "Soluciones"
   },
   "riskOverview": {
     "criticalAlert": "{{count}} riesgo{{plural}} crítico{{plural}} identificado{{plural}} que requiere{{plural}} atención inmediata. Estos problemas podrían impactar significativamente el bienestar comunitario y el medio ambiente.",
@@ -115,8 +117,8 @@
     "lastUpdated": "Última Actualización:",
     "confidenceLevel": "Nivel de Confianza:",
     "verificationAlert": "Esta evaluación se basa en datos disponibles públicamente y debe verificarse con conocimiento local y condiciones actuales.",
-    "envRiskSummary": "Resumen de Riesgos Ambientales",
-    "envRiskDescription": "Evaluación independiente basada en datos públicos y estándares ambientales",
+    "envRiskSummary": "Lo Que Encontramos",
+    "envRiskDescription": "Hallazgos independientes basados en datos públicos y estándares ambientales — con soluciones para cada problema",
     "aboutAssessment": "Acerca de Esta Evaluación",
     "whatsCovered": "Lo que se evalúa",
     "waterStressContamination": "Estrés hídrico y riesgo de contaminación",
@@ -131,7 +133,9 @@
     "ghgEmissions": "Emisiones de gases de efecto invernadero",
     "wasteTailings": "Gestión de residuos y relaves",
     "workerSafety": "Salud y seguridad de los trabajadores",
-    "disclaimerText": "Las evaluaciones utilizan conjuntos de datos globales disponibles públicamente (WRI Aqueduct, Global Forest Watch, LandMark y otros) y pueden no reflejar las condiciones locales. Recomendamos consultar con expertos ambientales locales y el conocimiento comunitario para validar los hallazgos."
+    "disclaimerText": "Las evaluaciones utilizan conjuntos de datos globales disponibles públicamente (WRI Aqueduct, Global Forest Watch, LandMark y otros) y pueden no reflejar las condiciones locales. Recomendamos consultar con expertos ambientales locales y el conocimiento comunitario para validar los hallazgos.",
+    "solutionsAvailable": "{{count}} soluciones identificadas",
+    "viewAllSolutions": "Ver todas las soluciones"
   },
   "actionPlanner": {
     "title": "Su Plan de Acción",
@@ -318,5 +322,22 @@
     "indigenousTerritoryDesc": "La superposición de tierras indígenas se evalúa utilizando datos de la plataforma global LandMark sobre tierras indígenas y comunitarias, complementados con registros nacionales de tierras y registros de tenencia local cuando están disponibles. El estado del CLPI se rastrea cuando se divulga.",
     "foodSecurity": "Seguridad Alimentaria",
     "foodSecurityDesc": "El impacto en la seguridad alimentaria se estima a partir de datos del censo agrícola, clasificación del uso del suelo derivada de satélites e índices de productividad de cultivos. La evaluación considera la proporción de tierra cultivable dentro del área del proyecto en relación con el distrito circundante."
+  },
+  "mitigation": {
+    "title": "Vías de Mitigación",
+    "community": "Acciones Comunitarias",
+    "company": "Acciones de la Empresa",
+    "government": "Acciones del Gobierno",
+    "timeframe": "Plazo",
+    "successExample": "Ejemplo real",
+    "expertHelp": "¿Necesita ayuda experta?"
+  },
+  "solutions": {
+    "title": "Soluciones de Mitigación",
+    "subtitle": "Acciones constructivas que las comunidades, empresas y el gobierno pueden tomar para reducir los riesgos ambientales. Use esto para prepararse para consultas y negociaciones.",
+    "filterAll": "Todos los Actores",
+    "connectExperts": "¿Necesita apoyo profesional?",
+    "connectExpertsDescription": "Conéctese con expertos independientes en medio ambiente, legal y desarrollo comunitario que pueden brindar asesoramiento personalizado y detallado para su situación específica.",
+    "connectExpertsButton": "Conectar con Expertos"
   }
 }

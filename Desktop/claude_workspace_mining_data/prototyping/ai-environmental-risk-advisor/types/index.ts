@@ -15,12 +15,28 @@ export type CommunityDistance = 'near' | 'medium' | 'far';
 
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
-export type RiskCategory = 
+export type RiskCategory =
   | 'water'
   | 'biodiversity'
   | 'community-displacement'
   | 'indigenous-lands'
   | 'food-security';
+
+export type StakeholderRole = 'community' | 'company' | 'government';
+
+export interface MitigationAction {
+  stakeholder: StakeholderRole;
+  title: string;
+  description: string;
+  timeframe: string;
+  priority: 'high' | 'medium' | 'low';
+}
+
+export interface MitigationSummary {
+  actions: MitigationAction[];
+  successExample?: string;
+  expertHelpCta?: string;
+}
 
 export interface MiningProject {
   id: string;
@@ -52,6 +68,7 @@ export interface RiskAssessment {
   dataSource: string;
   confidence: 'low' | 'medium' | 'high';
   lastUpdated: string;
+  mitigation: MitigationSummary;
 }
 
 export interface ProjectPhase {
